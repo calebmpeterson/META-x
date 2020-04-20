@@ -1,0 +1,16 @@
+{
+  "name": "xselerate",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "author": "caleb.peterson@cubicle6.com",
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development electron ."
+  },
+  "devDependencies": {
+    "cross-env": "^7.0.2",
+    "electron": "^8.2.3",
+    "electron-reload": "^1.5.0"
+  }
+}

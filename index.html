@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Hello World!</title>
+    <!-- https://electronjs.org/docs/tutorial/security#csp-meta-tag -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="script-src 'self' 'unsafe-inline';"
+    />
+    <style>
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        display: flex;
+        align-items: stretch;
+        flex-direction: column;
+      }
+      input,
+      textarea {
+        width: 100%;
+        border: none;
+        padding: 10px;
+        box-sizing: border-box;
+        outline: 0 !important;
+      }
+      input {
+        border-bottom: 1px solid #eee;
+      }
+      textarea {
+        height: 100%;
+        resize: none;
+      }
+    </style>
+    <script>
+      const getCommands = () =>
+        fs
+          .readdirSync(path.join(os.homedir(), ".xselerate"))
+          .filter((file) => file.endsWith(".js"));
+
+      const getCommandFilename = (commandFilename) =>
+        path.join(os.homedir(), ".xselerate", commandFilename);
+    </script>
+  </head>
+  <body>
+    <form id="command-form">
+      <input id="command" type="text" autofocus list="available-commands" />
+    </form>
+    <textarea id="selection" readonly></textarea>
+    <datalist id="available-commands"></datalist>
+
+    <script>
+      const theCommandForm = document.getElementById("command-form");
+
+      theCommandForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const theCommandInput = document.getElementById("command");
+        const commandFilename = getCommandFilename(theCommandInput.value);
+
+        try {
+          const commandModule = require(commandFilename);
+          commandModule.call(null, clipboard.readText("selection"));
+        } catch (e) {
+          console.error(`Failed to execute ${commandFilename}`, e);
+        }
+      });
+    </script>
+
+    <script>
+      const { clipboard } = require("electron");
+      const theSelectionTarget = document.getElementById("selection");
+      theSelectionTarget.value = clipboard.readText("selection");
+    </script>
+
+    <script>
+      const fs = require("fs");
+      const os = require("os");
+      const path = require("path");
+
+      const commands = getCommands();
+
+      const commandToOption = (command) => {
+        const option = document.createElement("option");
+        option.innerText = command;
+        option.value = command;
+        return option;
+      };
+
+      commands.map(commandToOption).forEach((option) => {
+        document.getElementById("available-commands").appendChild(option);
+      });
+    </script>
+  </body>
+</html>
