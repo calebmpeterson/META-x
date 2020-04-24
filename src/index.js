@@ -1,11 +1,4 @@
-const {
-  app,
-  clipboard,
-  globalShortcut,
-  screen,
-  BrowserWindow,
-  Menu,
-} = require("electron");
+const { app, globalShortcut, BrowserWindow } = require("electron");
 
 const path = require("path");
 
@@ -25,6 +18,7 @@ function initialize() {
       width: 600,
       height: 400,
       frame: false,
+      transparent: true,
       webPreferences: {
         nodeIntegration: true,
       },
