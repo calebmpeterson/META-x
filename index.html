@@ -19,6 +19,12 @@
       <input id="command" type="text" autofocus list="available-commands" />
     </form>
 
+    <div class="selection-container">
+      <div id="notification" class="toast">
+        <div class="toast-message">Copied to clipboard</div>
+      </div>
+    </div>
+
     <textarea id="selection" readonly></textarea>
 
     <datalist id="available-commands"></datalist>
@@ -65,6 +71,10 @@
 
           clipboard.writeText(resultAsText);
           theSelectionTarget.value = resultAsText;
+
+          const theNotification = document.getElementById("notification");
+          theNotification.classList.add("visible");
+          setTimeout(() => theNotification.classList.remove("visible"), 1000);
         } catch (e) {
           console.error(`Failed to execute ${commandFilename}`, e);
         }
@@ -74,17 +84,16 @@
     <script>
       const commands = getCommands();
 
-      const commandToOption = (command) => {
-        const option = document.createElement("option");
-        option.innerText = command;
-        option.value = command;
-        return option;
-      };
-
       const USE_NATIVE_AUTOCOMPLETE = false;
-      const USE_TYPE_1_AUTOCOMPLETE = false;
 
       if (USE_NATIVE_AUTOCOMPLETE) {
+        const commandToOption = (command) => {
+          const option = document.createElement("option");
+          option.innerText = command;
+          option.value = command;
+          return option;
+        };
+
         commands.map(commandToOption).forEach((option) => {
           document.getElementById("available-commands").appendChild(option);
         });
@@ -98,7 +107,10 @@
             const sanitized = text.toLowerCase();
             const matches = commands
               .filter((n) => n.toLowerCase().startsWith(sanitized))
-              .map((command) => ({ label: command, value: command }));
+              .map((command) => ({
+                label: path.basename(command),
+                value: command,
+              }));
 
             update(matches);
           },

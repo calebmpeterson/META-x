@@ -36,6 +36,29 @@ textarea {
   border-bottom: 1px solid #eee;
 }
 
+.selection-container {
+  position: relative;
+}
+
+.toast {
+  opacity: 0;
+  position: absolute;
+  text-align: center;
+  width: 100%;
+  transition: opacity 300ms ease-in-out;
+}
+.toast.visible {
+  opacity: 1;
+}
+.toast-message {
+  background: #000;
+  color: #fff;
+  padding: 0.5rem;
+  display: inline-block;
+  border-radius: 0.25rem;
+  margin-top: 0.5rem;
+}
+
 .command-suggestions {
   box-shadow: 0 0.25rem 0.25rem 1px rgba(0, 0, 0, 0.125);
   border: none;

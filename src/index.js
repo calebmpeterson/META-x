@@ -1,13 +1,6 @@
 const { app, globalShortcut, BrowserWindow } = require("electron");
 
-const path = require("path");
-
-require("electron-reload")(path.join(__dirname, "src"), {
-  electron: path.join(__dirname, "node_modules", ".bin", "electron"),
-});
-
 const isDevelopment = process.env.NODE_ENV === "development";
-const isProduction = !isDevelopment;
 
 const SHORTCUT = "Alt+X";
 

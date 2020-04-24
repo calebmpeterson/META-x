@@ -6,12 +6,12 @@
   "license": "MIT",
   "private": false,
   "scripts": {
-    "dev": "cross-env NODE_ENV=development electron ."
+    "dev": "cross-env NODE_ENV=development electron .",
+    "start": "cross-env NODE_ENV=production electron ."
   },
   "devDependencies": {
     "cross-env": "^7.0.2",
-    "electron": "^8.2.3",
-    "electron-reload": "^1.5.0"
+    "electron": "^8.2.3"
   },
   "dependencies": {
     "autocompleter": "^6.0.3",
