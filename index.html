@@ -16,7 +16,13 @@
   </head>
   <body>
     <form id="command-form">
-      <input id="command" type="text" autofocus list="available-commands" />
+      <input
+        id="command"
+        type="text"
+        autofocus
+        placeholder="> transformation command"
+        list="available-commands"
+      />
     </form>
 
     <div class="selection-container">
@@ -29,18 +35,14 @@
 
     <datalist id="available-commands"></datalist>
 
+    <!-- Imports and utils -->
     <script>
       const fs = require("fs");
       const os = require("os");
       const path = require("path");
-      const { clipboard } = require("electron");
       const _ = require("lodash");
-
-      const theCommandInput = document.getElementById("command");
-
-      const selection = clipboard.readText("selection");
-      const theSelectionTarget = document.getElementById("selection");
-      theSelectionTarget.value = selection;
+      const { clipboard } = require("electron");
+      const autocomplete = require("autocompleter");
 
       const getCommands = () =>
         fs
@@ -51,7 +53,14 @@
         path.join(os.homedir(), ".xselerate", commandFilename);
     </script>
 
+    <!-- UI interactions -->
     <script>
+      const theCommandInput = document.getElementById("command");
+
+      const selection = clipboard.readText("selection");
+      const theSelectionTarget = document.getElementById("selection");
+      theSelectionTarget.value = selection;
+
       const theCommandForm = document.getElementById("command-form");
 
       theCommandForm.addEventListener("submit", (e) => {
@@ -71,6 +80,7 @@
 
           clipboard.writeText(resultAsText);
           theSelectionTarget.value = resultAsText;
+          theCommandInput.select();
 
           const theNotification = document.getElementById("notification");
           theNotification.classList.add("visible");
@@ -81,44 +91,28 @@
       });
     </script>
 
+    <!-- Autocomplete functionality -->
     <script>
       const commands = getCommands();
 
-      const USE_NATIVE_AUTOCOMPLETE = false;
+      autocomplete({
+        input: theCommandInput,
+        className: "command-suggestions",
+        fetch: function (text, update) {
+          const sanitized = text.toLowerCase();
+          const matches = commands
+            .filter((n) => n.toLowerCase().startsWith(sanitized))
+            .map((command) => ({
+              label: path.basename(command),
+              value: command,
+            }));
 
-      if (USE_NATIVE_AUTOCOMPLETE) {
-        const commandToOption = (command) => {
-          const option = document.createElement("option");
-          option.innerText = command;
-          option.value = command;
-          return option;
-        };
-
-        commands.map(commandToOption).forEach((option) => {
-          document.getElementById("available-commands").appendChild(option);
-        });
-      } else {
-        const autocomplete = require("autocompleter");
-
-        autocomplete({
-          input: theCommandInput,
-          className: "command-suggestions",
-          fetch: function (text, update) {
-            const sanitized = text.toLowerCase();
-            const matches = commands
-              .filter((n) => n.toLowerCase().startsWith(sanitized))
-              .map((command) => ({
-                label: path.basename(command),
-                value: command,
-              }));
-
-            update(matches);
-          },
-          onSelect: function (item) {
-            theCommandInput.value = item.value;
-          },
-        });
-      }
+          update(matches);
+        },
+        onSelect: function (item) {
+          theCommandInput.value = item.value;
+        },
+      });
     </script>
   </body>
 </html>
