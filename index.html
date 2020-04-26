@@ -69,7 +69,7 @@
         const commandFilename = getCommandFilename(theCommandInput.value);
 
         try {
-          const commandModule = require(commandFilename);
+          const commandModule = require(`${commandFilename}.js`);
           const result = commandModule.call(null, selection);
           console.log(`Result: ${result}`);
 
@@ -98,19 +98,24 @@
       autocomplete({
         input: theCommandInput,
         className: "command-suggestions",
+        render: (item, currentValue) => {
+          const div = document.createElement("div");
+          div.textContent = item.label;
+          return div;
+        },
         fetch: function (text, update) {
           const sanitized = text.toLowerCase();
           const matches = commands
             .filter((n) => n.toLowerCase().startsWith(sanitized))
             .map((command) => ({
-              label: path.basename(command),
+              label: path.basename(command, ".js"),
               value: command,
             }));
 
           update(matches);
         },
         onSelect: function (item) {
-          theCommandInput.value = item.value;
+          theCommandInput.value = item.label;
         },
       });
     </script>
