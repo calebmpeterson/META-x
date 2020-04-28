@@ -106,7 +106,7 @@
         fetch: function (text, update) {
           const sanitized = text.toLowerCase();
           const matches = commands
-            .filter((n) => n.toLowerCase().startsWith(sanitized))
+            .filter((n) => n.toLowerCase().includes(sanitized))
             .map((command) => ({
               label: path.basename(command, ".js"),
               value: command,
