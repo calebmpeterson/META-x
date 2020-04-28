@@ -1,10 +1,10 @@
 ## TODO
 
-- [ ] name (and adjust .directory references)
-- [ ] built-in commands
 - [x] autocomplete labels
-- [ ] license
-- [ ] GitHub repo
+- [x] name (and adjust .directory references)
+- [x] GitHub repo
+- [x] license
+- [ ] built-in commands
 - [ ] usage instructions
 
 ## Names

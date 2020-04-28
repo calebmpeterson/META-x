@@ -46,11 +46,11 @@
 
       const getCommands = () =>
         fs
-          .readdirSync(path.join(os.homedir(), ".xselerate"))
+          .readdirSync(path.join(os.homedir(), ".meta-x"))
           .filter((file) => file.endsWith(".js"));
 
       const getCommandFilename = (commandFilename) =>
-        path.join(os.homedir(), ".xselerate", commandFilename);
+        path.join(os.homedir(), ".meta-x", commandFilename);
     </script>
 
     <!-- UI interactions -->
@@ -84,7 +84,7 @@
 
           const theNotification = document.getElementById("notification");
           theNotification.classList.add("visible");
-          setTimeout(() => theNotification.classList.remove("visible"), 1000);
+          setTimeout(() => theNotification.classList.remove("visible"), 2000);
         } catch (e) {
           console.error(`Failed to execute ${commandFilename}`, e);
         }

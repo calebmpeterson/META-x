@@ -57,7 +57,7 @@ textarea {
   position: absolute;
   text-align: center;
   width: 100%;
-  transition: opacity 300ms ease-in-out;
+  transition: opacity 500ms ease-in-out;
 }
 .toast.visible {
   opacity: 1;
