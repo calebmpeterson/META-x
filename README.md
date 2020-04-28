@@ -1,3 +1,7 @@
+# Meta-X
+
+Emacs-esque `M-x` commands for your entire OS
+
 ## TODO
 
 - [x] autocomplete labels
@@ -6,9 +10,3 @@
 - [x] license
 - [ ] built-in commands
 - [ ] usage instructions
-
-## Names
-
-- Meta-X
-- Impeller
-- Transfer Case
