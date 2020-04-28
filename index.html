@@ -43,14 +43,13 @@
       const _ = require("lodash");
       const { clipboard } = require("electron");
       const autocomplete = require("autocompleter");
+      const { getConfigDir } = require("./src/utils");
 
       const getCommands = () =>
-        fs
-          .readdirSync(path.join(os.homedir(), ".meta-x"))
-          .filter((file) => file.endsWith(".js"));
+        fs.readdirSync(getConfigDir()).filter((file) => file.endsWith(".js"));
 
       const getCommandFilename = (commandFilename) =>
-        path.join(os.homedir(), ".meta-x", commandFilename);
+        path.join(getConfigDir(), commandFilename);
     </script>
 
     <!-- UI interactions -->
