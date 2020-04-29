@@ -1,11 +1,14 @@
 const { app, globalShortcut, BrowserWindow } = require("electron");
+const { getConfig } = require("./utils");
 
 const isDevelopment = process.env.NODE_ENV === "development";
 
-const SHORTCUT = "Alt+X";
-
 function initialize() {
-  globalShortcut.register(SHORTCUT, () => {
+  const { hotkey } = getConfig();
+
+  console.log(`Using hotkey ${hotkey}`);
+
+  globalShortcut.register(hotkey, () => {
     const win = new BrowserWindow({
       center: true,
       width: 600,

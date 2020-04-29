@@ -104,6 +104,7 @@
       autocomplete({
         input: theCommandInput,
         className: "command-suggestions",
+        showOnFocus: false,
         render: (item, currentValue) => {
           const div = document.createElement("div");
           div.textContent = item.label;
