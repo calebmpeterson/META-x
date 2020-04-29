@@ -88,6 +88,13 @@
           console.error(`Failed to execute ${commandFilename}`, e);
         }
       });
+
+      // Close on ESCAPE
+      document.body.addEventListener("keyup", (e) => {
+        if (e.keyCode === 27) {
+          window.close();
+        }
+      });
     </script>
 
     <!-- Autocomplete functionality -->
