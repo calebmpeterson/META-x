@@ -7,8 +7,8 @@ Built on Electron and Vanilla JavaScript; I know, I know "Electron!?" Well, it's
 ## Support
 
 - [x] Ubuntu Linux
-- [ ] Windows 10
-- [ ] macOS
+- [ ] Windows 10 (testing pending)
+- [ ] macOS (testing pending)
 
 ## Installation
 
@@ -17,7 +17,7 @@ Built on Electron and Vanilla JavaScript; I know, I know "Electron!?" Well, it's
 3. `yarn install`
 4. `yarn start` (or `yarn dev` if you want devtools to open)
 
-**An NPM package is comming soon...**
+**An NPM package is coming soon...**
 
 ## Configuration
 
@@ -61,6 +61,8 @@ For example:
 **Meta-x** is released under the MIT license.
 
 ## Contributing
+
+Issues and Pull Requests are welcome!
 
 ### TODO
 
