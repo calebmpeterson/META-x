@@ -7,11 +7,13 @@
   "private": false,
   "scripts": {
     "dev": "cross-env NODE_ENV=development electron .",
-    "start": "cross-env NODE_ENV=production electron ."
+    "start": "cross-env NODE_ENV=production electron .",
+    "docs:build": "node scripts/build-docs"
   },
   "devDependencies": {
     "cross-env": "^7.0.2",
-    "electron": "^8.2.3"
+    "electron": "^8.2.3",
+    "showdown": "^1.9.1"
   },
   "dependencies": {
     "autocompleter": "^6.0.3",

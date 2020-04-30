@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Meta-x | Emacs-esque M-x for your entire OS</title>
+    <link
+      rel="stylesheet"
+      href="https://cubicle6.com/rebootstrap/themes/marathon/dist/bootstrap.min.css"
+    />
+    <style>
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
+        margin-top: 4rem;
+      }
+      h1 {
+        text-align: center;
+      }
+      p:first-of-type {
+        text-align: center;
+        font-size: 1.2rem;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="col-12 col-md-6 offset-md-3">
+          <h1 id="metax">Meta-X</h1>
+<p>Emacs-esque <code>M-x</code> commands for your entire OS.</p>
+<p>Built on Electron and Vanilla JavaScript; I know, I know "Electron!?" Well, it's Fast Enough&trade; and it works.</p>
+<h2 id="support">Support</h2>
+<ul>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> Ubuntu Linux</li>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;"> Windows 10</li>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;"> macOS</li>
+</ul>
+<h2 id="installation">Installation</h2>
+<ol>
+<li><code>git clone https://github.com/calebmpeterson/META-x.git</code></li>
+<li><code>cd META-x</code></li>
+<li><code>yarn install</code></li>
+<li><code>yarn start</code> (or <code>yarn dev</code> if you want devtools to open)</li>
+</ol>
+<p><strong>An NPM package is comming soon…</strong></p>
+<h2 id="configuration">Configuration</h2>
+<p><strong>Meta-x</strong> config is kept in <code>~/.meta-x/</code> directory. This makes it easy to keep your config under source control.</p>
+<h3 id="settings">Settings</h3>
+<p>All configuration options are contained in <code>~/.meta-x/config.json</code></p>
+<h4 id="hotkey">Hotkey</h4>
+<p>The <code>hotkey</code> setting is used to map which global keyboard shortcut launches <strong>Meta-x</strong> on your current selection.</p>
+<p>All available keys and modifiers can be viewed <a href="https://www.electronjs.org/docs/api/accelerator#available-modifiers">here</a></p>
+<h3 id="customcommands">Custom Commands</h3>
+<p>Custom commands are <code>common.js</code> modules placed in <code>~/.meta-x/</code>.</p>
+<h4 id="examplecommand">Example Command</h4>
+<p>To get a calculator capable of all operations/syntax available to you in JavaScript, create <code>~/.meta-x/calc.js</code> with the following content:</p>
+<pre><code class="js language-js">module.exports = (selection) =&gt; eval(selection);
+</code></pre>
+<h4 id="usingnpmpackages">Using NPM Packages</h4>
+<p>You can use <code>npm</code> packages by simply installing them in your <code>~/.meta-x/</code></p>
+<p>For example:</p>
+<pre><code class="js language-js">&gt; cd ~/.meta-x/
+&gt; yarn add lodash
+</code></pre>
+<h2 id="license">License</h2>
+<p><strong>Meta-x</strong> is released under the MIT license.</p>
+<h2 id="contributing">Contributing</h2>
+<h3 id="todo">TODO</h3>
+<ul>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> autocomplete labels</li>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> name (and adjust .directory references)</li>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> GitHub repo</li>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> license</li>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> close the window on <code>ESC</code> key press</li>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> configurable hot-key</li>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> usage instructions</li>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;"> built-in commands</li>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> installation instructions</li>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;"> publish to NPM</li>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;"> Test on Windows 10</li>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;"> Test on macOS</li>
+</ul>
+        </div>
+      </div>
+    </div>
+
+    <footer class="mt-5 py-4 bg-primary text-white text-center">
+      <small>Copyright Caleb Peterson 2020. All rights reserved.</small>
+    </footer>
+  </body>
+</html>
