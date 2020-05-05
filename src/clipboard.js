@@ -2,7 +2,9 @@ const { clipboard } = require("electron");
 
 module.exports = {
   getCurrentSelection() {
-    return clipboard.readText("selection");
+    // This will read the selected text on Linux and the
+    // current clipboard contents on macOS and Windows
+    return Promise.resolve(clipboard.readText("selection"));
   },
 
   setClipboardContent(contentAsText) {

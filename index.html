@@ -59,9 +59,12 @@
     <script>
       const theCommandInput = document.getElementById("command");
 
-      const selection = getCurrentSelection();
       const theSelectionTarget = document.getElementById("selection");
-      theSelectionTarget.value = selection;
+      let selection;
+      getCurrentSelection().then(
+        (currentSelection) =>
+          (theSelectionTarget.value = selection = currentSelection)
+      );
 
       const theCommandForm = document.getElementById("command-form");
 

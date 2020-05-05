@@ -1,5 +1,6 @@
 const { app, globalShortcut, BrowserWindow } = require("electron");
 const { getConfig } = require("./utils");
+const prepareClipboard = require("./clipboard/prepare");
 
 const isDevelopment = process.env.NODE_ENV === "development";
 
@@ -8,7 +9,9 @@ function initialize() {
 
   console.log(`Using hotkey ${hotkey}`);
 
-  globalShortcut.register(hotkey, () => {
+  globalShortcut.register(hotkey, async () => {
+    await prepareClipboard();
+
     const win = new BrowserWindow({
       center: true,
       width: 600,
