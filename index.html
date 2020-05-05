@@ -41,7 +41,10 @@
       const os = require("os");
       const path = require("path");
       const _ = require("lodash");
-      const { clipboard } = require("electron");
+      const {
+        getCurrentSelection,
+        setClipboardContent,
+      } = require("./src/clipboard");
       const autocomplete = require("autocompleter");
       const { getConfigDir } = require("./src/utils");
 
@@ -56,7 +59,7 @@
     <script>
       const theCommandInput = document.getElementById("command");
 
-      const selection = clipboard.readText("selection");
+      const selection = getCurrentSelection();
       const theSelectionTarget = document.getElementById("selection");
       theSelectionTarget.value = selection;
 
@@ -77,7 +80,7 @@
               ? JSON.stringify(result, null, "  ")
               : _.toString(result);
 
-          clipboard.writeText(resultAsText);
+          setClipboardContent(resultAsText);
           theSelectionTarget.value = resultAsText;
           theCommandInput.select();
 
