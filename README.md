@@ -8,7 +8,7 @@ Built on Electron and Vanilla JavaScript; I know, I know "Electron!?" Well, it's
 
 - [x] Ubuntu Linux
 - [ ] Windows 10 (testing pending)
-- [ ] macOS (testing pending)
+- [x] macOS (testing pending)
 
 ## Installation
 
@@ -77,4 +77,4 @@ Issues and Pull Requests are welcome!
 - [x] installation instructions
 - [ ] publish to NPM
 - [ ] Test on Windows 10
-- [ ] Test on macOS
+- [x] Test on macOS
