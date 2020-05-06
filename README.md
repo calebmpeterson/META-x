@@ -73,8 +73,8 @@ Issues and Pull Requests are welcome!
 - [x] close the window on `ESC` key press
 - [x] configurable hot-key
 - [x] usage instructions
-- [ ] built-in commands
+- [x] built-in commands
 - [x] installation instructions
-- [ ] publish to NPM
-- [ ] Test on Windows 10
 - [x] Test on macOS
+- [ ] Test on Windows 10
+- [ ] publish to NPM
