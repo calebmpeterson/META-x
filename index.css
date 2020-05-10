@@ -3,6 +3,8 @@
   --background-color: #fff;
   --border-color: #eee;
 
+  --border-radius: 0.5rem;
+
   --highlight-color: #fff;
   --highlight-background: #000;
 }
@@ -15,7 +17,7 @@ body {
   padding: 0;
   font-family: Arial, Helvetica, sans-serif;
   background: transparent;
-  border-radius: 0.5rem;
+  border-radius: var(--border-radius);
   color: var(--color);
 }
 body {
@@ -34,18 +36,19 @@ textarea {
   font-size: 1rem;
 }
 input {
-  border-top-left-radius: 0.5rem;
-  border-top-right-radius: 0.5rem;
+  border-top-left-radius: var(--border-radius);
+  border-top-right-radius: var(--border-radius);
   border: 1px solid var(--border-color);
 }
 textarea {
   height: 100%;
   resize: none;
-  border-bottom-left-radius: 0.5rem;
-  border-bottom-right-radius: 0.5rem;
+  border-bottom-left-radius: var(--border-radius);
+  border-bottom-right-radius: var(--border-radius);
   border-left: 1px solid var(--border-color);
   border-right: 1px solid var(--border-color);
   border-bottom: 1px solid var(--border-color);
+  font-family: monospace;
 }
 
 .selection-container {
@@ -72,6 +75,10 @@ textarea {
   font-size: 0.8rem;
 }
 
+#command-form input {
+  border-bottom-width: 1px !important;
+}
+
 .command-suggestions {
   box-shadow: 0 0.25rem 0.25rem 1px rgba(0, 0, 0, 0.125);
   border: none;
@@ -87,4 +94,13 @@ textarea {
   cursor: pointer;
   background: var(--highlight-background);
   color: var(--highlight-color);
+}
+
+.Darwin {
+  --border-radius: 0;
+}
+.Darwin input,
+.Darwin textarea,
+.Darwin .command-suggestions {
+  border-width: 0px;
 }

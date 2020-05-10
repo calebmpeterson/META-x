@@ -20,7 +20,7 @@
         id="command"
         type="text"
         autofocus
-        placeholder="> transformation command"
+        placeholder="Start typing to see the list of available commands..."
         list="available-commands"
       />
     </form>
@@ -41,9 +41,12 @@
       const os = require("os");
       const path = require("path");
       const _ = require("lodash");
-      const { clipboard } = require("electron");
+      const {
+        getCurrentSelection,
+        setClipboardContent,
+      } = require("./src/clipboard");
       const autocomplete = require("autocompleter");
-      const { getConfigDir } = require("./src/utils");
+      const { getConfigDir, getBuiltInCommands } = require("./src/utils");
 
       const getCommands = () =>
         fs.readdirSync(getConfigDir()).filter((file) => file.endsWith(".js"));
@@ -56,37 +59,18 @@
     <script>
       const theCommandInput = document.getElementById("command");
 
-      const selection = clipboard.readText("selection");
       const theSelectionTarget = document.getElementById("selection");
-      theSelectionTarget.value = selection;
+
+      let selection;
+      getCurrentSelection().then(
+        (currentSelection) =>
+          (theSelectionTarget.value = selection = currentSelection)
+      );
 
       const theCommandForm = document.getElementById("command-form");
 
       theCommandForm.addEventListener("submit", (e) => {
         e.preventDefault();
-
-        const commandFilename = getCommandFilename(theCommandInput.value);
-
-        try {
-          const commandModule = require(`${commandFilename}.js`);
-          const result = commandModule.call(null, selection);
-          console.log(`Result: ${result}`);
-
-          const resultAsText =
-            _.isArray(result) || _.isObject(result)
-              ? JSON.stringify(result, null, "  ")
-              : _.toString(result);
-
-          clipboard.writeText(resultAsText);
-          theSelectionTarget.value = resultAsText;
-          theCommandInput.select();
-
-          const theNotification = document.getElementById("notification");
-          theNotification.classList.add("visible");
-          setTimeout(() => theNotification.classList.remove("visible"), 2000);
-        } catch (e) {
-          console.error(`Failed to execute ${commandFilename}`, e);
-        }
       });
 
       // Close on ESCAPE
@@ -99,8 +83,6 @@
 
     <!-- Autocomplete functionality -->
     <script>
-      const commands = getCommands();
-
       autocomplete({
         input: theCommandInput,
         className: "command-suggestions",
@@ -112,19 +94,64 @@
         },
         fetch: function (text, update) {
           const sanitized = text.toLowerCase();
-          const matches = commands
-            .filter((n) => n.toLowerCase().includes(sanitized))
+
+          const allCommands = getCommands()
             .map((command) => ({
               label: path.basename(command, ".js"),
               value: command,
-            }));
+            }))
+            .concat(getBuiltInCommands());
+
+          const matches = allCommands.filter(({ label }) =>
+            label.toLowerCase().includes(sanitized)
+          );
 
           update(matches);
         },
         onSelect: function (item) {
           theCommandInput.value = item.label;
+
+          let resultAsText;
+
+          // Execute built-in command
+          if (_.isFunction(item.value)) {
+            resultAsText = item.value(selection);
+          }
+          // Execute custom module-based command
+          else {
+            const commandFilename = getCommandFilename(theCommandInput.value);
+
+            try {
+              const commandModule = require(`${commandFilename}.js`);
+              const result = commandModule.call(null, selection);
+              console.log(`Result: ${result}`);
+
+              resultAsText =
+                _.isArray(result) || _.isObject(result)
+                  ? JSON.stringify(result, null, "  ")
+                  : _.toString(result);
+            } catch (e) {
+              console.error(`Failed to execute ${commandFilename}`, e);
+            }
+          }
+
+          // Update to reflect the command execution result
+          setClipboardContent(resultAsText);
+          theSelectionTarget.value = resultAsText;
+          theCommandInput.select();
+
+          const theNotification = document.getElementById("notification");
+          theNotification.classList.add("visible");
+          setTimeout(() => theNotification.classList.remove("visible"), 2000);
         },
       });
+    </script>
+
+    <!-- UI Style Customization -->
+    <script>
+      // Enable OS-specific adjustments
+      const osName = os.type();
+      document.body.classList.add(osName);
     </script>
   </body>
 </html>

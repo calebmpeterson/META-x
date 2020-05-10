@@ -8,7 +8,7 @@ Built on Electron and Vanilla JavaScript; I know, I know "Electron!?" Well, it's
 
 - [x] Ubuntu Linux
 - [ ] Windows 10 (testing pending)
-- [ ] macOS (testing pending)
+- [x] macOS (testing pending)
 
 ## Installation
 
@@ -73,8 +73,8 @@ Issues and Pull Requests are welcome!
 - [x] close the window on `ESC` key press
 - [x] configurable hot-key
 - [x] usage instructions
-- [ ] built-in commands
+- [x] built-in commands
 - [x] installation instructions
-- [ ] publish to NPM
+- [x] Test on macOS
 - [ ] Test on Windows 10
-- [ ] Test on macOS
+- [ ] publish to NPM

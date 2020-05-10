@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "autocompleter": "^6.0.3",
-    "lodash": "^4.17.15"
+    "lodash": "^4.17.15",
+    "run-applescript": "^4.0.0"
   }
 }
