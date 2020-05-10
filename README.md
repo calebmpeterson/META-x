@@ -64,7 +64,7 @@ For example:
 
 Issues and Pull Requests are welcome!
 
-### TODO
+### Roadmap
 
 - [x] autocomplete labels
 - [x] name (and adjust .directory references)
