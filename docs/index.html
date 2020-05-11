@@ -59,6 +59,16 @@
 <p>To get a calculator capable of all operations/syntax available to you in JavaScript, create <code>~/.meta-x/calc.js</code> with the following content:</p>
 <pre><code class="js language-js">module.exports = (selection) =&gt; eval(selection);
 </code></pre>
+<h4 id="nontransformingcommands">Non-transforming Commands</h4>
+<p>To create a command which does not transform the current selection simply return <code>undefined</code> from the command module's exported function:</p>
+<pre><code class="js language-js">module.exports = (selection) =&gt; {
+  // Do something side-effect'ish here
+  // ...
+
+  // The current selection will not be transformed
+  return undefined;
+};
+</code></pre>
 <h4 id="usingnpmpackages">Using NPM Packages</h4>
 <p>You can use <code>npm</code> packages by simply installing them in your <code>~/.meta-x/</code></p>
 <p>For example:</p>
@@ -82,6 +92,7 @@
 <li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> installation instructions</li>
 <li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> Test on macOS</li>
 <li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;"> Test on Windows 10</li>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;"> add support for command arguments</li>
 <li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;"> publish to NPM</li>
 </ul>
         </div>

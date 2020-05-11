@@ -45,6 +45,20 @@ To get a calculator capable of all operations/syntax available to you in JavaScr
 module.exports = (selection) => eval(selection);
 ```
 
+#### Non-transforming Commands
+
+To create a command which does not transform the current selection simply return `undefined` from the command module's exported function:
+
+```js
+module.exports = (selection) => {
+  // Do something side-effect'ish here
+  // ...
+
+  // The current selection will not be transformed
+  return undefined;
+};
+```
+
 #### Using NPM Packages
 
 You can use `npm` packages by simply installing them in your `~/.meta-x/`
@@ -77,4 +91,5 @@ Issues and Pull Requests are welcome!
 - [x] installation instructions
 - [x] Test on macOS
 - [ ] Test on Windows 10
+- [ ] add support for command arguments
 - [ ] publish to NPM
