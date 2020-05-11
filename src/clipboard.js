@@ -1,3 +1,4 @@
+const { isString } = require("lodash");
 const { clipboard } = require("electron");
 
 module.exports = {
@@ -8,6 +9,8 @@ module.exports = {
   },
 
   setClipboardContent(contentAsText) {
-    clipboard.writeText(contentAsText);
+    if (isString(contentAsText)) {
+      clipboard.writeText(contentAsText);
+    }
   },
 };

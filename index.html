@@ -2,7 +2,7 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Hello World!</title>
+    <title>META-x</title>
     <!-- https://electronjs.org/docs/tutorial/security#csp-meta-tag -->
     <meta
       http-equiv="Content-Security-Policy"
@@ -57,8 +57,8 @@
 
     <!-- UI interactions -->
     <script>
+      const theCommandForm = document.getElementById("command-form");
       const theCommandInput = document.getElementById("command");
-
       const theSelectionTarget = document.getElementById("selection");
 
       let selection;
@@ -66,8 +66,6 @@
         (currentSelection) =>
           (theSelectionTarget.value = selection = currentSelection)
       );
-
-      const theCommandForm = document.getElementById("command-form");
 
       theCommandForm.addEventListener("submit", (e) => {
         e.preventDefault();
@@ -126,10 +124,12 @@
               const result = commandModule.call(null, selection);
               console.log(`Result: ${result}`);
 
-              resultAsText =
-                _.isArray(result) || _.isObject(result)
-                  ? JSON.stringify(result, null, "  ")
-                  : _.toString(result);
+              if (!_.isUndefined(result)) {
+                resultAsText =
+                  _.isArray(result) || _.isObject(result)
+                    ? JSON.stringify(result, null, "  ")
+                    : _.toString(result);
+              }
             } catch (e) {
               console.error(`Failed to execute ${commandFilename}`, e);
             }
@@ -138,7 +138,7 @@
           // Update to reflect the command execution result
           setClipboardContent(resultAsText);
           theSelectionTarget.value = resultAsText;
-          theCommandInput.select();
+          theCommandInput.value = "";
 
           const theNotification = document.getElementById("notification");
           theNotification.classList.add("visible");
