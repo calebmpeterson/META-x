@@ -135,8 +135,12 @@
           }
 
           // Update to reflect the command execution result
-          setClipboardContent(resultAsText);
-          theSelectionTarget.value = resultAsText;
+          if (!_.isUndefined(resultAsText)) {
+            setClipboardContent(resultAsText);
+            theSelectionTarget.value = resultAsText;
+          }
+
+          // Clear the command input for the next command
           theCommandInput.value = "";
 
           const theNotification = document.getElementById("notification");
