@@ -20,24 +20,29 @@ const getConfig = () => {
   }
 };
 
-const BUILT_IN_COMMANDS = [
-  _.toUpper,
-  _.toLower,
-  _.camelCase,
-  _.capitalize,
-  _.kebabCase,
-  _.snakeCase,
-  _.startCase,
-];
+const BUILT_IN_COMMANDS = {
+  "to-upper": _.toUpper,
+  "to-lower": _.toLower,
+  "camel-case": _.camelCase,
+  capitalize: _.capitalize,
+  "kebab-case": _.kebabCase,
+  "snake-case": _.snakeCase,
+  "start-case": _.startCase,
+};
 
 const getBuiltInCommands = () =>
-  BUILT_IN_COMMANDS.map((command) => ({
-    label: command.name,
+  _.map(BUILT_IN_COMMANDS, (command, name) => ({
+    label: name,
+    title: name,
     value: command,
   }));
+
+const getCommands = () =>
+  fs.readdirSync(getConfigDir()).filter((file) => file.endsWith(".js"));
 
 module.exports = {
   getConfigDir,
   getConfig,
   getBuiltInCommands,
+  getCommands,
 };

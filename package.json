@@ -8,7 +8,8 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development electron .",
     "start": "cross-env NODE_ENV=production electron .",
-    "docs:build": "node scripts/build-docs"
+    "docs:build": "node scripts/build-docs",
+    "terminal": "node src/terminal/main"
   },
   "devDependencies": {
     "cross-env": "^7.0.2",
@@ -18,6 +19,7 @@
   "dependencies": {
     "autocompleter": "^6.0.3",
     "lodash": "^4.17.15",
+    "prompts": "^2.3.2",
     "run-applescript": "^4.0.0"
   }
 }

@@ -17,7 +17,9 @@ function initialize() {
       width: 600,
       height: 400,
       frame: false,
+      skipTaskbar: true,
       transparent: true,
+      titleBarStyle: "hidden",
       webPreferences: {
         nodeIntegration: true,
       },

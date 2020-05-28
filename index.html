@@ -46,10 +46,11 @@
         setClipboardContent,
       } = require("./src/clipboard");
       const autocomplete = require("autocompleter");
-      const { getConfigDir, getBuiltInCommands } = require("./src/utils");
-
-      const getCommands = () =>
-        fs.readdirSync(getConfigDir()).filter((file) => file.endsWith(".js"));
+      const {
+        getConfigDir,
+        getBuiltInCommands,
+        getCommands,
+      } = require("./src/utils");
 
       const getCommandFilename = (commandFilename) =>
         path.join(getConfigDir(), commandFilename);
