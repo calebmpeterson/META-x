@@ -1,5 +1,6 @@
 const { exec } = require("child_process");
 
+// Uses choose: https://github.com/chipsenkbeil/choose
 // brew install choose-gui
 module.exports = (commands) =>
   new Promise((resolve, reject) => {
