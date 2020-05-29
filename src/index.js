@@ -4,6 +4,8 @@ const prepareClipboard = require("./clipboard/prepare");
 
 const isDevelopment = process.env.NODE_ENV === "development";
 
+const openTerminal = require("./terminal/main");
+
 const openWindow = () => {
   const win = new BrowserWindow({
     center: true,
@@ -31,6 +33,8 @@ const openWindow = () => {
   });
 };
 
+const open = openTerminal;
+
 function initialize() {
   const { hotkey } = getConfig();
 
@@ -39,7 +43,7 @@ function initialize() {
   globalShortcut.register(hotkey, async () => {
     await prepareClipboard();
 
-    openWindow();
+    open();
   });
 }
 

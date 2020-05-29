@@ -1,44 +1,27 @@
 const path = require("path");
-const prompts = require("prompts");
 const _ = require("lodash");
+
+const prompt = require("./darwin");
 
 const { getCurrentSelection, setClipboardContent } = require("../clipboard");
 const {
   getCommandFilename,
   getBuiltInCommands,
   getCommands,
+  getAllCommands,
 } = require("../utils");
 
-const getAllCommands = () =>
-  getCommands()
-    .map((command) => ({
-      title: path.basename(command, ".js"),
-      value: command,
-    }))
-    .concat(getBuiltInCommands());
+module.exports = async () => {
+  const selection = await getCurrentSelection();
 
-const suggest = (input, choices) =>
-  Promise.resolve(
-    choices.filter(({ title }) =>
-      title.toLowerCase().includes(input.toLowerCase())
-    )
-  );
-
-(async () => {
-  const item = await prompts({
-    type: "autocomplete",
-    name: "value",
-    message: "",
-    choices: getAllCommands(),
-    suggest,
-  });
-
-  const selection = getCurrentSelection();
+  const item = await prompt(getAllCommands());
 
   let resultAsText;
 
   // Execute built-in command
-  if (_.isFunction(item.value)) {
+  if (item.isUnknown) {
+    console.warn(`Unknown command`);
+  } else if (_.isFunction(item.value)) {
     resultAsText = item.value(selection);
   }
   // Execute custom module-based command
@@ -61,6 +44,9 @@ const suggest = (input, choices) =>
     }
   }
 
-  // Update to reflect the command execution result
-  setClipboardContent(resultAsText);
-})();
+  if (resultAsText && _.isString(resultAsText)) {
+    console.log(`Result: ${resultAsText}`);
+    // Update to reflect the command execution result
+    setClipboardContent(resultAsText);
+  }
+};

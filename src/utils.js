@@ -43,10 +43,19 @@ const getCommands = () =>
 const getCommandFilename = (commandFilename) =>
   path.join(getConfigDir(), commandFilename);
 
+const getAllCommands = () =>
+  getCommands()
+    .map((command) => ({
+      title: path.basename(command, ".js"),
+      value: command,
+    }))
+    .concat(getBuiltInCommands());
+
 module.exports = {
   getConfigDir,
   getConfig,
   getBuiltInCommands,
   getCommands,
+  getAllCommands,
   getCommandFilename,
 };
