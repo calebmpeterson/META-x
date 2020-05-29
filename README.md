@@ -7,8 +7,8 @@ Built on Electron and Vanilla JavaScript; I know, I know "Electron!?" Well, it's
 ## Support
 
 - [x] Ubuntu Linux
+- [x] macOS
 - [ ] Windows 10 (testing pending)
-- [x] macOS (testing pending)
 
 ## Installation
 
@@ -90,6 +90,7 @@ Issues and Pull Requests are welcome!
 - [x] built-in commands
 - [x] installation instructions
 - [x] Test on macOS
+- [x] Improve UI performance (with `choose` on macOS and `dmenu` on Linux)
 - [ ] Test on Windows 10
 - [ ] add support for command arguments
 - [ ] publish to NPM

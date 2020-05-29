@@ -8,8 +8,7 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development electron .",
     "start": "cross-env NODE_ENV=production electron .",
-    "docs:build": "node scripts/build-docs",
-    "terminal": "electron src/terminal/main"
+    "docs:build": "node scripts/build-docs"
   },
   "devDependencies": {
     "cross-env": "^7.0.2",
