@@ -4,6 +4,33 @@ const prepareClipboard = require("./clipboard/prepare");
 
 const isDevelopment = process.env.NODE_ENV === "development";
 
+const openWindow = () => {
+  const win = new BrowserWindow({
+    center: true,
+    width: 600,
+    height: 400,
+    frame: false,
+    skipTaskbar: true,
+    transparent: true,
+    titleBarStyle: "hidden",
+    webPreferences: {
+      nodeIntegration: true,
+    },
+  });
+
+  win.loadFile("index.html");
+
+  if (isDevelopment) {
+    win.webContents.openDevTools({ mode: "detach" });
+  }
+  win.focus();
+  win.on("blur", () => {
+    if (!win.webContents.isDevToolsFocused()) {
+      win.close();
+    }
+  });
+};
+
 function initialize() {
   const { hotkey } = getConfig();
 
@@ -12,30 +39,7 @@ function initialize() {
   globalShortcut.register(hotkey, async () => {
     await prepareClipboard();
 
-    const win = new BrowserWindow({
-      center: true,
-      width: 600,
-      height: 400,
-      frame: false,
-      skipTaskbar: true,
-      transparent: true,
-      titleBarStyle: "hidden",
-      webPreferences: {
-        nodeIntegration: true,
-      },
-    });
-
-    win.loadFile("index.html");
-
-    if (isDevelopment) {
-      win.webContents.openDevTools({ mode: "detach" });
-    }
-    win.focus();
-    win.on("blur", () => {
-      if (!win.webContents.isDevToolsFocused()) {
-        win.close();
-      }
-    });
+    openWindow();
   });
 }
 

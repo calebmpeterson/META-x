@@ -9,7 +9,7 @@
     "dev": "cross-env NODE_ENV=development electron .",
     "start": "cross-env NODE_ENV=production electron .",
     "docs:build": "node scripts/build-docs",
-    "terminal": "node src/terminal/main"
+    "terminal": "electron src/terminal/main"
   },
   "devDependencies": {
     "cross-env": "^7.0.2",

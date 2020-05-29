@@ -40,9 +40,13 @@ const getBuiltInCommands = () =>
 const getCommands = () =>
   fs.readdirSync(getConfigDir()).filter((file) => file.endsWith(".js"));
 
+const getCommandFilename = (commandFilename) =>
+  path.join(getConfigDir(), commandFilename);
+
 module.exports = {
   getConfigDir,
   getConfig,
   getBuiltInCommands,
   getCommands,
+  getCommandFilename,
 };
