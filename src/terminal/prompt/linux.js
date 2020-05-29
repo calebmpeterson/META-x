@@ -5,7 +5,7 @@ const _ = require("lodash");
 module.exports = (commands) =>
   new Promise((resolve, reject) => {
     const choices = commands.map(({ title }) => title).join("\n");
-    const cmd = `echo "${choices}" | dmenu`;
+    const cmd = `echo "${choices}" | dmenu -i -b`;
     exec(cmd, (error, stdout, stderr) => {
       if (stdout) {
         const query = _.trim(stdout);
