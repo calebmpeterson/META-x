@@ -42,6 +42,7 @@ function initialize() {
   console.log(`Using hotkey ${hotkey}`);
 
   globalShortcut.register(hotkey, async () => {
+    console.log("Meta-x triggered");
     await prepareClipboard();
     await open();
     await finishClipboard();

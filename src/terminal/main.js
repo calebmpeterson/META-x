@@ -1,20 +1,17 @@
 const path = require("path");
 const _ = require("lodash");
 
-const prompt = require("./darwin");
+const prompt = require("./prompt");
 
 const { getCurrentSelection, setClipboardContent } = require("../clipboard");
-const {
-  getCommandFilename,
-  getBuiltInCommands,
-  getCommands,
-  getAllCommands,
-} = require("../utils");
+const { getCommandFilename, getAllCommands } = require("../utils");
 
 module.exports = async () => {
   const selection = await getCurrentSelection();
 
-  const item = await prompt(getAllCommands());
+  const commands = getAllCommands();
+
+  const item = await prompt(commands);
 
   let resultAsText;
 
@@ -31,7 +28,6 @@ module.exports = async () => {
     try {
       const commandModule = require(`${commandFilename}`);
       const result = commandModule.call(null, selection);
-      console.log(`Result: ${result}`);
 
       if (!_.isUndefined(result)) {
         resultAsText =
