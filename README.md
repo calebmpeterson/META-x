@@ -2,13 +2,14 @@
 
 Emacs-esque `M-x` commands for your entire OS.
 
-Built on Electron and Vanilla JavaScript; I know, I know "Electron!?" Well, it's Fast Enough&trade; and it works.
+- Uses `electron` for clipboard and global hot key interactions.
+- Uses `choose` for the command picker on macOS and `dmenu` on Linux.
 
 ## Support
 
 - [x] Ubuntu Linux
 - [x] macOS
-- [ ] Windows 10 (testing pending)
+- [ ] Windows 10 (pending)
 
 ## Installation
 
@@ -35,7 +36,7 @@ All available keys and modifiers can be viewed [here](https://www.electronjs.org
 
 ### Custom Commands
 
-Custom commands are `common.js` modules placed in `~/.meta-x/`.
+Custom commands are `commonjs` modules placed in `~/.meta-x/`.
 
 #### Example Command
 
@@ -61,7 +62,7 @@ module.exports = (selection) => {
 
 #### Using NPM Packages
 
-You can use `npm` packages by simply installing them in your `~/.meta-x/`
+You can use `npm` packages by simply installing them in your `~/.meta-x/` directory.
 
 For example:
 
@@ -80,17 +81,10 @@ Issues and Pull Requests are welcome!
 
 ### Roadmap
 
-- [x] autocomplete labels
-- [x] name (and adjust .directory references)
-- [x] GitHub repo
-- [x] license
-- [x] close the window on `ESC` key press
-- [x] configurable hot-key
-- [x] usage instructions
-- [x] built-in commands
-- [x] installation instructions
-- [x] Test on macOS
+- [x] Configurable hot-key
+- [x] Document usage instructions
+- [x] Add built-in commands
+- [x] Document installation instructions
 - [x] Improve UI performance (with `choose` on macOS and `dmenu` on Linux)
+- [ ] Publish to NPM
 - [ ] Test on Windows 10
-- [ ] add support for command arguments
-- [ ] publish to NPM

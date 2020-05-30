@@ -31,12 +31,15 @@
         <div class="col-12 col-md-6 offset-md-3">
           <h1 id="metax">Meta-X</h1>
 <p>Emacs-esque <code>M-x</code> commands for your entire OS.</p>
-<p>Built on Electron and Vanilla JavaScript; I know, I know "Electron!?" Well, it's Fast Enough&trade; and it works.</p>
+<ul>
+<li>Uses <code>electron</code> for clipboard and global hot key interactions.</li>
+<li>Uses <code>choose</code> for the command picker on macOS and <code>dmenu</code> on Linux.</li>
+</ul>
 <h2 id="support">Support</h2>
 <ul>
 <li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> Ubuntu Linux</li>
 <li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> macOS</li>
-<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;"> Windows 10 (testing pending)</li>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;"> Windows 10 (pending)</li>
 </ul>
 <h2 id="installation">Installation</h2>
 <ol>
@@ -54,7 +57,7 @@
 <p>The <code>hotkey</code> setting is used to map which global keyboard shortcut launches <strong>Meta-x</strong> on your current selection.</p>
 <p>All available keys and modifiers can be viewed <a href="https://www.electronjs.org/docs/api/accelerator#available-modifiers">here</a></p>
 <h3 id="customcommands">Custom Commands</h3>
-<p>Custom commands are <code>common.js</code> modules placed in <code>~/.meta-x/</code>.</p>
+<p>Custom commands are <code>commonjs</code> modules placed in <code>~/.meta-x/</code>.</p>
 <h4 id="examplecommand">Example Command</h4>
 <p>To get a calculator capable of all operations/syntax available to you in JavaScript, create <code>~/.meta-x/calc.js</code> with the following content:</p>
 <pre><code class="js language-js">module.exports = (selection) =&gt; eval(selection);
@@ -70,7 +73,7 @@
 };
 </code></pre>
 <h4 id="usingnpmpackages">Using NPM Packages</h4>
-<p>You can use <code>npm</code> packages by simply installing them in your <code>~/.meta-x/</code></p>
+<p>You can use <code>npm</code> packages by simply installing them in your <code>~/.meta-x/</code> directory.</p>
 <p>For example:</p>
 <pre><code class="js language-js">&gt; cd ~/.meta-x/
 &gt; yarn add lodash
@@ -81,20 +84,13 @@
 <p>Issues and Pull Requests are welcome!</p>
 <h3 id="roadmap">Roadmap</h3>
 <ul>
-<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> autocomplete labels</li>
-<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> name (and adjust .directory references)</li>
-<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> GitHub repo</li>
-<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> license</li>
-<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> close the window on <code>ESC</code> key press</li>
-<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> configurable hot-key</li>
-<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> usage instructions</li>
-<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> built-in commands</li>
-<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> installation instructions</li>
-<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> Test on macOS</li>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> Configurable hot-key</li>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> Document usage instructions</li>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> Add built-in commands</li>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> Document installation instructions</li>
 <li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> Improve UI performance (with <code>choose</code> on macOS and <code>dmenu</code> on Linux)</li>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;"> Publish to NPM</li>
 <li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;"> Test on Windows 10</li>
-<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;"> add support for command arguments</li>
-<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;"> publish to NPM</li>
 </ul>
         </div>
       </div>
