@@ -44,5 +44,9 @@ module.exports = async () => {
     console.log(`Result: ${resultAsText}`);
     // Update to reflect the command execution result
     setClipboardContent(resultAsText);
+
+    return true;
   }
+
+  return false;
 };
