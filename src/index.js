@@ -37,6 +37,8 @@ const openWindow = () => {
 const open = openTerminal;
 
 function initialize() {
+  app.dock.hide();
+
   const { hotkey } = getConfig();
 
   console.log(`Using hotkey ${hotkey}`);
