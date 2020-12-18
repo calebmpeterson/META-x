@@ -10,7 +10,13 @@ module.exports = (commands) =>
     exec(cmd, (error, stdout, stderr) => {
       if (stdout) {
         const query = _.trim(stdout);
-        resolve(commands.find(({ title }) => title === query));
+        const rawQueryCommand = {
+          isUnhandled: true,
+          query,
+        };
+        const command =
+          commands.find(({ title }) => title === query) || rawQueryCommand;
+        resolve(command);
       } else {
         if (error) {
           console.error(error);

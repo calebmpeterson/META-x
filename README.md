@@ -60,6 +60,25 @@ module.exports = (selection) => {
 };
 ```
 
+#### Command Not Found Fallback
+
+If the event that your query does not match a known command, the raw query string will be passed to `~/.meta-x/fallback-handler.js` if it exists:
+
+```js
+module.exports = function (selection, query) {
+  // Do something with the currently selected
+  // text and/or the raw query string
+};
+```
+
+#### Command Context
+
+In addition to the `selection`, each command function is invoked with `this` bound to the current "command context".
+
+The "command context" API includes a subset of the Electron API mapped to the following properties:
+
+- [`shell` API](https://www.electronjs.org/docs/api/shell) ↗
+
 #### Using NPM Packages
 
 You can use `npm` packages by simply installing them in your `~/.meta-x/` directory.

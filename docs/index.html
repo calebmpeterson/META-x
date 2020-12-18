@@ -72,6 +72,19 @@
   return undefined;
 };
 </code></pre>
+<h4 id="commandnotfoundfallback">Command Not Found Fallback</h4>
+<p>If the event that your query does not match a known command, the raw query string will be passed to <code>~/.meta-x/fallback-handler.js</code> if it exists:</p>
+<pre><code class="js language-js">module.exports = function (selection, query) {
+  // Do something with the currently selected
+  // text and/or the raw query string
+};
+</code></pre>
+<h4 id="commandcontext">Command Context</h4>
+<p>In addition to the <code>selection</code>, each command function is invoked with <code>this</code> bound to the current "command context".</p>
+<p>The "command context" API includes a subset of the Electron API mapped to the following properties:</p>
+<ul>
+<li><a href="https://www.electronjs.org/docs/api/shell"><code>shell</code> API</a> ↗</li>
+</ul>
 <h4 id="usingnpmpackages">Using NPM Packages</h4>
 <p>You can use <code>npm</code> packages by simply installing them in your <code>~/.meta-x/</code> directory.</p>
 <p>For example:</p>
