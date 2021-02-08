@@ -38,7 +38,11 @@ const getBuiltInCommands = () =>
   }));
 
 const getCommands = () =>
-  fs.readdirSync(getConfigDir()).filter((file) => file.endsWith(".js"));
+  fs
+    .readdirSync(getConfigDir())
+    .filter(
+      (file) => file.endsWith(".js") && !file.includes("fallback-handler")
+    );
 
 const getCommandFilename = (commandFilename) =>
   path.join(getConfigDir(), commandFilename);
