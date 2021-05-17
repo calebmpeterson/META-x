@@ -58,6 +58,8 @@ const getCommandsFromFallbackHandler = () => {
     return fallbackCommands.map((fallbackCommand) => ({
       label: fallbackCommand,
       title: fallbackCommand,
+      value: fallbackCommand,
+      isFallback: true,
     }));
   } catch (e) {
     return [];

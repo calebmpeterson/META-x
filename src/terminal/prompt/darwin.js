@@ -16,7 +16,9 @@ module.exports = (commands) =>
           query,
         };
         const command =
-          commands.find(({ title }) => title === query) || rawQueryCommand;
+          commands.find(
+            ({ title, isFallback }) => title === query && !isFallback
+          ) || rawQueryCommand;
         resolve(command);
       } else {
         if (error) {
