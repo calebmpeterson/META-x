@@ -47,13 +47,36 @@ const getCommands = () =>
 const getCommandFilename = (commandFilename) =>
   path.join(getConfigDir(), commandFilename);
 
+const getCommandsFromFallbackHandler = () => {
+  const commandFilename = getCommandFilename("fallback-handler.js");
+  try {
+    const fallbackHandler = require(commandFilename);
+
+    const fallbackCommands =
+      fallbackHandler.suggestions && fallbackHandler.suggestions.call();
+
+    return fallbackCommands.map((fallbackCommand) => ({
+      label: fallbackCommand,
+      title: fallbackCommand,
+    }));
+  } catch (e) {
+    return [];
+  }
+};
+
+const commandComparator = ({ title }) => title;
+
 const getAllCommands = () =>
-  getCommands()
-    .map((command) => ({
-      title: path.basename(command, ".js"),
-      value: command,
-    }))
-    .concat(getBuiltInCommands());
+  _.sortBy(
+    getCommands()
+      .map((command) => ({
+        title: path.basename(command, ".js"),
+        value: command,
+      }))
+      .concat(getBuiltInCommands())
+      .concat(getCommandsFromFallbackHandler()),
+    commandComparator
+  );
 
 module.exports = {
   getConfigDir,

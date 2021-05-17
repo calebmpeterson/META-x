@@ -79,6 +79,18 @@
   // text and/or the raw query string
 };
 </code></pre>
+<h4 id="commandnotfoundfallbacksuggestions">Command Not Found Fallback suggestions</h4>
+<p>The <code>fallback-handler</code> can provide suggestions:</p>
+<pre><code class="js language-js">module.exports = function (selection, query) {
+  // Do something with the currently selected
+  // text and/or the raw query string
+};
+
+module.exports.suggestions = function () {
+  // The suggestions should be an array of strings
+  return ["suggestion one", "suggestion two", "suggestion three"];
+};
+</code></pre>
 <h4 id="commandcontext">Command Context</h4>
 <p>In addition to the <code>selection</code>, each command function is invoked with <code>this</code> bound to the current "command context".</p>
 <p>The "command context" API includes a subset of the Electron API mapped to the following properties:</p>

@@ -71,6 +71,22 @@ module.exports = function (selection, query) {
 };
 ```
 
+#### Command Not Found Fallback suggestions
+
+The `fallback-handler` can provide suggestions:
+
+```js
+module.exports = function (selection, query) {
+  // Do something with the currently selected
+  // text and/or the raw query string
+};
+
+module.exports.suggestions = function () {
+  // The suggestions should be an array of strings
+  return ["suggestion one", "suggestion two", "suggestion three"];
+};
+```
+
 #### Command Context
 
 In addition to the `selection`, each command function is invoked with `this` bound to the current "command context".
