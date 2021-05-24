@@ -68,17 +68,18 @@ const getCommandsFromFallbackHandler = () => {
 
 const commandComparator = ({ title }) => title;
 
-const getAllCommands = () =>
-  _.sortBy(
-    getCommands()
-      .map((command) => ({
-        title: path.basename(command, ".js"),
-        value: command,
-      }))
-      .concat(getBuiltInCommands())
-      .concat(getCommandsFromFallbackHandler()),
-    commandComparator
-  );
+const ALL_COMMANDS = _.sortBy(
+  getCommands()
+    .map((command) => ({
+      title: path.basename(command, ".js"),
+      value: command,
+    }))
+    .concat(getBuiltInCommands())
+    .concat(getCommandsFromFallbackHandler()),
+  commandComparator
+);
+
+const getAllCommands = () => ALL_COMMANDS;
 
 module.exports = {
   getConfigDir,
