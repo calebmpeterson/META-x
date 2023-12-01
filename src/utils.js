@@ -68,18 +68,20 @@ const getCommandsFromFallbackHandler = () => {
 
 const commandComparator = ({ title }) => title;
 
-const ALL_COMMANDS = _.sortBy(
-  getCommands()
-    .map((command) => ({
-      title: path.basename(command, ".js"),
-      value: command,
-    }))
-    .concat(getBuiltInCommands())
-    .concat(getCommandsFromFallbackHandler()),
-  commandComparator
-);
+const getAllCommands = () =>
+  _.sortBy(
+    getCommands()
+      .map((command) => ({
+        title: path.basename(command, ".js"),
+        value: command,
+      }))
+      .concat(getBuiltInCommands())
+      .concat(getCommandsFromFallbackHandler()),
+    commandComparator
+  );
 
-const getAllCommands = () => ALL_COMMANDS;
+const delay = (timeout) =>
+  new Promise((resolve) => setTimeout(resolve, timeout));
 
 module.exports = {
   getConfigDir,
@@ -88,4 +90,5 @@ module.exports = {
   getCommands,
   getAllCommands,
   getCommandFilename,
+  delay,
 };

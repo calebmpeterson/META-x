@@ -2,23 +2,32 @@
 
 Emacs-esque `M-x` commands for your entire OS.
 
-- Uses `electron` for clipboard and global hot key interactions.
-- Uses `choose` for the command picker on macOS and `dmenu` on Linux.
+- Recommends `skhd` for hot-key bindings.
+- Uses `clipboardy` for clipboard interactions.
+- Uses `choose` for the command picker on macOS.
 
 ## Support
 
-- [x] Ubuntu Linux
 - [x] macOS
-- [ ] Windows 10 (pending)
+- [ ] Linux
+- [ ] Windows
 
 ## Installation
 
 1. `git clone https://github.com/calebmpeterson/META-x.git`
 2. `cd META-x`
 3. `yarn install`
-4. `yarn start` (or `yarn dev` if you want devtools to open)
 
-**An NPM package is coming soon...**
+## Running
+
+**Meta-x** needs a hot-key launcher. [`skhd`](https://github.com/koekeishiya/skhd) is recommended for macOS.
+
+### Sample `.shkdrc`
+
+```
+# ⌘SPACE to launch Meta-x on the current text selection in the active window
+cmd - space : node <meta-x-root-dir>/src/launcher.js
+```
 
 ## Configuration
 
@@ -27,12 +36,6 @@ Emacs-esque `M-x` commands for your entire OS.
 ### Settings
 
 All configuration options are contained in `~/.meta-x/config.json`
-
-#### Hotkey
-
-The `hotkey` setting is used to map which global keyboard shortcut launches **Meta-x** on your current selection.
-
-All available keys and modifiers can be viewed [here](https://www.electronjs.org/docs/api/accelerator#available-modifiers)
 
 ### Custom Commands
 
@@ -71,7 +74,7 @@ module.exports = function (selection, query) {
 };
 ```
 
-#### Command Not Found Fallback suggestions
+#### Command Not Found Fallback Suggestions
 
 The `fallback-handler` can provide suggestions:
 
@@ -91,9 +94,9 @@ module.exports.suggestions = function () {
 
 In addition to the `selection`, each command function is invoked with `this` bound to the current "command context".
 
-The "command context" API includes a subset of the Electron API mapped to the following properties:
+The "command context" API includes:
 
-- [`shell` API](https://www.electronjs.org/docs/api/shell) ↗
+- [`open` API](https://www.npmjs.com/package/open) ↗
 
 #### Using NPM Packages
 
@@ -122,4 +125,3 @@ Issues and Pull Requests are welcome!
 - [x] Document installation instructions
 - [x] Improve UI performance (with `choose` on macOS and `dmenu` on Linux)
 - [ ] Publish to NPM
-- [ ] Test on Windows 10

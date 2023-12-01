@@ -1,16 +1,18 @@
 const { isString } = require("lodash");
-const { clipboard } = require("electron");
 
 module.exports = {
-  getCurrentSelection() {
+  async getCurrentSelection() {
+    const { default: clipboard } = await import("clipboardy");
     // This will read the selected text on Linux and the
     // current clipboard contents on macOS and Windows
-    return Promise.resolve(clipboard.readText("selection"));
+    return clipboard.read();
   },
 
-  setClipboardContent(contentAsText) {
+  async setClipboardContent(contentAsText) {
     if (isString(contentAsText)) {
-      clipboard.writeText(contentAsText);
+      const { default: clipboard } = await import("clipboardy");
+
+      await clipboard.write(contentAsText);
     }
   },
 };

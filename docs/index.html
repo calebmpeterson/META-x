@@ -28,30 +28,32 @@
         <div class="col-12 col-md-6 offset-md-3"><h1 id="metax">Meta-X</h1>
 <p>Emacs-esque <code>M-x</code> commands for your entire OS.</p>
 <ul>
-<li>Uses <code>electron</code> for clipboard and global hot key interactions.</li>
-<li>Uses <code>choose</code> for the command picker on macOS and <code>dmenu</code> on Linux.</li>
+<li>Recommends <code>skhd</code> for hot-key bindings.</li>
+<li>Uses <code>clipboardy</code> for clipboard interactions.</li>
+<li>Uses <code>choose</code> for the command picker on macOS.</li>
 </ul>
 <h2 id="support">Support</h2>
 <ul>
-<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> Ubuntu Linux</li>
 <li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> macOS</li>
-<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;"> Windows 10 (pending)</li>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;"> Linux</li>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;"> Windows</li>
 </ul>
 <h2 id="installation">Installation</h2>
 <ol>
 <li><code>git clone https://github.com/calebmpeterson/META-x.git</code></li>
 <li><code>cd META-x</code></li>
 <li><code>yarn install</code></li>
-<li><code>yarn start</code> (or <code>yarn dev</code> if you want devtools to open)</li>
 </ol>
-<p><strong>An NPM package is coming soon…</strong></p>
+<h2 id="running">Running</h2>
+<p><strong>Meta-x</strong> needs a hot-key launcher. <a href="https://github.com/koekeishiya/skhd"><code>skhd</code></a> is recommended for macOS.</p>
+<h3 id="sampleshkdrc">Sample <code>.shkdrc</code></h3>
+<pre><code># ⌘SPACE to launch Meta-x on the current text selection in the active window
+cmd - space : node &lt;meta-x-root-dir&gt;/src/launcher.js
+</code></pre>
 <h2 id="configuration">Configuration</h2>
 <p><strong>Meta-x</strong> config is kept in <code>~/.meta-x/</code> directory. This makes it easy to keep your config under source control.</p>
 <h3 id="settings">Settings</h3>
 <p>All configuration options are contained in <code>~/.meta-x/config.json</code></p>
-<h4 id="hotkey">Hotkey</h4>
-<p>The <code>hotkey</code> setting is used to map which global keyboard shortcut launches <strong>Meta-x</strong> on your current selection.</p>
-<p>All available keys and modifiers can be viewed <a href="https://www.electronjs.org/docs/api/accelerator#available-modifiers">here</a></p>
 <h3 id="customcommands">Custom Commands</h3>
 <p>Custom commands are <code>commonjs</code> modules placed in <code>~/.meta-x/</code>.</p>
 <h4 id="examplecommand">Example Command</h4>
@@ -75,7 +77,7 @@
   // text and/or the raw query string
 };
 </code></pre>
-<h4 id="commandnotfoundfallbacksuggestions">Command Not Found Fallback suggestions</h4>
+<h4 id="commandnotfoundfallbacksuggestions">Command Not Found Fallback Suggestions</h4>
 <p>The <code>fallback-handler</code> can provide suggestions:</p>
 <pre><code class="js language-js">module.exports = function (selection, query) {
   // Do something with the currently selected
@@ -89,9 +91,9 @@ module.exports.suggestions = function () {
 </code></pre>
 <h4 id="commandcontext">Command Context</h4>
 <p>In addition to the <code>selection</code>, each command function is invoked with <code>this</code> bound to the current "command context".</p>
-<p>The "command context" API includes a subset of the Electron API mapped to the following properties:</p>
+<p>The "command context" API includes:</p>
 <ul>
-<li><a href="https://www.electronjs.org/docs/api/shell"><code>shell</code> API</a> ↗</li>
+<li><a href="https://www.npmjs.com/package/open"><code>open</code> API</a> ↗</li>
 </ul>
 <h4 id="usingnpmpackages">Using NPM Packages</h4>
 <p>You can use <code>npm</code> packages by simply installing them in your <code>~/.meta-x/</code> directory.</p>
@@ -111,7 +113,6 @@ module.exports.suggestions = function () {
 <li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> Document installation instructions</li>
 <li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> Improve UI performance (with <code>choose</code> on macOS and <code>dmenu</code> on Linux)</li>
 <li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;"> Publish to NPM</li>
-<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;"> Test on Windows 10</li>
 </ul></div>
       </div>
     </div>

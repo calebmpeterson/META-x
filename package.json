@@ -1,24 +1,24 @@
 {
   "name": "meta-x",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "main": "src/index.js",
   "author": "caleb.peterson@cubicle6.com",
   "license": "MIT",
   "private": false,
   "scripts": {
-    "dev": "cross-env NODE_ENV=development electron .",
-    "start": "cross-env NODE_ENV=production electron .",
+    "dev": "cross-env NODE_ENV=development node src/terminal/launcher.js",
+    "start": "cross-env NODE_ENV=production node src/terminal/launcher.js",
     "docs:build": "node scripts/build-docs"
   },
   "devDependencies": {
     "cross-env": "^7.0.2",
-    "electron": "^22.3.25",
     "showdown": "^1.9.1"
   },
   "dependencies": {
-    "autocompleter": "^6.0.3",
+    "@nut-tree/nut-js": "^3.1.2",
+    "clipboardy": "^4.0.0",
     "lodash": "^4.17.21",
-    "prompts": "^2.3.2",
-    "run-applescript": "^4.0.0"
+    "open": "^9.1.0",
+    "prompts": "^2.3.2"
   }
 }

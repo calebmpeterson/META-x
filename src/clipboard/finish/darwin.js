@@ -1,5 +1,7 @@
-const runApplescript = require("run-applescript");
+const { keyboard, Key } = require("@nut-tree/nut-js");
+const { delay } = require("../../utils");
 
-const script = `tell application "System Events" to keystroke "v" using command down`;
-
-module.exports = () => runApplescript(script);
+module.exports = async () => {
+  await delay(100);
+  await keyboard.type(Key.LeftSuper, Key.V);
+};

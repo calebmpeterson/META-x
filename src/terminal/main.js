@@ -1,6 +1,5 @@
 const path = require("path");
 const _ = require("lodash");
-const { shell } = require("electron");
 
 const prompt = require("./prompt");
 
@@ -16,8 +15,9 @@ module.exports = async () => {
 
   let resultAsText;
 
+  const { default: open } = await import("open");
   const commandContext = {
-    shell,
+    open,
   };
 
   // Execute built-in command
@@ -73,7 +73,7 @@ module.exports = async () => {
   if (resultAsText && _.isString(resultAsText)) {
     console.log(`Result: ${resultAsText}`);
     // Update to reflect the command execution result
-    setClipboardContent(resultAsText);
+    await setClipboardContent(resultAsText);
 
     return true;
   }
