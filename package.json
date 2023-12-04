@@ -1,13 +1,14 @@
 {
   "name": "meta-x",
-  "version": "2.0.0",
-  "main": "src/index.js",
+  "version": "3.0.0",
+  "main": "src/launcher.mjs",
   "author": "caleb.peterson@cubicle6.com",
   "license": "MIT",
   "private": false,
+  "type": "module",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development node src/terminal/launcher.js",
-    "start": "cross-env NODE_ENV=production node src/terminal/launcher.js",
+    "dev": "cross-env NODE_ENV=development node src/terminal/launcher.mjs",
+    "start": "cross-env NODE_ENV=production node src/terminal/launcher.mjs",
     "docs:build": "node scripts/build-docs"
   },
   "devDependencies": {

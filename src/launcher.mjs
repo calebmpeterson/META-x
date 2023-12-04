@@ -1,6 +1,6 @@
-const prepareClipboard = require("./clipboard/prepare");
-const finishClipboard = require("./clipboard/finish");
-const openTerminal = require("./terminal/main");
+import prepareClipboard from './clipboard/prepare/index.mjs';
+import finishClipboard from './clipboard/finish/index.mjs';
+import openTerminal from './terminal/main.mjs';
 
 const launch = async () => {
   console.log("Meta-x triggered");

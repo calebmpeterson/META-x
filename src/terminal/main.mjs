@@ -1,12 +1,14 @@
-const path = require("path");
-const _ = require("lodash");
+import _ from "lodash";
+import { createRequire } from "module";
+import open from "open";
+import prompt from "./prompt/index.mjs";
+import {
+  getCurrentSelection,
+  setClipboardContent,
+} from "../clipboard/utils.mjs";
+import { getCommandFilename, getAllCommands } from "../utils.mjs";
 
-const prompt = require("./prompt");
-
-const { getCurrentSelection, setClipboardContent } = require("../clipboard");
-const { getCommandFilename, getAllCommands } = require("../utils");
-
-module.exports = async () => {
+export default async () => {
   const selection = await getCurrentSelection();
 
   const commands = getAllCommands();
@@ -15,7 +17,9 @@ module.exports = async () => {
 
   let resultAsText;
 
-  const { default: open } = await import("open");
+  const require = createRequire(import.meta.url);
+  Object.assign(global, { open, require });
+
   const commandContext = {
     open,
   };

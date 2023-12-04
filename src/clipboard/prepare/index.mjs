@@ -1,4 +1,4 @@
-const prepareDarwin = require("./darwin");
+import prepareDarwin from './darwin.mjs';
 
-module.exports = () =>
+export default () =>
   process.platform === "darwin" ? prepareDarwin() : Promise.resolve();

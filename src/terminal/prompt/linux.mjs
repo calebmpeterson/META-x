@@ -1,8 +1,8 @@
-const { exec } = require("child_process");
-const _ = require("lodash");
+import { exec } from 'child_process';
+import _ from 'lodash';
 
 // Uses dmenu
-module.exports = (commands) =>
+export default (commands) =>
   new Promise((resolve, reject) => {
     const choices = commands.map(({ title }) => title).join("\n");
     const cmd = `echo "${choices}" | dmenu -i -b`;

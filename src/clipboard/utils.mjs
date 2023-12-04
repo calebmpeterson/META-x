@@ -1,6 +1,6 @@
-const { isString } = require("lodash");
+import _ from 'lodash';
 
-module.exports = {
+const exported = {
   async getCurrentSelection() {
     const { default: clipboard } = await import("clipboardy");
     // This will read the selected text on Linux and the
@@ -9,10 +9,17 @@ module.exports = {
   },
 
   async setClipboardContent(contentAsText) {
-    if (isString(contentAsText)) {
+    if (_.isString(contentAsText)) {
       const { default: clipboard } = await import("clipboardy");
 
       await clipboard.write(contentAsText);
     }
-  },
+  }
 };
+
+export default exported;
+
+export const {
+  getCurrentSelection,
+  setClipboardContent
+} = exported;
