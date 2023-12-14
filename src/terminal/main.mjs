@@ -27,8 +27,14 @@ export default async () => {
   // Execute built-in command
   if (item.isUnknown) {
     console.warn(`Unknown command`);
-  } else if (_.isFunction(item.value)) {
+  }
+  // Handle built-in functions
+  else if (_.isFunction(item.value)) {
     resultAsText = item.value(selection);
+  }
+  // Execute an application
+  else if (item.isApplication) {
+    open(item.value);
   }
   // Execute default handler
   else if (item.isUnhandled) {

@@ -9,10 +9,13 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development node src/terminal/launcher.mjs",
     "start": "cross-env NODE_ENV=production node src/terminal/launcher.mjs",
-    "docs:build": "node scripts/build-docs"
+    "build": "rollup src/launcher.mjs --file bin/launcher.mjs --format es",
+    "docs:build": "node scripts/build-docs",
+    "postinstall": "build"
   },
   "devDependencies": {
     "cross-env": "^7.0.2",
+    "rollup": "^4.9.0",
     "showdown": "^1.9.1"
   },
   "dependencies": {

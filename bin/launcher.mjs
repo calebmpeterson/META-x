@@ -1,0 +1,283 @@
+import { keyboard, Key } from '@nut-tree/nut-js';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+import _ from 'lodash';
+import { createRequire } from 'module';
+import open from 'open';
+import { exec } from 'child_process';
+import clipboard from 'clipboardy';
+
+const getConfigDir = () => path.join(os.homedir(), ".meta-x");
+
+const BUILT_IN_COMMANDS = {
+  "to-upper": _.toUpper,
+  "to-lower": _.toLower,
+  "camel-case": _.camelCase,
+  capitalize: _.capitalize,
+  "kebab-case": _.kebabCase,
+  "snake-case": _.snakeCase,
+  "start-case": _.startCase,
+  deburr: _.deburr,
+};
+
+const getBuiltInCommands = () =>
+  _.map(BUILT_IN_COMMANDS, (command, name) => ({
+    label: name,
+    title: `⌬ ${name}`,
+    value: command,
+  }));
+
+const getCommands = () =>
+  fs
+    .readdirSync(getConfigDir())
+    .filter(
+      (file) => file.endsWith(".js") && !file.includes("fallback-handler")
+    );
+
+const getCommandFilename = (commandFilename) =>
+  path.join(getConfigDir(), commandFilename);
+
+const getCommandsFromFallbackHandler = () => {
+  const commandFilename = getCommandFilename("fallback-handler.js");
+  try {
+    const require = createRequire(import.meta.url);
+    const fallbackHandler = require(commandFilename);
+
+    const fallbackCommands =
+      fallbackHandler.suggestions && fallbackHandler.suggestions.call();
+
+    return fallbackCommands.map((fallbackCommand) => ({
+      label: fallbackCommand,
+      title: fallbackCommand,
+      value: fallbackCommand,
+      isFallback: true,
+    }));
+  } catch (e) {
+    console.error(`Failed to run fallback handler: ${e.message}`);
+    return [];
+  }
+};
+
+const getApplications = () => {
+  const applications = fs
+    .readdirSync("/Applications")
+    .filter((filename) => {
+      const pathname = path.join("/Applications", filename);
+      try {
+        // If this doesn't throw, then the file is executable
+        fs.accessSync(pathname, fs.constants.X_OK);
+        return true;
+      } catch {
+        return false;
+      }
+    })
+    .filter((filename) => !filename.startsWith("."));
+
+  return applications.map((application) => ({
+    title: `⚙︎ ${_.get(path.parse(application), "name", application)}`,
+    value: path.join("/Applications", application),
+    isApplication: true,
+  }));
+};
+
+const commandComparator = ({ title }) => title;
+
+const getAllCommands = () => {
+  try {
+    console.time("getAllCommands");
+    return [
+      ..._.sortBy(
+        getCommands()
+          .map((command) => ({
+            title: `⌁ ${path.basename(command, ".js")}`,
+            value: command,
+          }))
+          .concat(getBuiltInCommands()),
+        commandComparator
+      ),
+      ..._.sortBy(getApplications(), commandComparator),
+      ...getCommandsFromFallbackHandler(),
+    ];
+  } finally {
+    console.timeEnd("getAllCommands");
+  }
+};
+
+const delay = (timeout) =>
+  new Promise((resolve) => setTimeout(resolve, timeout));
+
+var prepareDarwin$1 = async () => {
+  await keyboard.type(Key.LeftSuper, Key.C);
+  await delay(20);
+};
+
+var prepareClipboard = () =>
+  process.platform === "darwin" ? prepareDarwin$1() : Promise.resolve();
+
+var prepareDarwin = async () => {
+  await delay(20);
+  await keyboard.type(Key.LeftSuper, Key.V);
+};
+
+var finishClipboard = () =>
+  process.platform === "darwin" ? prepareDarwin() : Promise.resolve();
+
+// Uses choose: https://github.com/chipsenkbeil/choose
+// brew install choose-gui
+var promptDarwin = (commands) =>
+  new Promise((resolve, reject) => {
+    const choices = commands.map(({ title }) => title).join("\n");
+    const toShow = Math.min(20, _.size(commands));
+    const cmd = `echo "${choices}" | choose -b 000000 -c 222222 -w 30 -s 16 -m -n ${toShow}`;
+    exec(cmd, (error, stdout, stderr) => {
+      if (stdout) {
+        const query = _.trim(stdout);
+        const rawQueryCommand = {
+          isUnhandled: true,
+          query,
+        };
+        const command =
+          commands.find(
+            ({ title, isFallback }) => title === query && !isFallback
+          ) || rawQueryCommand;
+        resolve(command);
+      } else {
+        if (error) {
+          console.error(error);
+        }
+        resolve({
+          isUnknown: true,
+        });
+      }
+    });
+  });
+
+// Uses dmenu
+var promptLinux = (commands) =>
+  new Promise((resolve, reject) => {
+    const choices = commands.map(({ title }) => title).join("\n");
+    const cmd = `echo "${choices}" | dmenu -i -b`;
+    exec(cmd, (error, stdout, stderr) => {
+      if (stdout) {
+        const query = _.trim(stdout);
+        resolve(commands.find(({ title }) => title === query));
+      } else {
+        if (error) {
+          console.error(error);
+        }
+        resolve({
+          isUnknown: true,
+        });
+      }
+    });
+  });
+
+var prompt = (...args) =>
+  process.platform === "darwin" ? promptDarwin(...args) : promptLinux(...args);
+
+const exported = {
+  async getCurrentSelection() {
+    // This will read the selected text on Linux and the
+    // current clipboard contents on macOS and Windows
+    return clipboard.read();
+  },
+
+  async setClipboardContent(contentAsText) {
+    if (_.isString(contentAsText)) {
+      await clipboard.write(contentAsText);
+    }
+  },
+};
+
+const { getCurrentSelection, setClipboardContent } = exported;
+
+var openTerminal = async () => {
+  const selection = await getCurrentSelection();
+
+  const commands = getAllCommands();
+
+  const item = await prompt(commands);
+
+  let resultAsText;
+
+  const require = createRequire(import.meta.url);
+  Object.assign(global, { open, require });
+
+  const commandContext = {
+    open,
+  };
+
+  // Execute built-in command
+  if (item.isUnknown) {
+    console.warn(`Unknown command`);
+  } else if (_.isFunction(item.value)) {
+    resultAsText = item.value(selection);
+  } else if (item.isApplication) {
+    open(item.value);
+  }
+  // Execute default handler
+  else if (item.isUnhandled) {
+    console.warn(`Unhandled command: ${item.query}`);
+
+    const commandFilename = getCommandFilename("fallback-handler.js");
+
+    try {
+      const fallbackHandler = require(commandFilename);
+
+      const result = fallbackHandler.call(
+        commandContext,
+        selection,
+        item.query
+      );
+
+      if (!_.isUndefined(result)) {
+        resultAsText =
+          _.isArray(result) || _.isObject(result)
+            ? JSON.stringify(result, null, "  ")
+            : _.toString(result);
+      }
+    } catch (e) {
+      console.error(`Failed to execute ${commandFilename}`, e);
+    }
+  }
+  // Execute custom module-based command
+  else {
+    const commandFilename = getCommandFilename(item.value);
+
+    try {
+      const commandModule = require(`${commandFilename}`);
+      const result = commandModule.call(commandContext, selection);
+
+      if (!_.isUndefined(result)) {
+        resultAsText =
+          _.isArray(result) || _.isObject(result)
+            ? JSON.stringify(result, null, "  ")
+            : _.toString(result);
+      }
+    } catch (e) {
+      console.error(`Failed to execute ${commandFilename}`, e);
+    }
+  }
+
+  if (resultAsText && _.isString(resultAsText)) {
+    console.log(`Result: ${resultAsText}`);
+    // Update to reflect the command execution result
+    await setClipboardContent(resultAsText);
+
+    return true;
+  }
+
+  return false;
+};
+
+const launch = async () => {
+  console.log("Meta-x triggered");
+  await prepareClipboard();
+  const result = await openTerminal();
+  if (result) {
+    await finishClipboard();
+  }
+};
+
+launch();
