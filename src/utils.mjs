@@ -3,8 +3,12 @@ import os from "os";
 import path from "path";
 import _ from "lodash";
 import { createRequire } from "module";
+import { openApp } from "open";
 
 const getConfigDir = () => path.join(os.homedir(), ".meta-x");
+
+const getApplicationUsageHistory = () =>
+  path.join(getConfigDir(), ".application-usage");
 
 const BUILT_IN_COMMANDS = {
   "to-upper": _.toUpper,
@@ -55,7 +59,32 @@ const getCommandsFromFallbackHandler = () => {
   }
 };
 
+const persistApplicationUsage = (values) => {
+  fs.writeFileSync(
+    getApplicationUsageHistory(),
+    _.takeRight(values, 100).join("\n"),
+    "utf8"
+  );
+};
+
+const restoreApplicationUsage = () => {
+  try {
+    return fs.readFileSync(getApplicationUsageHistory(), "utf8").split("\n");
+  } catch {
+    // The file doesn't exist yet
+    return [];
+  }
+};
+
+const trackApplicationUsage = (value) => {
+  const history = restoreApplicationUsage();
+  persistApplicationUsage([...history, value]);
+};
+
 const getApplications = () => {
+  const history = restoreApplicationUsage();
+  const scores = _.countBy(history, _.identity);
+
   const applications = fs
     .readdirSync("/Applications")
     .filter((filename) => {
@@ -70,19 +99,31 @@ const getApplications = () => {
     })
     .filter((filename) => !filename.startsWith("."));
 
-  return applications.map((application) => ({
-    title: `⚙︎ ${_.get(path.parse(application), "name", application)}`,
-    value: path.join("/Applications", application),
-    isApplication: true,
-  }));
+  const items = applications.map((application) => {
+    const value = path.join("/Applications", application);
+    return {
+      title: `⚙︎ ${_.get(path.parse(application), "name", application)}`,
+      value,
+      isApplication: true,
+      score: scores[value] ?? 0,
+      execute: async () => {
+        trackApplicationUsage(value);
+        await openApp(value);
+      },
+    };
+  });
+
+  return items;
 };
 
 const commandComparator = ({ title }) => title;
 
+const applicationComparator = ({ score }) => -score;
+
 const getAllCommands = () => {
   try {
     console.time("getAllCommands");
-    return [
+    const allCommands = [
       ..._.sortBy(
         getCommands()
           .map((command) => ({
@@ -92,9 +133,14 @@ const getAllCommands = () => {
           .concat(getBuiltInCommands()),
         commandComparator
       ),
-      ..._.sortBy(getApplications(), commandComparator),
+      ..._.chain(getApplications())
+        .sortBy(commandComparator)
+        .sortBy(applicationComparator)
+        .value(),
       ...getCommandsFromFallbackHandler(),
     ];
+
+    return allCommands;
   } finally {
     console.timeEnd("getAllCommands");
   }

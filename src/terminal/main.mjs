@@ -34,7 +34,8 @@ export default async () => {
   }
   // Execute an application
   else if (item.isApplication) {
-    open(item.value);
+    console.log(`Opening application ${item.value}`);
+    item.execute();
   }
   // Execute default handler
   else if (item.isUnhandled) {
