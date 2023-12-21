@@ -11,7 +11,9 @@
     "start": "cross-env NODE_ENV=production node src/terminal/launcher.mjs",
     "build": "rollup src/launcher.mjs --file bin/launcher.mjs --format es",
     "docs:build": "node scripts/build-docs",
-    "postinstall": "build"
+    "postinstall": "yarn build",
+    "tail-logs": "tail -f /tmp/skhd_$USER.out.log",
+    "tail-errors": "tail -f /tmp/skhd_$USER.err.log"
   },
   "devDependencies": {
     "cross-env": "^7.0.2",
