@@ -54,11 +54,11 @@ const getAllCommands = () => {
         [...getCommands(), ...getBuiltInCommands()],
         commandComparator
       ),
+      ...getFolders(),
       ..._.chain(getApplications())
         .sortBy(commandComparator)
         .sortBy(applicationComparator)
         .value(),
-      ...getFolders(),
       ...getCommandsFromFallbackHandler(),
     ];
 
