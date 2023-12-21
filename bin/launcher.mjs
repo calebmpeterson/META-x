@@ -110,6 +110,7 @@ const getApplications = () => {
       isApplication: true,
       score: scores[value] ?? 0,
       execute: async () => {
+        console.log(`Opening ${application}`);
         trackApplicationUsage(value);
         await openApp(value);
       },
@@ -118,6 +119,19 @@ const getApplications = () => {
 
   return items;
 };
+
+const getFolders = () =>
+  ["Documents", "Downloads", "Home", "Pictures"].map((folder) => ({
+    title: `⏍ ${folder}`,
+    value: folder,
+    isFolder: true,
+    open: async () => {
+      const dirname =
+        folder === "Home" ? os.homedir() : path.join(os.homedir(), folder);
+      console.log(`Opening ${dirname}`);
+      await open(dirname);
+    },
+  }));
 
 const commandComparator = ({ title }) => title;
 
@@ -140,6 +154,7 @@ const getAllCommands = () => {
         .sortBy(commandComparator)
         .sortBy(applicationComparator)
         .value(),
+      ...getFolders(),
       ...getCommandsFromFallbackHandler(),
     ];
 
@@ -263,8 +278,11 @@ var openTerminal = async () => {
   }
   // Execute an application
   else if (item.isApplication) {
-    console.log(`Opening application ${item.value}`);
-    item.execute();
+    await item.execute();
+  }
+  // Opens a folder
+  else if (item.isFolder) {
+    await item.open();
   }
   // Execute default handler
   else if (item.isUnhandled) {

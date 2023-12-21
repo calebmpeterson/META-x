@@ -3,7 +3,7 @@ import os from "os";
 import path from "path";
 import _ from "lodash";
 import { createRequire } from "module";
-import { openApp } from "open";
+import open, { openApp } from "open";
 
 const getConfigDir = () => path.join(os.homedir(), ".meta-x");
 
@@ -107,6 +107,7 @@ const getApplications = () => {
       isApplication: true,
       score: scores[value] ?? 0,
       execute: async () => {
+        console.log(`Opening ${application}`);
         trackApplicationUsage(value);
         await openApp(value);
       },
@@ -115,6 +116,19 @@ const getApplications = () => {
 
   return items;
 };
+
+const getFolders = () =>
+  ["Documents", "Downloads", "Home", "Pictures"].map((folder) => ({
+    title: `⏍ ${folder}`,
+    value: folder,
+    isFolder: true,
+    open: async () => {
+      const dirname =
+        folder === "Home" ? os.homedir() : path.join(os.homedir(), folder);
+      console.log(`Opening ${dirname}`);
+      await open(dirname);
+    },
+  }));
 
 const commandComparator = ({ title }) => title;
 
@@ -137,6 +151,7 @@ const getAllCommands = () => {
         .sortBy(commandComparator)
         .sortBy(applicationComparator)
         .value(),
+      ...getFolders(),
       ...getCommandsFromFallbackHandler(),
     ];
 
