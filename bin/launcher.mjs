@@ -1,17 +1,12 @@
 import { keyboard, Key } from '@nut-tree/nut-js';
 import fs from 'fs';
-import os from 'os';
 import path from 'path';
 import _ from 'lodash';
 import { createRequire } from 'module';
+import os from 'os';
 import open, { openApp } from 'open';
 import { exec } from 'child_process';
 import clipboard from 'clipboardy';
-
-const getConfigDir = () => path.join(os.homedir(), ".meta-x");
-
-const getApplicationUsageHistory = () =>
-  path.join(getConfigDir(), ".application-usage");
 
 const BUILT_IN_COMMANDS = {
   "to-upper": _.toUpper,
@@ -31,36 +26,21 @@ const getBuiltInCommands = () =>
     value: command,
   }));
 
-const getCommands = () =>
-  fs
-    .readdirSync(getConfigDir())
-    .filter(
-      (file) => file.endsWith(".js") && !file.includes("fallback-handler")
-    );
+const getFolders = () =>
+  ["Documents", "Downloads", "Home", "Pictures"].map((folder) => ({
+    title: `⏍ ${folder}`,
+    value: folder,
+    isFolder: true,
+    open: async () => {
+      const dirname =
+        folder === "Home" ? os.homedir() : path.join(os.homedir(), folder);
+      console.log(`Opening ${dirname}`);
+      await open(dirname);
+    },
+  }));
 
-const getCommandFilename = (commandFilename) =>
-  path.join(getConfigDir(), commandFilename);
-
-const getCommandsFromFallbackHandler = () => {
-  const commandFilename = getCommandFilename("fallback-handler.js");
-  try {
-    const require = createRequire(import.meta.url);
-    const fallbackHandler = require(commandFilename);
-
-    const fallbackCommands =
-      fallbackHandler.suggestions && fallbackHandler.suggestions.call();
-
-    return fallbackCommands.map((fallbackCommand) => ({
-      label: fallbackCommand,
-      title: fallbackCommand,
-      value: fallbackCommand,
-      isFallback: true,
-    }));
-  } catch (e) {
-    console.error(`Failed to run fallback handler: ${e.message}`);
-    return [];
-  }
-};
+const getApplicationUsageHistory = () =>
+  path.join(getConfigDir(), ".application-usage");
 
 const persistApplicationUsage = (values) => {
   fs.writeFileSync(
@@ -120,18 +100,42 @@ const getApplications = () => {
   return items;
 };
 
-const getFolders = () =>
-  ["Documents", "Downloads", "Home", "Pictures"].map((folder) => ({
-    title: `⏍ ${folder}`,
-    value: folder,
-    isFolder: true,
-    open: async () => {
-      const dirname =
-        folder === "Home" ? os.homedir() : path.join(os.homedir(), folder);
-      console.log(`Opening ${dirname}`);
-      await open(dirname);
-    },
-  }));
+const getConfigDir$1 = () => path.join(os.homedir(), ".meta-x");
+
+const getCommands = () =>
+  fs
+    .readdirSync(getConfigDir$1())
+    .filter(
+      (file) => file.endsWith(".js") && !file.includes("fallback-handler")
+    )
+    .map((command) => ({
+      title: `⌁ ${path.basename(command, ".js")}`,
+      value: command,
+    }));
+
+const getCommandFilename = (commandFilename) =>
+  path.join(getConfigDir$1(), commandFilename);
+
+const getCommandsFromFallbackHandler = () => {
+  const commandFilename = getCommandFilename("fallback-handler.js");
+  try {
+    const require = createRequire(import.meta.url);
+    const fallbackHandler = require(commandFilename);
+
+    const fallbackCommands =
+      fallbackHandler.suggestions && fallbackHandler.suggestions.call();
+
+    return fallbackCommands.map((fallbackCommand) => ({
+      label: fallbackCommand,
+      title: fallbackCommand,
+      value: fallbackCommand,
+      isFallback: true,
+    }));
+  } catch (e) {
+    console.error(`Failed to run fallback handler: ${e.message}`);
+    return [];
+  }
+};
 
 const commandComparator = ({ title }) => title;
 
@@ -142,12 +146,7 @@ const getAllCommands = () => {
     console.time("getAllCommands");
     const allCommands = [
       ..._.sortBy(
-        getCommands()
-          .map((command) => ({
-            title: `⌁ ${path.basename(command, ".js")}`,
-            value: command,
-          }))
-          .concat(getBuiltInCommands()),
+        [...getCommands(), ...getBuiltInCommands()],
         commandComparator
       ),
       ..._.chain(getApplications())
