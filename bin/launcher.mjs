@@ -7,6 +7,7 @@ import os from 'os';
 import open, { openApp } from 'open';
 import fs$1 from 'node:fs';
 import path$1 from 'node:path';
+import { execa } from 'execa';
 import { exec } from 'child_process';
 import clipboard from 'clipboardy';
 
@@ -117,12 +118,28 @@ const getSystemPreferences = () =>
     value: pane,
     isFolder: true,
     open: async () => {
-      console.log(`Opening ${pane}`);
       await open(getPane(pane));
     },
   }));
 
 const getConfigDir$1 = () => path.join(os.homedir(), ".meta-x");
+
+const getSystemCommands = () => [
+  {
+    title: "Sleep",
+    isApplication: true,
+    execute: async () => {
+      await execa("pmset", ["sleepnow"]);
+    },
+  },
+  {
+    title: "Sleep Displays",
+    isApplication: true,
+    execute: async () => {
+      await execa("pmset", ["displaysleepnow"]);
+    },
+  },
+];
 
 const getCommands = () =>
   fs
@@ -173,6 +190,7 @@ const getAllCommands = () => {
       ),
       ...getFolders(),
       ...getSystemPreferences(),
+      ...getSystemCommands(),
       ..._.chain(getApplications())
         .sortBy(commandComparator)
         .sortBy(applicationComparator)

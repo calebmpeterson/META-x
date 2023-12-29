@@ -17,7 +17,6 @@ export const getSystemPreferences = () =>
     value: pane,
     isFolder: true,
     open: async () => {
-      console.log(`Opening ${pane}`);
       await open(getPane(pane));
     },
   }));

@@ -7,6 +7,7 @@ import { getFolders } from "./catalog/folders";
 import { getApplications } from "./catalog/applications";
 import { getSystemPreferences } from "./catalog/system-preferences";
 import { getConfigDir } from "./utils/getConfigDir";
+import { getSystemCommands } from "./catalog/system.mjs";
 
 const getCommands = () =>
   fs
@@ -57,6 +58,7 @@ const getAllCommands = () => {
       ),
       ...getFolders(),
       ...getSystemPreferences(),
+      ...getSystemCommands(),
       ..._.chain(getApplications())
         .sortBy(commandComparator)
         .sortBy(applicationComparator)
