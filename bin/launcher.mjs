@@ -5,6 +5,8 @@ import _ from 'lodash';
 import { createRequire } from 'module';
 import os from 'os';
 import open, { openApp } from 'open';
+import fs$1 from 'node:fs';
+import path$1 from 'node:path';
 import { exec } from 'child_process';
 import clipboard from 'clipboardy';
 
@@ -100,6 +102,26 @@ const getApplications = () => {
   return items;
 };
 
+const PREFERENCE_PANE_ROOT_DIR = "/System/Library/PreferencePanes";
+
+const getPreferencePanes = () =>
+  fs$1
+    .readdirSync(PREFERENCE_PANE_ROOT_DIR)
+    .map((filename) => path$1.parse(filename).name);
+
+const getPane = (pane) => `${PREFERENCE_PANE_ROOT_DIR}/${pane}.prefPane`;
+
+const getSystemPreferences = () =>
+  getPreferencePanes().map((pane) => ({
+    title: `⚙︎ ${pane}`,
+    value: pane,
+    isFolder: true,
+    open: async () => {
+      console.log(`Opening ${pane}`);
+      await open(getPane(pane));
+    },
+  }));
+
 const getConfigDir$1 = () => path.join(os.homedir(), ".meta-x");
 
 const getCommands = () =>
@@ -150,6 +172,7 @@ const getAllCommands = () => {
         commandComparator
       ),
       ...getFolders(),
+      ...getSystemPreferences(),
       ..._.chain(getApplications())
         .sortBy(commandComparator)
         .sortBy(applicationComparator)

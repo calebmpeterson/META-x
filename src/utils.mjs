@@ -5,6 +5,7 @@ import { createRequire } from "module";
 import { getBuiltInCommands } from "./catalog/built-ins";
 import { getFolders } from "./catalog/folders";
 import { getApplications } from "./catalog/applications";
+import { getSystemPreferences } from "./catalog/system-preferences";
 import { getConfigDir } from "./utils/getConfigDir";
 
 const getCommands = () =>
@@ -55,6 +56,7 @@ const getAllCommands = () => {
         commandComparator
       ),
       ...getFolders(),
+      ...getSystemPreferences(),
       ..._.chain(getApplications())
         .sortBy(commandComparator)
         .sortBy(applicationComparator)
