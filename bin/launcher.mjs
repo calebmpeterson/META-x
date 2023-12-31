@@ -75,10 +75,7 @@ const getApplications = () => {
     .readdirSync("/Applications")
     .filter((filename) => {
       const pathname = path.join("/Applications", filename);
-      const stats = fs.statSync(pathname);
-      if (stats.isDirectory()) {
-        return false;
-      }
+      fs.statSync(pathname);
 
       try {
         // If this doesn't throw, then the file is executable

@@ -37,9 +37,6 @@ export const getApplications = () => {
     .filter((filename) => {
       const pathname = path.join("/Applications", filename);
       const stats = fs.statSync(pathname);
-      if (stats.isDirectory()) {
-        return false;
-      }
 
       try {
         // If this doesn't throw, then the file is executable
