@@ -28,15 +28,18 @@ const trackApplicationUsage = (value) => {
   persistApplicationUsage([...history, value]);
 };
 
-export const getApplications = () => {
+export const getApplications = (rootDir = "/Applications") => {
   const history = restoreApplicationUsage();
   const scores = _.countBy(history, _.identity);
 
   const applications = fs
-    .readdirSync("/Applications")
+    .readdirSync(rootDir)
     .filter((filename) => {
-      const pathname = path.join("/Applications", filename);
+      const pathname = path.join(rootDir, filename);
       const stats = fs.statSync(pathname);
+      if (stats.isDirectory() && !filename.endsWith(".app")) {
+        return false;
+      }
 
       try {
         // If this doesn't throw, then the file is executable
@@ -49,7 +52,7 @@ export const getApplications = () => {
     .filter((filename) => !filename.startsWith("."));
 
   const items = applications.map((application) => {
-    const value = path.join("/Applications", application);
+    const value = path.join(rootDir, application);
     return {
       title: `⚙︎ ${_.get(path.parse(application), "name", application)}`,
       value,

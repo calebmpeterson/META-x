@@ -59,10 +59,11 @@ const getAllCommands = () => {
       ...getFolders(),
       ...getSystemPreferences(),
       ...getSystemCommands(),
-      ..._.chain(getApplications())
+      ..._.chain(getApplications("/Applications"))
         .sortBy(commandComparator)
         .sortBy(applicationComparator)
         .value(),
+      ...getApplications("/Applications/Utilities"),
       ...getCommandsFromFallbackHandler(),
     ];
 
