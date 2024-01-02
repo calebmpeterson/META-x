@@ -1,16 +1,15 @@
-import open from "open";
 import { execa } from "execa";
 
 export const getSystemCommands = () => [
   {
-    title: "Sleep",
+    title: "⚙︎ Sleep",
     isApplication: true,
     execute: async () => {
       await execa("pmset", ["sleepnow"]);
     },
   },
   {
-    title: "Sleep Displays",
+    title: "⚙︎ Sleep Displays",
     isApplication: true,
     execute: async () => {
       await execa("pmset", ["displaysleepnow"]);

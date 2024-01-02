@@ -14,6 +14,6 @@ const BUILT_IN_COMMANDS = {
 export const getBuiltInCommands = () =>
   _.map(BUILT_IN_COMMANDS, (command, name) => ({
     label: name,
-    title: `⌬ ${name}`,
+    title: `⌁ ${name}`,
     value: command,
   }));

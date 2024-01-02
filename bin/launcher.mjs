@@ -25,7 +25,7 @@ const BUILT_IN_COMMANDS = {
 const getBuiltInCommands = () =>
   _.map(BUILT_IN_COMMANDS, (command, name) => ({
     label: name,
-    title: `⌬ ${name}`,
+    title: `⌁ ${name}`,
     value: command,
   }));
 
@@ -93,7 +93,7 @@ const getApplications = (rootDir = "/Applications") => {
   const items = applications.map((application) => {
     const value = path.join(rootDir, application);
     return {
-      title: `⚙︎ ${_.get(path.parse(application), "name", application)}`,
+      title: `⌬ ${_.get(path.parse(application), "name", application)}`,
       value,
       isApplication: true,
       score: scores[value] ?? 0,
@@ -131,14 +131,14 @@ const getConfigDir = () => path.join(os.homedir(), ".meta-x");
 
 const getSystemCommands = () => [
   {
-    title: "Sleep",
+    title: "⚙︎ Sleep",
     isApplication: true,
     execute: async () => {
       await execa("pmset", ["sleepnow"]);
     },
   },
   {
-    title: "Sleep Displays",
+    title: "⚙︎ Sleep Displays",
     isApplication: true,
     execute: async () => {
       await execa("pmset", ["displaysleepnow"]);
@@ -235,7 +235,7 @@ var finishClipboard = () =>
 var promptDarwin = (commands) =>
   new Promise((resolve, reject) => {
     const choices = commands.map(({ title }) => title).join("\n");
-    const toShow = Math.min(20, _.size(commands));
+    const toShow = Math.min(10, _.size(commands));
     const cmd = `echo "${choices}" | choose -b 000000 -c 222222 -w 30 -s 18 -m -n ${toShow}`;
     exec(cmd, (error, stdout, stderr) => {
       if (stdout) {

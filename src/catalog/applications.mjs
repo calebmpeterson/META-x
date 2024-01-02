@@ -55,7 +55,7 @@ export const getApplications = (rootDir = "/Applications") => {
   const items = applications.map((application) => {
     const value = path.join(rootDir, application);
     return {
-      title: `⚙︎ ${_.get(path.parse(application), "name", application)}`,
+      title: `⌬ ${_.get(path.parse(application), "name", application)}`,
       value,
       isApplication: true,
       score: scores[value] ?? 0,
