@@ -1,4 +1,4 @@
 node_modules
 
-# ESM conversion
-esm
+# Profiler output
+*.cpuprofile

@@ -7,8 +7,8 @@
   "private": false,
   "type": "module",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development node src/terminal/launcher.mjs",
-    "start": "cross-env NODE_ENV=production node src/terminal/launcher.mjs",
+    "dev": "cross-env NODE_ENV=development node --cpu-prof src/launcher.mjs",
+    "start": "cross-env NODE_ENV=production node --cpu-prof bin/launcher.mjs",
     "build": "rollup src/launcher.mjs --file bin/launcher.mjs --format es",
     "docs:build": "node scripts/build-docs",
     "postinstall": "yarn build",

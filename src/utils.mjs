@@ -2,11 +2,11 @@ import fs from "fs";
 import path from "path";
 import _ from "lodash";
 import { createRequire } from "module";
-import { getBuiltInCommands } from "./catalog/built-ins";
-import { getFolders } from "./catalog/folders";
-import { getApplications } from "./catalog/applications";
-import { getSystemPreferences } from "./catalog/system-preferences";
-import { getConfigDir } from "./utils/getConfigDir";
+import { getBuiltInCommands } from "./catalog/built-ins.mjs";
+import { getFolders } from "./catalog/folders.mjs";
+import { getApplications } from "./catalog/applications.mjs";
+import { getSystemPreferences } from "./catalog/system-preferences.mjs";
+import { getConfigDir } from "./utils/getConfigDir.mjs";
 import { getSystemCommands } from "./catalog/system.mjs";
 
 const getCommands = () =>
@@ -51,6 +51,7 @@ const applicationComparator = ({ score }) => -score;
 const getAllCommands = () => {
   try {
     console.time("getAllCommands");
+
     const allCommands = [
       ..._.sortBy(
         [...getCommands(), ...getBuiltInCommands()],

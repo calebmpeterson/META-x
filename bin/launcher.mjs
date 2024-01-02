@@ -188,6 +188,7 @@ const applicationComparator = ({ score }) => -score;
 const getAllCommands = () => {
   try {
     console.time("getAllCommands");
+
     const allCommands = [
       ..._.sortBy(
         [...getCommands(), ...getBuiltInCommands()],
