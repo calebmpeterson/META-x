@@ -127,7 +127,7 @@ const getSystemPreferences = () =>
     },
   }));
 
-const getConfigDir$1 = () => path.join(os.homedir(), ".meta-x");
+const getConfigDir = () => path.join(os.homedir(), ".meta-x");
 
 const getSystemCommands = () => [
   {
@@ -148,7 +148,7 @@ const getSystemCommands = () => [
 
 const getCommands = () =>
   fs
-    .readdirSync(getConfigDir$1())
+    .readdirSync(getConfigDir())
     .filter(
       (file) => file.endsWith(".js") && !file.includes("fallback-handler")
     )
@@ -158,7 +158,7 @@ const getCommands = () =>
     }));
 
 const getCommandFilename = (commandFilename) =>
-  path.join(getConfigDir$1(), commandFilename);
+  path.join(getConfigDir(), commandFilename);
 
 const getCommandsFromFallbackHandler = () => {
   const commandFilename = getCommandFilename("fallback-handler.js");
