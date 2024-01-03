@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import _ from "lodash";
 import { openApp } from "open";
-import { getConfigDir } from "../utils.mjs";
+import { getConfigDir } from "../utils/getConfigDir.mjs";
 
 const getApplicationUsageHistory = () =>
   path.join(getConfigDir(), ".application-usage");

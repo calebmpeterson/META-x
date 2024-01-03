@@ -6,7 +6,10 @@ import {
   getCurrentSelection,
   setClipboardContent,
 } from "../clipboard/utils.mjs";
-import { getCommandFilename, getAllCommands } from "../utils.mjs";
+import {
+  getCommandFilename,
+  getAllCommands,
+} from "../utils/getAllCommands.mjs";
 
 export default async () => {
   const selection = await getCurrentSelection();

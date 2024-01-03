@@ -1,215 +1,15 @@
 import { keyboard, Key } from '@nut-tree/nut-js';
-import fs from 'fs';
-import path from 'path';
 import _ from 'lodash';
 import { createRequire } from 'module';
-import os from 'os';
 import open, { openApp } from 'open';
+import { exec } from 'child_process';
+import clipboard from 'clipboardy';
+import fs from 'fs';
+import path from 'path';
+import os from 'os';
 import fs$1 from 'node:fs';
 import path$1 from 'node:path';
 import { execa } from 'execa';
-import { exec } from 'child_process';
-import clipboard from 'clipboardy';
-
-const BUILT_IN_COMMANDS = {
-  "to-upper": _.toUpper,
-  "to-lower": _.toLower,
-  "camel-case": _.camelCase,
-  capitalize: _.capitalize,
-  "kebab-case": _.kebabCase,
-  "snake-case": _.snakeCase,
-  "start-case": _.startCase,
-  deburr: _.deburr,
-};
-
-const getBuiltInCommands = () =>
-  _.map(BUILT_IN_COMMANDS, (command, name) => ({
-    label: name,
-    title: `⌁ ${name}`,
-    value: command,
-  }));
-
-const getFolders = () =>
-  ["Documents", "Downloads", "Home", "Pictures"].map((folder) => ({
-    title: `⏍ ${folder}`,
-    value: folder,
-    isFolder: true,
-    open: async () => {
-      const dirname =
-        folder === "Home" ? os.homedir() : path.join(os.homedir(), folder);
-      console.log(`Opening ${dirname}`);
-      await open(dirname);
-    },
-  }));
-
-const getApplicationUsageHistory = () =>
-  path.join(getConfigDir(), ".application-usage");
-
-const persistApplicationUsage = (values) => {
-  fs.writeFileSync(
-    getApplicationUsageHistory(),
-    _.takeRight(values, 100).join("\n"),
-    "utf8"
-  );
-};
-
-const restoreApplicationUsage = () => {
-  try {
-    return fs.readFileSync(getApplicationUsageHistory(), "utf8").split("\n");
-  } catch {
-    // The file doesn't exist yet
-    return [];
-  }
-};
-
-const trackApplicationUsage = (value) => {
-  const history = restoreApplicationUsage();
-  persistApplicationUsage([...history, value]);
-};
-
-const getApplications = (rootDir = "/Applications") => {
-  const history = restoreApplicationUsage();
-  const scores = _.countBy(history, _.identity);
-
-  const applications = fs
-    .readdirSync(rootDir)
-    .filter((filename) => {
-      const pathname = path.join(rootDir, filename);
-      const stats = fs.statSync(pathname);
-      if (stats.isDirectory() && !filename.endsWith(".app")) {
-        return false;
-      }
-
-      try {
-        // If this doesn't throw, then the file is executable
-        fs.accessSync(pathname, fs.constants.X_OK);
-        return true;
-      } catch {
-        return false;
-      }
-    })
-    .filter((filename) => !filename.startsWith("."));
-
-  const items = applications.map((application) => {
-    const value = path.join(rootDir, application);
-    return {
-      title: `⌬ ${_.get(path.parse(application), "name", application)}`,
-      value,
-      isApplication: true,
-      score: scores[value] ?? 0,
-      execute: async () => {
-        console.log(`Opening ${application}`);
-        trackApplicationUsage(value);
-        await openApp(value);
-      },
-    };
-  });
-
-  return items;
-};
-
-const PREFERENCE_PANE_ROOT_DIR = "/System/Library/PreferencePanes";
-
-const getPreferencePanes = () =>
-  fs$1
-    .readdirSync(PREFERENCE_PANE_ROOT_DIR)
-    .map((filename) => path$1.parse(filename).name);
-
-const getPane = (pane) => `${PREFERENCE_PANE_ROOT_DIR}/${pane}.prefPane`;
-
-const getSystemPreferences = () =>
-  getPreferencePanes().map((pane) => ({
-    title: `⚙︎ ${pane}`,
-    value: pane,
-    isFolder: true,
-    open: async () => {
-      await open(getPane(pane));
-    },
-  }));
-
-const getConfigDir = () => path.join(os.homedir(), ".meta-x");
-
-const getSystemCommands = () => [
-  {
-    title: "⚙︎ Sleep",
-    isApplication: true,
-    execute: async () => {
-      await execa("pmset", ["sleepnow"]);
-    },
-  },
-  {
-    title: "⚙︎ Sleep Displays",
-    isApplication: true,
-    execute: async () => {
-      await execa("pmset", ["displaysleepnow"]);
-    },
-  },
-];
-
-const getCommands = () =>
-  fs
-    .readdirSync(getConfigDir())
-    .filter(
-      (file) => file.endsWith(".js") && !file.includes("fallback-handler")
-    )
-    .map((command) => ({
-      title: `⌁ ${path.basename(command, ".js")}`,
-      value: command,
-    }));
-
-const getCommandFilename = (commandFilename) =>
-  path.join(getConfigDir(), commandFilename);
-
-const getCommandsFromFallbackHandler = () => {
-  const commandFilename = getCommandFilename("fallback-handler.js");
-  try {
-    const require = createRequire(import.meta.url);
-    const fallbackHandler = require(commandFilename);
-
-    const fallbackCommands =
-      fallbackHandler.suggestions && fallbackHandler.suggestions.call();
-
-    return fallbackCommands.map((fallbackCommand) => ({
-      label: fallbackCommand,
-      title: fallbackCommand,
-      value: fallbackCommand,
-      isFallback: true,
-    }));
-  } catch (e) {
-    console.error(`Failed to run fallback handler: ${e.message}`);
-    return [];
-  }
-};
-
-const commandComparator = ({ title }) => title;
-
-const applicationComparator = ({ score }) => -score;
-
-const getAllCommands = () => {
-  try {
-    console.time("getAllCommands");
-
-    const allCommands = [
-      ..._.sortBy(
-        [...getCommands(), ...getBuiltInCommands()],
-        commandComparator
-      ),
-      ...getFolders(),
-      ...getSystemPreferences(),
-      ...getSystemCommands(),
-      ..._.chain(getApplications("/Applications"))
-        .sortBy(commandComparator)
-        .sortBy(applicationComparator)
-        .value(),
-      ...getApplications("/Applications/Utilities"),
-      ...getCommandsFromFallbackHandler(),
-    ];
-
-    return allCommands;
-  } finally {
-    console.timeEnd("getAllCommands");
-  }
-};
 
 const delay = (timeout) =>
   new Promise((resolve) => setTimeout(resolve, timeout));
@@ -298,6 +98,212 @@ const exported = {
 };
 
 const { getCurrentSelection, setClipboardContent } = exported;
+
+const BUILT_IN_COMMANDS = {
+  "to-upper": _.toUpper,
+  "to-lower": _.toLower,
+  "camel-case": _.camelCase,
+  capitalize: _.capitalize,
+  "kebab-case": _.kebabCase,
+  "snake-case": _.snakeCase,
+  "start-case": _.startCase,
+  deburr: _.deburr,
+};
+
+const getBuiltInCommands = () =>
+  _.map(BUILT_IN_COMMANDS, (command, name) => ({
+    label: name,
+    title: `⌁ ${name}`,
+    value: command,
+  }));
+
+const getFolders = () =>
+  ["Documents", "Downloads", "Home", "Pictures"].map((folder) => ({
+    title: `⏍ ${folder}`,
+    value: folder,
+    isFolder: true,
+    open: async () => {
+      const dirname =
+        folder === "Home" ? os.homedir() : path.join(os.homedir(), folder);
+      console.log(`Opening ${dirname}`);
+      await open(dirname);
+    },
+  }));
+
+const getConfigDir = () => path.join(os.homedir(), ".meta-x");
+
+const getApplicationUsageHistory = () =>
+  path.join(getConfigDir(), ".application-usage");
+
+const persistApplicationUsage = (values) => {
+  fs.writeFileSync(
+    getApplicationUsageHistory(),
+    _.takeRight(values, 100).join("\n"),
+    "utf8"
+  );
+};
+
+const restoreApplicationUsage = () => {
+  try {
+    return fs.readFileSync(getApplicationUsageHistory(), "utf8").split("\n");
+  } catch {
+    // The file doesn't exist yet
+    return [];
+  }
+};
+
+const trackApplicationUsage = (value) => {
+  const history = restoreApplicationUsage();
+  persistApplicationUsage([...history, value]);
+};
+
+const getApplications = (rootDir = "/Applications") => {
+  const history = restoreApplicationUsage();
+  const scores = _.countBy(history, _.identity);
+
+  const applications = fs
+    .readdirSync(rootDir)
+    .filter((filename) => {
+      const pathname = path.join(rootDir, filename);
+      const stats = fs.statSync(pathname);
+      if (stats.isDirectory() && !filename.endsWith(".app")) {
+        return false;
+      }
+
+      try {
+        // If this doesn't throw, then the file is executable
+        fs.accessSync(pathname, fs.constants.X_OK);
+        return true;
+      } catch {
+        return false;
+      }
+    })
+    .filter((filename) => !filename.startsWith("."));
+
+  const items = applications.map((application) => {
+    const value = path.join(rootDir, application);
+    return {
+      title: `⌬ ${_.get(path.parse(application), "name", application)}`,
+      value,
+      isApplication: true,
+      score: scores[value] ?? 0,
+      execute: async () => {
+        console.log(`Opening ${application}`);
+        trackApplicationUsage(value);
+        await openApp(value);
+      },
+    };
+  });
+
+  return items;
+};
+
+const PREFERENCE_PANE_ROOT_DIR = "/System/Library/PreferencePanes";
+
+const getPreferencePanes = () =>
+  fs$1
+    .readdirSync(PREFERENCE_PANE_ROOT_DIR)
+    .map((filename) => path$1.parse(filename).name);
+
+const getPane = (pane) => `${PREFERENCE_PANE_ROOT_DIR}/${pane}.prefPane`;
+
+const getSystemPreferences = () =>
+  getPreferencePanes().map((pane) => ({
+    title: `⚙︎ ${pane}`,
+    value: pane,
+    isFolder: true,
+    open: async () => {
+      await open(getPane(pane));
+    },
+  }));
+
+const getSystemCommands = () => [
+  {
+    title: "⚙︎ Sleep",
+    isApplication: true,
+    execute: async () => {
+      await execa("pmset", ["sleepnow"]);
+    },
+  },
+  {
+    title: "⚙︎ Sleep Displays",
+    isApplication: true,
+    execute: async () => {
+      await execa("pmset", ["displaysleepnow"]);
+    },
+  },
+];
+
+const getCommands = () =>
+  fs
+    .readdirSync(getConfigDir())
+    .filter(
+      (file) => file.endsWith(".js") && !file.includes("fallback-handler")
+    )
+    .map((command) => ({
+      title: `⌁ ${path.basename(command, ".js")}`,
+      value: command,
+    }));
+
+const getCommandFilename = (commandFilename) =>
+  path.join(getConfigDir(), commandFilename);
+
+const getCommandsFromFallbackHandler = () => {
+  const commandFilename = getCommandFilename("fallback-handler.js");
+  try {
+    const require = createRequire(import.meta.url);
+    const fallbackHandler = require(commandFilename);
+
+    const fallbackCommands =
+      fallbackHandler.suggestions && fallbackHandler.suggestions.call();
+
+    return fallbackCommands.map((fallbackCommand) => ({
+      label: fallbackCommand,
+      title: fallbackCommand,
+      value: fallbackCommand,
+      isFallback: true,
+    }));
+  } catch (e) {
+    console.error(`Failed to run fallback handler: ${e.message}`);
+    return [];
+  }
+};
+
+const commandComparator = ({ title }) => title;
+
+const applicationComparator = ({ score }) => -score;
+
+const getAllCommands = () => {
+  try {
+    console.time("getAllCommands");
+
+    const allCommands = [
+      ..._.sortBy(
+        [...getCommands(), ...getBuiltInCommands()],
+        commandComparator
+      ),
+      ...getFolders(),
+      ...getSystemPreferences(),
+      ...getSystemCommands(),
+      ..._.chain([
+        // Applications can live in multiple locations on macOS
+        // Source: https://unix.stackexchange.com/a/583843
+        ...getApplications("/Applications"),
+        ...getApplications("/Applications/Utilities"),
+        ...getApplications("/System/Applications"),
+        ...getApplications("/System/Applications/Utilities"),
+      ])
+        .sortBy(commandComparator)
+        .sortBy(applicationComparator)
+        .value(),
+      ...getCommandsFromFallbackHandler(),
+    ];
+
+    return allCommands;
+  } finally {
+    console.timeEnd("getAllCommands");
+  }
+};
 
 var openTerminal = async () => {
   const selection = await getCurrentSelection();
