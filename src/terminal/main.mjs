@@ -35,13 +35,9 @@ export default async () => {
   else if (_.isFunction(item.value)) {
     resultAsText = item.value(selection);
   }
-  // Execute an application
-  else if (item.isApplication) {
-    await item.execute();
-  }
-  // Opens a folder
-  else if (item.isFolder) {
-    await item.open();
+  // Invoke
+  else if (_.isFunction(item.invoke)) {
+    await item.invoke();
   }
   // Execute default handler
   else if (item.isUnhandled) {

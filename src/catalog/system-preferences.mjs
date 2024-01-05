@@ -15,8 +15,7 @@ export const getSystemPreferences = () =>
   getPreferencePanes().map((pane) => ({
     title: `⚙︎ ${pane}`,
     value: pane,
-    isFolder: true,
-    open: async () => {
+    invoke: async () => {
       await open(getPane(pane));
     },
   }));

@@ -1,5 +1,5 @@
 import { keyboard, Key } from "@nut-tree/nut-js";
-import { delay } from "../../utils.mjs";
+import { delay } from "../../utils/delay.mjs";
 
 export default async () => {
   await delay(20);

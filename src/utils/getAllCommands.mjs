@@ -8,6 +8,7 @@ import { getApplications } from "../catalog/applications.mjs";
 import { getSystemPreferences } from "../catalog/system-preferences.mjs";
 import { getSystemCommands } from "../catalog/system.mjs";
 import { getConfigDir } from "./getConfigDir.mjs";
+import { getManageScriptCommands } from "../catalog/manage-scripts.mjs";
 
 const getCommands = () =>
   fs
@@ -57,6 +58,7 @@ const getAllCommands = () => {
         [...getCommands(), ...getBuiltInCommands()],
         commandComparator
       ),
+      ...getManageScriptCommands(),
       ...getFolders(),
       ...getSystemPreferences(),
       ...getSystemCommands(),

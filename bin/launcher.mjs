@@ -10,6 +10,7 @@ import os from 'os';
 import fs$1 from 'node:fs';
 import path$1 from 'node:path';
 import { execa } from 'execa';
+import cocoaDialog from 'cocoa-dialog';
 
 const delay = (timeout) =>
   new Promise((resolve) => setTimeout(resolve, timeout));
@@ -122,8 +123,7 @@ const getFolders = () =>
     (folder) => ({
       title: `⏍ ${folder}`,
       value: folder,
-      isFolder: true,
-      open: async () => {
+      invoke: async () => {
         if (folder === "Applications") {
           await open("/Applications");
         } else if (folder === "Home") {
@@ -191,9 +191,8 @@ const getApplications = (rootDir = "/Applications") => {
     return {
       title: `⌬ ${_.get(path.parse(application), "name", application)}`,
       value,
-      isApplication: true,
       score: scores[value] ?? 0,
-      execute: async () => {
+      invoke: async () => {
         console.log(`Opening ${application}`);
         trackApplicationUsage(value);
         await openApp(value);
@@ -217,8 +216,7 @@ const getSystemPreferences = () =>
   getPreferencePanes().map((pane) => ({
     title: `⚙︎ ${pane}`,
     value: pane,
-    isFolder: true,
-    open: async () => {
+    invoke: async () => {
       await open(getPane(pane));
     },
   }));
@@ -226,16 +224,59 @@ const getSystemPreferences = () =>
 const getSystemCommands = () => [
   {
     title: "⚙︎ Sleep",
-    isApplication: true,
-    execute: async () => {
+    invoke: async () => {
       await execa("pmset", ["sleepnow"]);
     },
   },
   {
     title: "⚙︎ Sleep Displays",
-    isApplication: true,
-    execute: async () => {
+    invoke: async () => {
       await execa("pmset", ["displaysleepnow"]);
+    },
+  },
+];
+
+const getPathnameWithExtension = (pathname) =>
+  pathname.endsWith(".js") ? pathname : `${pathname}.js`;
+
+const TEMPLATE = `
+module.exports = (selection) => {
+  // \`this\` is bound to the Command Context. API documentation can be
+  // found at https://github.com/calebmpeterson/META-x#command-context.
+
+  // Modify the currently selected text and return the replacement text.
+  //
+  // Or perform some other side-effect and return undefined, in which
+  // case the currently selected text will not be transformed.
+  return selection.toUpperCase();
+};
+`.trim();
+
+const createEmptyScript = (pathname) => {
+  const nameWithExtension = getPathnameWithExtension(pathname);
+
+  if (!fs$1.existsSync(nameWithExtension)) {
+    fs$1.writeFileSync(nameWithExtension, TEMPLATE, "utf8");
+  }
+};
+
+const editScript = async (pathname) => {
+  await execa(process.env.EDITOR, [getPathnameWithExtension(pathname)]);
+};
+
+const getManageScriptCommands = () => [
+  {
+    title: "⌁ Create Script",
+    invoke: async () => {
+      const result = await cocoaDialog("filesave", {
+        title: "Save Script As...",
+        withDirectory: getConfigDir(),
+      });
+
+      if (!_.isEmpty(result)) {
+        createEmptyScript(result);
+        await editScript(result);
+      }
     },
   },
 ];
@@ -288,6 +329,7 @@ const getAllCommands = () => {
         [...getCommands(), ...getBuiltInCommands()],
         commandComparator
       ),
+      ...getManageScriptCommands(),
       ...getFolders(),
       ...getSystemPreferences(),
       ...getSystemCommands(),
@@ -335,13 +377,9 @@ var openTerminal = async () => {
   else if (_.isFunction(item.value)) {
     resultAsText = item.value(selection);
   }
-  // Execute an application
-  else if (item.isApplication) {
-    await item.execute();
-  }
-  // Opens a folder
-  else if (item.isFolder) {
-    await item.open();
+  // Invoke
+  else if (_.isFunction(item.invoke)) {
+    await item.invoke();
   }
   // Execute default handler
   else if (item.isUnhandled) {

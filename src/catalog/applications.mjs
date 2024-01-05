@@ -57,9 +57,8 @@ export const getApplications = (rootDir = "/Applications") => {
     return {
       title: `⌬ ${_.get(path.parse(application), "name", application)}`,
       value,
-      isApplication: true,
       score: scores[value] ?? 0,
-      execute: async () => {
+      invoke: async () => {
         console.log(`Opening ${application}`);
         trackApplicationUsage(value);
         await openApp(value);

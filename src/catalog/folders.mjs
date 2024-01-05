@@ -7,8 +7,7 @@ export const getFolders = () =>
     (folder) => ({
       title: `⏍ ${folder}`,
       value: folder,
-      isFolder: true,
-      open: async () => {
+      invoke: async () => {
         if (folder === "Applications") {
           await open("/Applications");
         } else if (folder === "Home") {
