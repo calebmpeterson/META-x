@@ -10,6 +10,7 @@ import {
   getCommandFilename,
   getAllCommands,
 } from "../utils/getAllCommands.mjs";
+import { showCommandErrorDialog } from "../utils/showCommandErrorDialog.mjs";
 
 export default async () => {
   const selection = await getCurrentSelection();
@@ -78,8 +79,9 @@ export default async () => {
             ? JSON.stringify(result, null, "  ")
             : _.toString(result);
       }
-    } catch (e) {
-      console.error(`Failed to execute ${commandFilename}`, e);
+    } catch (error) {
+      console.error(`Failed to execute ${commandFilename}`, error);
+      await showCommandErrorDialog(commandFilename, error);
     }
   }
 

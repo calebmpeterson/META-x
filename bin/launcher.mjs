@@ -279,6 +279,19 @@ const getManageScriptCommands = () => [
       }
     },
   },
+  {
+    title: "⌁ Edit Script",
+    invoke: async () => {
+      const result = await cocoaDialog("fileselect", {
+        title: "Choose Script To Edit...",
+        withDirectory: getConfigDir(),
+      });
+
+      if (!_.isEmpty(result)) {
+        await editScript(result);
+      }
+    },
+  },
 ];
 
 const getCommands = () =>
@@ -353,6 +366,19 @@ const getAllCommands = () => {
   }
 };
 
+const showCommandErrorDialog = async (commandFilename, error) => {
+  const result = await cocoaDialog("msgbox", {
+    title: `Error in ${commandFilename}`,
+    text: error.stack,
+    button1: "Edit",
+    button2: "Dismiss",
+  });
+
+  if (result === "1") {
+    await editScript(commandFilename);
+  }
+};
+
 var openTerminal = async () => {
   const selection = await getCurrentSelection();
 
@@ -420,8 +446,9 @@ var openTerminal = async () => {
             ? JSON.stringify(result, null, "  ")
             : _.toString(result);
       }
-    } catch (e) {
-      console.error(`Failed to execute ${commandFilename}`, e);
+    } catch (error) {
+      console.error(`Failed to execute ${commandFilename}`, error);
+      await showCommandErrorDialog(commandFilename, error);
     }
   }
 

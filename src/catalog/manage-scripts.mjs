@@ -19,4 +19,17 @@ export const getManageScriptCommands = () => [
       }
     },
   },
+  {
+    title: "⌁ Edit Script",
+    invoke: async () => {
+      const result = await cocoaDialog("fileselect", {
+        title: "Choose Script To Edit...",
+        withDirectory: getConfigDir(),
+      });
+
+      if (!_.isEmpty(result)) {
+        await editScript(result);
+      }
+    },
+  },
 ];
