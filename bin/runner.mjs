@@ -325,7 +325,7 @@ const getManageScriptCommands = () => [
   },
 ];
 
-const getCommands = () =>
+const getScriptCommands = () =>
   fs
     .readdirSync(getConfigDir())
     .filter(
@@ -370,7 +370,7 @@ const getAllCommands = () => {
 
     const allCommands = [
       ..._.sortBy(
-        [...getCommands(), ...getBuiltInCommands()],
+        [...getScriptCommands(), ...getBuiltInCommands()],
         commandComparator
       ),
       ...getManageScriptCommands(),

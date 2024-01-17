@@ -9,17 +9,7 @@ import { getSystemPreferences } from "../catalog/system-preferences.mjs";
 import { getSystemCommands } from "../catalog/system.mjs";
 import { getConfigDir } from "./getConfigDir.mjs";
 import { getManageScriptCommands } from "../catalog/manage-scripts.mjs";
-
-const getCommands = () =>
-  fs
-    .readdirSync(getConfigDir())
-    .filter(
-      (file) => file.endsWith(".js") && !file.includes("fallback-handler")
-    )
-    .map((command) => ({
-      title: `⌁ ${path.basename(command, ".js")}`,
-      value: command,
-    }));
+import { getScriptCommands } from "../catalog/scripts.mjs";
 
 const getCommandFilename = (commandFilename) =>
   path.join(getConfigDir(), commandFilename);
@@ -55,7 +45,7 @@ const getAllCommands = () => {
 
     const allCommands = [
       ..._.sortBy(
-        [...getCommands(), ...getBuiltInCommands()],
+        [...getScriptCommands(), ...getBuiltInCommands()],
         commandComparator
       ),
       ...getManageScriptCommands(),
