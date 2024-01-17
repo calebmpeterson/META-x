@@ -1,5 +1,5 @@
-import net from "node:net";
-import "node:fs";
+import net from 'node:net';
+import 'node:fs';
 
 const SOCKET_FILE = "/tmp/meta-x.socket";
 

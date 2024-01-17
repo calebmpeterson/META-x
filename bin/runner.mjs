@@ -240,7 +240,7 @@ const getSystemCommands = () => [
 const getPathnameWithExtension = (pathname) =>
   pathname.endsWith(".js") ? pathname : `${pathname}.js`;
 
-const TEMPLATE = `
+const TEMPLATE$1 = `
 module.exports = (selection) => {
   // \`this\` is bound to the Command Context. API documentation can be
   // found at https://github.com/calebmpeterson/META-x#command-context.
@@ -257,12 +257,32 @@ const createEmptyScript = (pathname) => {
   const nameWithExtension = getPathnameWithExtension(pathname);
 
   if (!fs$1.existsSync(nameWithExtension)) {
-    fs$1.writeFileSync(nameWithExtension, TEMPLATE, "utf8");
+    fs$1.writeFileSync(nameWithExtension, TEMPLATE$1, "utf8");
   }
 };
 
 const editScript = async (pathname) => {
   await execa(process.env.EDITOR, [getPathnameWithExtension(pathname)]);
+};
+
+const TEMPLATE = `
+module.exports = function (selection, query) {
+  // Do something with the currently selected
+  // text and/or the raw query string
+};
+
+module.exports.suggestions = function () {
+  // The suggestions should be an array of strings
+  return ["suggestion one", "suggestion two", "suggestion three"];
+};
+`.trim();
+
+const ensureEmptyFallbackHandler = () => {
+  const fallbackHandlerFilename = getCommandFilename("fallback-handler.js");
+
+  if (!fs$1.existsSync(fallbackHandlerFilename)) {
+    fs$1.writeFileSync(fallbackHandlerFilename, TEMPLATE, "utf8");
+  }
 };
 
 const getManageScriptCommands = () => [
@@ -293,6 +313,16 @@ const getManageScriptCommands = () => [
       }
     },
   },
+  {
+    title: "⌁ Edit Fallback Handler",
+    invoke: async () => {
+      const fallbackHandlerFilename = getCommandFilename("fallback-handler.js");
+
+      ensureEmptyFallbackHandler();
+
+      await editScript(fallbackHandlerFilename);
+    },
+  },
 ];
 
 const getCommands = () =>
@@ -306,11 +336,11 @@ const getCommands = () =>
       value: command,
     }));
 
-const getCommandFilename = (commandFilename) =>
+const getCommandFilename$1 = (commandFilename) =>
   path.join(getConfigDir(), commandFilename);
 
 const getCommandsFromFallbackHandler = () => {
-  const commandFilename = getCommandFilename("fallback-handler.js");
+  const commandFilename = getCommandFilename$1("fallback-handler.js");
   try {
     const require = createRequire(import.meta.url);
     const fallbackHandler = require(commandFilename);
@@ -380,7 +410,7 @@ const showCommandErrorDialog = async (commandFilename, error) => {
   }
 };
 
-var openTerminal = async () => {
+var showPrompt = async () => {
   const selection = await getCurrentSelection();
 
   const commands = getAllCommands();
@@ -412,7 +442,7 @@ var openTerminal = async () => {
   else if (item.isUnhandled) {
     console.warn(`Unhandled command: ${item.query}`);
 
-    const commandFilename = getCommandFilename("fallback-handler.js");
+    const commandFilename = getCommandFilename$1("fallback-handler.js");
 
     try {
       const fallbackHandler = require(commandFilename);
@@ -435,7 +465,7 @@ var openTerminal = async () => {
   }
   // Execute custom module-based command
   else {
-    const commandFilename = getCommandFilename(item.value);
+    const commandFilename = getCommandFilename$1(item.value);
 
     try {
       const commandModule = require(`${commandFilename}`);
@@ -506,7 +536,7 @@ const listen = (onMessage) => {
 const run = async () => {
   console.log("Meta-x triggered");
   await prepareClipboard();
-  const result = await openTerminal();
+  const result = await showPrompt();
   if (result) {
     await finishClipboard();
   }
