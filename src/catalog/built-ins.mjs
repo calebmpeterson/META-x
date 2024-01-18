@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { SCRIPT_PREFIX } from "./_constants.mjs";
 
 const BUILT_IN_COMMANDS = {
   "to-upper": _.toUpper,
@@ -14,6 +15,6 @@ const BUILT_IN_COMMANDS = {
 export const getBuiltInCommands = () =>
   _.map(BUILT_IN_COMMANDS, (command, name) => ({
     label: name,
-    title: `⌁ ${name}`,
+    title: `${SCRIPT_PREFIX} ${name}`,
     value: command,
   }));

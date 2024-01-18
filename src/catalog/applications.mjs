@@ -3,6 +3,7 @@ import path from "path";
 import _ from "lodash";
 import { openApp } from "open";
 import { getConfigDir } from "../utils/getConfigDir.mjs";
+import { APPLICATION_PREFIX } from "./_constants.mjs";
 
 const getApplicationUsageHistory = () =>
   path.join(getConfigDir(), ".application-usage");
@@ -55,7 +56,11 @@ export const getApplications = (rootDir = "/Applications") => {
   const items = applications.map((application) => {
     const value = path.join(rootDir, application);
     return {
-      title: `⌬ ${_.get(path.parse(application), "name", application)}`,
+      title: `${APPLICATION_PREFIX} ${_.get(
+        path.parse(application),
+        "name",
+        application
+      )}`,
       value,
       score: scores[value] ?? 0,
       invoke: async () => {

@@ -1,4 +1,3 @@
-import fs from "fs";
 import path from "path";
 import _ from "lodash";
 import { createRequire } from "module";
@@ -50,8 +49,6 @@ const getAllCommands = () => {
       ),
       ...getManageScriptCommands(),
       ...getFolders(),
-      ...getSystemPreferences(),
-      ...getSystemCommands(),
       ..._.chain([
         // Applications can live in multiple locations on macOS
         // Source: https://unix.stackexchange.com/a/583843
@@ -63,6 +60,8 @@ const getAllCommands = () => {
         .sortBy(commandComparator)
         .sortBy(applicationComparator)
         .value(),
+      ...getSystemCommands(),
+      ...getSystemPreferences(),
       ...getCommandsFromFallbackHandler(),
     ];
 

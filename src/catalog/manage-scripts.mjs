@@ -4,10 +4,11 @@ import { createEmptyScript } from "../utils/createEmptyScript.mjs";
 import { getConfigDir } from "../utils/getConfigDir.mjs";
 import { editScript } from "../utils/editScript.mjs";
 import { ensureEmptyFallbackHandler } from "../utils/ensureEmptyFallbackHandler.mjs";
+import { MANAGE_SCRIPTS_PREFIX } from "./_constants.mjs";
 
 export const getManageScriptCommands = () => [
   {
-    title: "⌁ Create Script",
+    title: `${MANAGE_SCRIPTS_PREFIX} Create Script`,
     invoke: async () => {
       const result = await cocoaDialog("filesave", {
         title: "Save Script As...",
@@ -21,7 +22,7 @@ export const getManageScriptCommands = () => [
     },
   },
   {
-    title: "⌁ Edit Script",
+    title: `${MANAGE_SCRIPTS_PREFIX} Edit Script`,
     invoke: async () => {
       const result = await cocoaDialog("fileselect", {
         title: "Choose Script To Edit...",
@@ -34,7 +35,7 @@ export const getManageScriptCommands = () => [
     },
   },
   {
-    title: "⌁ Edit Fallback Handler",
+    title: `${MANAGE_SCRIPTS_PREFIX} Edit Fallback Handler`,
     invoke: async () => {
       const fallbackHandlerFilename = getCommandFilename("fallback-handler.js");
 

@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import open from "open";
+import { SYSTEM_PREFIX } from "./_constants.mjs";
 
 const PREFERENCE_PANE_ROOT_DIR = "/System/Library/PreferencePanes";
 
@@ -13,7 +14,7 @@ const getPane = (pane) => `${PREFERENCE_PANE_ROOT_DIR}/${pane}.prefPane`;
 
 export const getSystemPreferences = () =>
   getPreferencePanes().map((pane) => ({
-    title: `⚙︎ ${pane}`,
+    title: `${SYSTEM_PREFIX} ${pane}`,
     value: pane,
     invoke: async () => {
       await open(getPane(pane));

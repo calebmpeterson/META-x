@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { getConfigDir } from "../utils/getConfigDir.mjs";
+import { SCRIPT_PREFIX } from "./_constants.mjs";
 
 export const getScriptCommands = () =>
   fs
@@ -9,6 +10,6 @@ export const getScriptCommands = () =>
       (file) => file.endsWith(".js") && !file.includes("fallback-handler")
     )
     .map((command) => ({
-      title: `⌁ ${path.basename(command, ".js")}`,
+      title: `${SCRIPT_PREFIX} ${path.basename(command, ".js")}`,
       value: command,
     }));
