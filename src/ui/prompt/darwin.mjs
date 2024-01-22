@@ -21,8 +21,8 @@ export default (commands) =>
           ) || rawQueryCommand;
         resolve(command);
       } else {
-        if (error) {
-          console.error(error);
+        if (error && process.env.NODE_ENV === "development") {
+          console.error(error.stack);
         }
         resolve({
           isUnknown: true,
