@@ -11,6 +11,7 @@ import {
   getAllCommands,
 } from "../utils/getAllCommands.mjs";
 import { showCommandErrorDialog } from "../utils/showCommandErrorDialog.mjs";
+import { calculate, didCalculate } from "../utils/calculate.mjs";
 
 export default async () => {
   const selection = await getCurrentSelection();
@@ -40,29 +41,37 @@ export default async () => {
   else if (_.isFunction(item.invoke)) {
     await item.invoke();
   }
-  // Execute default handler
+  // Unhandled command: attempt to treat as a calculation, then defer to the fallback handler
   else if (item.isUnhandled) {
     console.warn(`Unhandled command: ${item.query}`);
 
-    const commandFilename = getCommandFilename("fallback-handler.js");
+    // Attempt to calculate
+    const calculated = calculate(item.query);
+    if (didCalculate(calculated)) {
+      resultAsText = String(calculated);
+    }
+    // Execute default handler
+    else {
+      const commandFilename = getCommandFilename("fallback-handler.js");
 
-    try {
-      const fallbackHandler = require(commandFilename);
+      try {
+        const fallbackHandler = require(commandFilename);
 
-      const result = fallbackHandler.call(
-        commandContext,
-        selection,
-        item.query
-      );
+        const result = fallbackHandler.call(
+          commandContext,
+          selection,
+          item.query
+        );
 
-      if (!_.isUndefined(result)) {
-        resultAsText =
-          _.isArray(result) || _.isObject(result)
-            ? JSON.stringify(result, null, "  ")
-            : _.toString(result);
+        if (!_.isUndefined(result)) {
+          resultAsText =
+            _.isArray(result) || _.isObject(result)
+              ? JSON.stringify(result, null, "  ")
+              : _.toString(result);
+        }
+      } catch (e) {
+        console.error(`Failed to execute ${commandFilename}`, e);
       }
-    } catch (e) {
-      console.error(`Failed to execute ${commandFilename}`, e);
     }
   }
   // Execute custom module-based command

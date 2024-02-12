@@ -11,6 +11,7 @@ import fs$1 from 'node:fs';
 import path$1 from 'node:path';
 import { execa } from 'execa';
 import cocoaDialog from 'cocoa-dialog';
+import vm from 'node:vm';
 import net from 'node:net';
 
 const delay = (timeout) =>
@@ -426,6 +427,21 @@ const showCommandErrorDialog = async (commandFilename, error) => {
   }
 };
 
+const INCALCULABLE = Symbol("incalculable");
+
+const calculate = (input) => {
+  try {
+    const script = new vm.Script(input);
+    const result = script.runInNewContext();
+    console.log(`Calculated ${input} as ${result}`);
+    return result;
+  } catch {
+    return INCALCULABLE;
+  }
+};
+
+const didCalculate = (result) => result !== INCALCULABLE;
+
 var showPrompt = async () => {
   const selection = await getCurrentSelection();
 
@@ -454,29 +470,37 @@ var showPrompt = async () => {
   else if (_.isFunction(item.invoke)) {
     await item.invoke();
   }
-  // Execute default handler
+  // Unhandled command: attempt to treat as a calculation, then defer to the fallback handler
   else if (item.isUnhandled) {
     console.warn(`Unhandled command: ${item.query}`);
 
-    const commandFilename = getCommandFilename$1("fallback-handler.js");
+    // Attempt to calculate
+    const calculated = calculate(item.query);
+    if (didCalculate(calculated)) {
+      resultAsText = String(calculated);
+    }
+    // Execute default handler
+    else {
+      const commandFilename = getCommandFilename$1("fallback-handler.js");
 
-    try {
-      const fallbackHandler = require(commandFilename);
+      try {
+        const fallbackHandler = require(commandFilename);
 
-      const result = fallbackHandler.call(
-        commandContext,
-        selection,
-        item.query
-      );
+        const result = fallbackHandler.call(
+          commandContext,
+          selection,
+          item.query
+        );
 
-      if (!_.isUndefined(result)) {
-        resultAsText =
-          _.isArray(result) || _.isObject(result)
-            ? JSON.stringify(result, null, "  ")
-            : _.toString(result);
+        if (!_.isUndefined(result)) {
+          resultAsText =
+            _.isArray(result) || _.isObject(result)
+              ? JSON.stringify(result, null, "  ")
+              : _.toString(result);
+        }
+      } catch (e) {
+        console.error(`Failed to execute ${commandFilename}`, e);
       }
-    } catch (e) {
-      console.error(`Failed to execute ${commandFilename}`, e);
     }
   }
   // Execute custom module-based command
