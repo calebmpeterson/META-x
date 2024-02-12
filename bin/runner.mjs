@@ -4,9 +4,9 @@ import { createRequire } from 'module';
 import open, { openApp } from 'open';
 import { exec } from 'child_process';
 import clipboard from 'clipboardy';
-import fs from 'fs';
 import path from 'path';
 import os from 'os';
+import fs from 'fs';
 import fs$1 from 'node:fs';
 import path$1 from 'node:path';
 import { execa } from 'execa';
@@ -52,8 +52,8 @@ var promptDarwin = (commands) =>
           ) || rawQueryCommand;
         resolve(command);
       } else {
-        if (error) {
-          console.error(error);
+        if (error && process.env.NODE_ENV === "development") {
+          console.error(error.stack);
         }
         resolve({
           isUnknown: true,
@@ -101,6 +101,12 @@ const exported = {
 
 const { getCurrentSelection, setClipboardContent } = exported;
 
+const SCRIPT_PREFIX = "ƒո";
+const MANAGE_SCRIPTS_PREFIX = "⛮";
+const FOLDER_PREFIX = "⌂";
+const APPLICATION_PREFIX = "⇰";
+const SYSTEM_PREFIX = "⚙︎";
+
 const BUILT_IN_COMMANDS = {
   "to-upper": _.toUpper,
   "to-lower": _.toLower,
@@ -115,14 +121,14 @@ const BUILT_IN_COMMANDS = {
 const getBuiltInCommands = () =>
   _.map(BUILT_IN_COMMANDS, (command, name) => ({
     label: name,
-    title: `⌁ ${name}`,
+    title: `${SCRIPT_PREFIX} ${name}`,
     value: command,
   }));
 
 const getFolders = () =>
   ["Applications", "Documents", "Downloads", "Home", "Pictures"].map(
     (folder) => ({
-      title: `⏍ ${folder}`,
+      title: `${FOLDER_PREFIX} ${folder}`,
       value: folder,
       invoke: async () => {
         if (folder === "Applications") {
@@ -190,7 +196,11 @@ const getApplications = (rootDir = "/Applications") => {
   const items = applications.map((application) => {
     const value = path.join(rootDir, application);
     return {
-      title: `⌬ ${_.get(path.parse(application), "name", application)}`,
+      title: `${APPLICATION_PREFIX} ${_.get(
+        path.parse(application),
+        "name",
+        application
+      )}`,
       value,
       score: scores[value] ?? 0,
       invoke: async () => {
@@ -215,7 +225,7 @@ const getPane = (pane) => `${PREFERENCE_PANE_ROOT_DIR}/${pane}.prefPane`;
 
 const getSystemPreferences = () =>
   getPreferencePanes().map((pane) => ({
-    title: `⚙︎ ${pane}`,
+    title: `${SYSTEM_PREFIX} ${pane}`,
     value: pane,
     invoke: async () => {
       await open(getPane(pane));
@@ -224,15 +234,21 @@ const getSystemPreferences = () =>
 
 const getSystemCommands = () => [
   {
-    title: "⚙︎ Sleep",
+    title: `${SYSTEM_PREFIX} Sleep`,
     invoke: async () => {
       await execa("pmset", ["sleepnow"]);
     },
   },
   {
-    title: "⚙︎ Sleep Displays",
+    title: `${SYSTEM_PREFIX} Sleep Displays`,
     invoke: async () => {
       await execa("pmset", ["displaysleepnow"]);
+    },
+  },
+  {
+    title: `${SYSTEM_PREFIX} About This Mac`,
+    invoke: async () => {
+      await execa("open", ["-a", "About This Mac"]);
     },
   },
 ];
@@ -287,7 +303,7 @@ const ensureEmptyFallbackHandler = () => {
 
 const getManageScriptCommands = () => [
   {
-    title: "⌁ Create Script",
+    title: `${MANAGE_SCRIPTS_PREFIX} Create Script`,
     invoke: async () => {
       const result = await cocoaDialog("filesave", {
         title: "Save Script As...",
@@ -301,7 +317,7 @@ const getManageScriptCommands = () => [
     },
   },
   {
-    title: "⌁ Edit Script",
+    title: `${MANAGE_SCRIPTS_PREFIX} Edit Script`,
     invoke: async () => {
       const result = await cocoaDialog("fileselect", {
         title: "Choose Script To Edit...",
@@ -314,7 +330,7 @@ const getManageScriptCommands = () => [
     },
   },
   {
-    title: "⌁ Edit Fallback Handler",
+    title: `${MANAGE_SCRIPTS_PREFIX} Edit Fallback Handler`,
     invoke: async () => {
       const fallbackHandlerFilename = getCommandFilename("fallback-handler.js");
 
@@ -332,7 +348,7 @@ const getScriptCommands = () =>
       (file) => file.endsWith(".js") && !file.includes("fallback-handler")
     )
     .map((command) => ({
-      title: `⌁ ${path.basename(command, ".js")}`,
+      title: `${SCRIPT_PREFIX} ${path.basename(command, ".js")}`,
       value: command,
     }));
 
@@ -375,8 +391,6 @@ const getAllCommands = () => {
       ),
       ...getManageScriptCommands(),
       ...getFolders(),
-      ...getSystemPreferences(),
-      ...getSystemCommands(),
       ..._.chain([
         // Applications can live in multiple locations on macOS
         // Source: https://unix.stackexchange.com/a/583843
@@ -388,6 +402,8 @@ const getAllCommands = () => {
         .sortBy(commandComparator)
         .sortBy(applicationComparator)
         .value(),
+      ...getSystemCommands(),
+      ...getSystemPreferences(),
       ...getCommandsFromFallbackHandler(),
     ];
 

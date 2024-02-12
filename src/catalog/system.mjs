@@ -14,4 +14,10 @@ export const getSystemCommands = () => [
       await execa("pmset", ["displaysleepnow"]);
     },
   },
+  {
+    title: `${SYSTEM_PREFIX} About This Mac`,
+    invoke: async () => {
+      await execa("open", ["-a", "About This Mac"]);
+    },
+  },
 ];
