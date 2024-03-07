@@ -2,3 +2,6 @@ node_modules
 
 # Profiler output
 *.cpuprofile
+
+# Logs
+*.log

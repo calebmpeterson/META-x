@@ -414,19 +414,6 @@ const getAllCommands = () => {
   }
 };
 
-const showCommandErrorDialog = async (commandFilename, error) => {
-  const result = await cocoaDialog("msgbox", {
-    title: `Error in ${commandFilename}`,
-    text: error.stack,
-    button1: "Edit",
-    button2: "Dismiss",
-  });
-
-  if (result === "1") {
-    await editScript(commandFilename);
-  }
-};
-
 const INCALCULABLE = Symbol("incalculable");
 
 const calculate = (input) => {
@@ -442,6 +429,74 @@ const calculate = (input) => {
 
 const didCalculate = (result) => result !== INCALCULABLE;
 
+const ENTER = "{ENTER}";
+
+const stripKeystrokes = (text) =>
+  text.endsWith(ENTER) ? text.slice(0, -ENTER.length) : text;
+
+var pressEnter = async () => {
+  console.log("pressEnter");
+  await delay(1000);
+  await keyboard.pressKey(Key.Enter);
+  await delay(10);
+  await keyboard.releaseKey(Key.Enter);
+};
+
+const showCommandErrorDialog = async (commandFilename, error) => {
+  const result = await cocoaDialog("msgbox", {
+    title: `Error in ${commandFilename}`,
+    text: error.stack,
+    button1: "Edit",
+    button2: "Dismiss",
+  });
+
+  if (result === "1") {
+    await editScript(commandFilename);
+  }
+};
+
+const wrapCommandSource = (commandSource) => `
+const module = {};
+
+${commandSource};
+
+module.exports(selection);
+`;
+
+const resultToString = (result) =>
+  _.isArray(result) || _.isObject(result)
+    ? JSON.stringify(result, null, "  ")
+    : _.toString(result);
+
+const invokeScript = async (commandFilename, selection) => {
+  const require = createRequire(import.meta.url);
+
+  const commandContext = {
+    selection,
+    require,
+    console,
+    open,
+    ENTER,
+  };
+
+  try {
+    const commandSource = fs$1.readFileSync(commandFilename, "utf8");
+
+    const wrappedCommandSource = wrapCommandSource(commandSource);
+
+    const commandScript = new vm.Script(wrappedCommandSource);
+
+    const result = commandScript.runInNewContext(commandContext);
+
+    if (!_.isUndefined(result)) {
+      return resultToString(result);
+    }
+  } catch (error) {
+    console.error(`Failed to execute ${commandFilename}`, error);
+    await showCommandErrorDialog(commandFilename, error);
+  }
+};
+
 var showPrompt = async () => {
   const selection = await getCurrentSelection();
 
@@ -456,6 +511,7 @@ var showPrompt = async () => {
 
   const commandContext = {
     open,
+    ENTER,
   };
 
   // Execute built-in command
@@ -507,26 +563,17 @@ var showPrompt = async () => {
   else {
     const commandFilename = getCommandFilename$1(item.value);
 
-    try {
-      const commandModule = require(`${commandFilename}`);
-      const result = commandModule.call(commandContext, selection);
-
-      if (!_.isUndefined(result)) {
-        resultAsText =
-          _.isArray(result) || _.isObject(result)
-            ? JSON.stringify(result, null, "  ")
-            : _.toString(result);
-      }
-    } catch (error) {
-      console.error(`Failed to execute ${commandFilename}`, error);
-      await showCommandErrorDialog(commandFilename, error);
-    }
+    resultAsText = await invokeScript(commandFilename, selection);
   }
 
   if (resultAsText && _.isString(resultAsText)) {
     console.log(`Result: ${resultAsText}`);
     // Update to reflect the command execution result
-    await setClipboardContent(resultAsText);
+    await setClipboardContent(stripKeystrokes(resultAsText));
+
+    if (resultAsText.endsWith(ENTER)) {
+      await pressEnter();
+    }
 
     return true;
   }
