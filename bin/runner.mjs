@@ -4,14 +4,17 @@ import { createRequire } from 'module';
 import open, { openApp } from 'open';
 import { exec } from 'child_process';
 import clipboard from 'clipboardy';
-import path from 'path';
+import path$1 from 'path';
 import os from 'os';
 import fs from 'fs';
 import fs$1 from 'node:fs';
-import path$1 from 'node:path';
+import * as path from 'node:path';
+import path__default from 'node:path';
 import { execa } from 'execa';
 import cocoaDialog from 'cocoa-dialog';
 import vm from 'node:vm';
+import dotenv from 'dotenv';
+import axios from 'axios';
 import net from 'node:net';
 
 const delay = (timeout) =>
@@ -137,17 +140,17 @@ const getFolders = () =>
         } else if (folder === "Home") {
           await open(os.homedir());
         } else {
-          const dirname = path.join(os.homedir(), folder);
+          const dirname = path$1.join(os.homedir(), folder);
           await open(dirname);
         }
       },
     })
   );
 
-const getConfigDir = () => path.join(os.homedir(), ".meta-x");
+const getConfigDir = () => path$1.join(os.homedir(), ".meta-x");
 
 const getApplicationUsageHistory = () =>
-  path.join(getConfigDir(), ".application-usage");
+  path$1.join(getConfigDir(), ".application-usage");
 
 const persistApplicationUsage = (values) => {
   fs.writeFileSync(
@@ -178,7 +181,7 @@ const getApplications = (rootDir = "/Applications") => {
   const applications = fs
     .readdirSync(rootDir)
     .filter((filename) => {
-      const pathname = path.join(rootDir, filename);
+      const pathname = path$1.join(rootDir, filename);
       const stats = fs.statSync(pathname);
       if (stats.isDirectory() && !filename.endsWith(".app")) {
         return false;
@@ -195,10 +198,10 @@ const getApplications = (rootDir = "/Applications") => {
     .filter((filename) => !filename.startsWith("."));
 
   const items = applications.map((application) => {
-    const value = path.join(rootDir, application);
+    const value = path$1.join(rootDir, application);
     return {
       title: `${APPLICATION_PREFIX} ${_.get(
-        path.parse(application),
+        path$1.parse(application),
         "name",
         application
       )}`,
@@ -220,7 +223,7 @@ const PREFERENCE_PANE_ROOT_DIR = "/System/Library/PreferencePanes";
 const getPreferencePanes = () =>
   fs$1
     .readdirSync(PREFERENCE_PANE_ROOT_DIR)
-    .map((filename) => path$1.parse(filename).name);
+    .map((filename) => path__default.parse(filename).name);
 
 const getPane = (pane) => `${PREFERENCE_PANE_ROOT_DIR}/${pane}.prefPane`;
 
@@ -349,12 +352,12 @@ const getScriptCommands = () =>
       (file) => file.endsWith(".js") && !file.includes("fallback-handler")
     )
     .map((command) => ({
-      title: `${SCRIPT_PREFIX} ${path.basename(command, ".js")}`,
+      title: `${SCRIPT_PREFIX} ${path$1.basename(command, ".js")}`,
       value: command,
     }));
 
 const getCommandFilename$1 = (commandFilename) =>
-  path.join(getConfigDir(), commandFilename);
+  path$1.join(getConfigDir(), commandFilename);
 
 const getCommandsFromFallbackHandler = () => {
   const commandFilename = getCommandFilename$1("fallback-handler.js");
@@ -455,6 +458,8 @@ const showCommandErrorDialog = async (commandFilename, error) => {
   }
 };
 
+const getConfigPath = (filename) => path.join(getConfigDir(), filename);
+
 const wrapCommandSource = (commandSource) => `
 const module = {};
 
@@ -469,13 +474,22 @@ const resultToString = (result) =>
     : _.toString(result);
 
 const invokeScript = async (commandFilename, selection) => {
-  const require = createRequire(import.meta.url);
+  const require = createRequire(commandFilename);
+
+  const ENV = {};
+  dotenv.config({ path: getConfigPath(".env"), processEnv: ENV });
 
   const commandContext = {
     selection,
     require,
     console,
     open,
+    get: axios.get,
+    post: axios.post,
+    put: axios.put,
+    patch: axios.patch,
+    delete: axios.delete,
+    ENV,
     ENTER,
   };
 
@@ -486,7 +500,7 @@ const invokeScript = async (commandFilename, selection) => {
 
     const commandScript = new vm.Script(wrappedCommandSource);
 
-    const result = commandScript.runInNewContext(commandContext);
+    const result = await commandScript.runInNewContext(commandContext);
 
     if (!_.isUndefined(result)) {
       return resultToString(result);

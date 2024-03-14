@@ -3,8 +3,11 @@ import fs from "node:fs";
 import vm from "node:vm";
 import _ from "lodash";
 import open from "open";
+import dotenv from "dotenv";
 import { ENTER } from "../keystrokes/constants.mjs";
 import { showCommandErrorDialog } from "./showCommandErrorDialog.mjs";
+import { getConfigPath } from "./getConfigPath.mjs";
+import axios from "axios";
 
 const wrapCommandSource = (commandSource) => `
 const module = {};
@@ -20,13 +23,22 @@ const resultToString = (result) =>
     : _.toString(result);
 
 export const invokeScript = async (commandFilename, selection) => {
-  const require = createRequire(import.meta.url);
+  const require = createRequire(commandFilename);
+
+  const ENV = {};
+  dotenv.config({ path: getConfigPath(".env"), processEnv: ENV });
 
   const commandContext = {
     selection,
     require,
     console,
     open,
+    get: axios.get,
+    post: axios.post,
+    put: axios.put,
+    patch: axios.patch,
+    delete: axios.delete,
+    ENV,
     ENTER,
   };
 
@@ -37,7 +49,7 @@ export const invokeScript = async (commandFilename, selection) => {
 
     const commandScript = new vm.Script(wrappedCommandSource);
 
-    const result = commandScript.runInNewContext(commandContext);
+    const result = await commandScript.runInNewContext(commandContext);
 
     if (!_.isUndefined(result)) {
       return resultToString(result);

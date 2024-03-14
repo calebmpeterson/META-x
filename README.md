@@ -92,11 +92,13 @@ module.exports.suggestions = function () {
 
 #### Command Context
 
-In addition to the `selection`, each command function is invoked with `this` bound to the current "command context".
+In addition to the `selection`, each command function is invoked within the "command context".
 
 The "command context" API includes:
 
 - [`open` API](https://www.npmjs.com/package/open) ↗
+- [`axios` `get`/`put`/`post`/`patch`/`delete`](https://www.npmjs.com/package/axios#request-method-aliases) ↗
+- [`ENV`] which is loaded from the `~/.meta-x/.env` file if it exists
 
 #### Using NPM Packages
 
