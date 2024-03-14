@@ -97,8 +97,8 @@ In addition to the `selection`, each command function is invoked within the "com
 The "command context" API includes:
 
 - [`open` API](https://www.npmjs.com/package/open) ↗
-- [`axios` `get`/`put`/`post`/`patch`/`delete`](https://www.npmjs.com/package/axios#request-method-aliases) ↗
-- [`ENV`] which is loaded from the `~/.meta-x/.env` file if it exists
+- `get`/`put`/`post`/`patch`/`delete` methods from [`axios`](https://www.npmjs.com/package/axios#request-method-aliases) ↗
+- `ENV` which is loaded from the `~/.meta-x/.env` file if it exists
 
 #### Using NPM Packages
 
