@@ -4,10 +4,11 @@ import vm from "node:vm";
 import _ from "lodash";
 import open from "open";
 import dotenv from "dotenv";
+import axios from "axios";
 import { ENTER } from "../keystrokes/constants.mjs";
 import { showCommandErrorDialog } from "./showCommandErrorDialog.mjs";
 import { getConfigPath } from "./getConfigPath.mjs";
-import axios from "axios";
+import { resultToString } from "./resultToString.mjs";
 
 const wrapCommandSource = (commandSource) => `
 const module = {};
@@ -16,11 +17,6 @@ ${commandSource};
 
 module.exports(selection);
 `;
-
-const resultToString = (result) =>
-  _.isArray(result) || _.isObject(result)
-    ? JSON.stringify(result, null, "  ")
-    : _.toString(result);
 
 export const invokeScript = async (commandFilename, selection) => {
   const require = createRequire(commandFilename);

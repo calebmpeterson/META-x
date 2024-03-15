@@ -15,6 +15,7 @@ import { stripKeystrokes } from "../utils/stripKeystrokes.mjs";
 import { ENTER } from "../keystrokes/constants.mjs";
 import pressEnter from "../keystrokes/pressEnter.mjs";
 import { invokeScript } from "../utils/invokeScript.mjs";
+import { resultToString } from "../utils/resultToString.mjs";
 
 export default async () => {
   const selection = await getCurrentSelection();
@@ -68,10 +69,7 @@ export default async () => {
         );
 
         if (!_.isUndefined(result)) {
-          resultAsText =
-            _.isArray(result) || _.isObject(result)
-              ? JSON.stringify(result, null, "  ")
-              : _.toString(result);
+          resultAsText = resultToString(result);
         }
       } catch (e) {
         console.error(`Failed to execute ${commandFilename}`, e);
