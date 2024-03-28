@@ -90,10 +90,12 @@ module.exports.suggestions = function () {
 };
 </code></pre>
 <h4 id="commandcontext">Command Context</h4>
-<p>In addition to the <code>selection</code>, each command function is invoked with <code>this</code> bound to the current "command context".</p>
+<p>In addition to the <code>selection</code>, each command function is invoked within the "command context".</p>
 <p>The "command context" API includes:</p>
 <ul>
 <li><a href="https://www.npmjs.com/package/open"><code>open</code> API</a> ↗</li>
+<li><code>get</code>/<code>put</code>/<code>post</code>/<code>patch</code>/<code>delete</code> methods from <a href="https://www.npmjs.com/package/axios#request-method-aliases"><code>axios</code></a> ↗</li>
+<li><code>ENV</code> which is loaded from the <code>~/.meta-x/.env</code> file if it exists</li>
 </ul>
 <h4 id="usingnpmpackages">Using NPM Packages</h4>
 <p>You can use <code>npm</code> packages by simply installing them in your <code>~/.meta-x/</code> directory.</p>

@@ -13,7 +13,7 @@
     "build:runner": "rollup src/runner.mjs --file bin/runner.mjs --format es",
     "build:launcher": "rollup src/launcher.mjs --file bin/launcher.mjs --format es",
     "build": "yarn build:runner && yarn build:launcher",
-    "docs:build": "node scripts/build-docs",
+    "docs:build": "node scripts/build-docs.mjs",
     "postinstall": "yarn build",
     "tail-logs": "tail -f /tmp/skhd_$USER.out.log",
     "tail-errors": "tail -f /tmp/skhd_$USER.err.log"

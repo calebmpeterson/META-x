@@ -1,5 +1,5 @@
-const fs = require("fs");
-const showdown = require("showdown");
+import fs from "node:fs";
+import showdown from "showdown";
 
 const converter = new showdown.Converter();
 converter.setOption("tasklists", true);
