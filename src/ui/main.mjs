@@ -16,6 +16,7 @@ import { ENTER } from "../keystrokes/constants.mjs";
 import pressEnter from "../keystrokes/pressEnter.mjs";
 import { invokeScript } from "../utils/invokeScript.mjs";
 import { resultToString } from "../utils/resultToString.mjs";
+import { showCalculationResultDialog } from "../utils/showCalculationResultDialog.mjs";
 
 export default async () => {
   const selection = await getCurrentSelection();
@@ -54,6 +55,7 @@ export default async () => {
     const calculated = calculate(item.query);
     if (didCalculate(calculated)) {
       resultAsText = String(calculated);
+      await showCalculationResultDialog(item.query, resultAsText);
     }
     // Execute default handler
     else {

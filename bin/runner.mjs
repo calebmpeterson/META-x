@@ -460,6 +460,11 @@ const showCommandErrorDialog = async (commandFilename, error) => {
 
 const getConfigPath = (filename) => path.join(getConfigDir(), filename);
 
+const resultToString = (result) =>
+  _.isArray(result) || _.isObject(result)
+    ? JSON.stringify(result, null, "  ")
+    : _.toString(result);
+
 const wrapCommandSource = (commandSource) => `
 const module = {};
 
@@ -467,11 +472,6 @@ ${commandSource};
 
 module.exports(selection);
 `;
-
-const resultToString = (result) =>
-  _.isArray(result) || _.isObject(result)
-    ? JSON.stringify(result, null, "  ")
-    : _.toString(result);
 
 const invokeScript = async (commandFilename, selection) => {
   const require = createRequire(commandFilename);
@@ -511,6 +511,30 @@ const invokeScript = async (commandFilename, selection) => {
   }
 };
 
+const showCalculationResultDialog = async (query, result) => {
+  // await cocoaDialog("msgbox", {
+  //   title: `META-x`,
+  //   text: result,
+  //   timeout: 5,
+  //   timeoutFormat: " ",
+  // });
+  await execa("open", [
+    "-n",
+    "-a",
+    "Brave Browser",
+    "--args",
+    `--app=https://quickulator.cubicle6.com/?code=${encodeURIComponent(query)}`,
+  ]);
+
+  // await openApp(apps.browser, {
+  //   arguments: [
+  //     `--app=https://quickulator.cubicle6.com/?code=${encodeURIComponent(
+  //       query
+  //     )}`,
+  //   ],
+  // });
+};
+
 var showPrompt = async () => {
   const selection = await getCurrentSelection();
 
@@ -548,6 +572,7 @@ var showPrompt = async () => {
     const calculated = calculate(item.query);
     if (didCalculate(calculated)) {
       resultAsText = String(calculated);
+      await showCalculationResultDialog(item.query);
     }
     // Execute default handler
     else {
@@ -563,10 +588,7 @@ var showPrompt = async () => {
         );
 
         if (!_.isUndefined(result)) {
-          resultAsText =
-            _.isArray(result) || _.isObject(result)
-              ? JSON.stringify(result, null, "  ")
-              : _.toString(result);
+          resultAsText = resultToString(result);
         }
       } catch (e) {
         console.error(`Failed to execute ${commandFilename}`, e);
