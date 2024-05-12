@@ -1,15 +1,26 @@
+import ora from "ora";
 import prepareClipboard from "./clipboard/prepare/index.mjs";
 import finishClipboard from "./clipboard/finish/index.mjs";
 import showPrompt from "./ui/main.mjs";
 import { listen } from "./bridge.mjs";
 
+const spinner = ora({
+  text: "Ready",
+  interval: 1_000,
+  spinner: "sand",
+});
+
 const run = async () => {
+  spinner.stop();
+
   console.log("Meta-x triggered");
   await prepareClipboard();
   const result = await showPrompt();
   if (result) {
     await finishClipboard();
   }
+
+  spinner.start();
 };
 
 listen((message) => {
@@ -17,3 +28,5 @@ listen((message) => {
     run();
   }
 });
+
+spinner.start();
