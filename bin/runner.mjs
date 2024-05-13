@@ -1,3 +1,4 @@
+import ora from 'ora';
 import { keyboard, Key } from '@nut-tree/nut-js';
 import _ from 'lodash';
 import { createRequire } from 'module';
@@ -15,6 +16,7 @@ import cocoaDialog from 'cocoa-dialog';
 import vm from 'node:vm';
 import dotenv from 'dotenv';
 import axios from 'axios';
+import os$1 from 'node:os';
 import net from 'node:net';
 
 const delay = (timeout) =>
@@ -41,7 +43,7 @@ var finishClipboard = () =>
 var promptDarwin = (commands) =>
   new Promise((resolve, reject) => {
     const choices = commands.map(({ title }) => title).join("\n");
-    const toShow = Math.min(10, _.size(commands));
+    const toShow = Math.min(20, _.size(commands));
     const cmd = `echo "${choices}" | choose -b 000000 -c 222222 -w 30 -s 18 -m -n ${toShow}`;
     exec(cmd, (error, stdout, stderr) => {
       if (stdout) {
@@ -512,27 +514,14 @@ const invokeScript = async (commandFilename, selection) => {
 };
 
 const showCalculationResultDialog = async (query, result) => {
-  // await cocoaDialog("msgbox", {
-  //   title: `META-x`,
-  //   text: result,
-  //   timeout: 5,
-  //   timeoutFormat: " ",
-  // });
-  await execa("open", [
-    "-n",
-    "-a",
-    "Brave Browser",
-    "--args",
-    `--app=https://quickulator.cubicle6.com/?code=${encodeURIComponent(query)}`,
-  ]);
+  const cwd = path__default.join(os$1.homedir(), "Tools", "quickulator", "app");
+  const target = path__default.join(cwd, "dist", "quickulator");
 
-  // await openApp(apps.browser, {
-  //   arguments: [
-  //     `--app=https://quickulator.cubicle6.com/?code=${encodeURIComponent(
-  //       query
-  //     )}`,
-  //   ],
-  // });
+  try {
+    await execa(target, [...query], { cwd, preferLocal: true });
+  } catch (error) {
+    console.error(`Failed to show calculation result`, error);
+  }
 };
 
 var showPrompt = async () => {
@@ -656,13 +645,23 @@ const listen = (onMessage) => {
   process.on("SIGINT", cleanup);
 };
 
+const spinner = ora({
+  text: "Ready",
+  interval: 1_000,
+  spinner: "sand",
+});
+
 const run = async () => {
+  spinner.stop();
+
   console.log("Meta-x triggered");
   await prepareClipboard();
   const result = await showPrompt();
   if (result) {
     await finishClipboard();
   }
+
+  spinner.start();
 };
 
 listen((message) => {
@@ -670,3 +669,5 @@ listen((message) => {
     run();
   }
 });
+
+spinner.start();
