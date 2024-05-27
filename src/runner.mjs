@@ -6,8 +6,8 @@ import { listen } from "./bridge.mjs";
 
 const spinner = ora({
   text: "Ready",
-  interval: 1_000,
-  spinner: "sand",
+  interval: 500,
+  spinner: "dots",
 });
 
 const run = async () => {

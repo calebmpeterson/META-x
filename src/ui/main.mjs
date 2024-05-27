@@ -47,7 +47,9 @@ export default async () => {
   else if (_.isFunction(item.invoke)) {
     await item.invoke();
   }
-  // Unhandled command: attempt to treat as a calculation, then defer to the fallback handler
+  // Unhandled command:
+  // 1. attempt to treat as a calculation
+  // 2. defer to the fallback handler, if it exists
   else if (item.isUnhandled) {
     console.warn(`Unhandled command: ${item.query}`);
 

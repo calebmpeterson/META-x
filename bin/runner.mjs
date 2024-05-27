@@ -45,6 +45,7 @@ var promptDarwin = (commands) =>
     const choices = commands.map(({ title }) => title).join("\n");
     const toShow = Math.min(20, _.size(commands));
     const cmd = `echo "${choices}" | choose -b 000000 -c 222222 -w 30 -s 18 -m -n ${toShow}`;
+
     exec(cmd, (error, stdout, stderr) => {
       if (stdout) {
         const query = _.trim(stdout);
@@ -93,9 +94,14 @@ var prompt = (...args) =>
 
 const exported = {
   async getCurrentSelection() {
-    // This will read the selected text on Linux and the
-    // current clipboard contents on macOS and Windows
-    return clipboard.read();
+    console.time("get selection");
+    try {
+      // This will read the selected text on Linux and the
+      // current clipboard contents on macOS and Windows
+      return clipboard.read();
+    } finally {
+      console.timeEnd("get selection");
+    }
   },
 
   async setClipboardContent(contentAsText) {
@@ -110,7 +116,7 @@ const { getCurrentSelection, setClipboardContent } = exported;
 const SCRIPT_PREFIX = "ƒո";
 const MANAGE_SCRIPTS_PREFIX = "⛮";
 const FOLDER_PREFIX = "⌂";
-const APPLICATION_PREFIX = "⇰";
+const APPLICATION_PREFIX = "⌬";
 const SYSTEM_PREFIX = "⚙︎";
 
 const BUILT_IN_COMMANDS = {
@@ -553,7 +559,9 @@ var showPrompt = async () => {
   else if (_.isFunction(item.invoke)) {
     await item.invoke();
   }
-  // Unhandled command: attempt to treat as a calculation, then defer to the fallback handler
+  // Unhandled command:
+  // 1. attempt to treat as a calculation
+  // 2. defer to the fallback handler, if it exists
   else if (item.isUnhandled) {
     console.warn(`Unhandled command: ${item.query}`);
 
@@ -647,8 +655,8 @@ const listen = (onMessage) => {
 
 const spinner = ora({
   text: "Ready",
-  interval: 1_000,
-  spinner: "sand",
+  interval: 500,
+  spinner: "dots",
 });
 
 const run = async () => {
