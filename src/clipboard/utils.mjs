@@ -3,19 +3,24 @@ import clipboard from "clipboardy";
 
 const exported = {
   async getCurrentSelection() {
-    console.time("get selection");
+    console.time("getCurrentSelection");
     try {
       // This will read the selected text on Linux and the
       // current clipboard contents on macOS and Windows
       return clipboard.read();
     } finally {
-      console.timeEnd("get selection");
+      console.timeEnd("getCurrentSelection");
     }
   },
 
   async setClipboardContent(contentAsText) {
-    if (_.isString(contentAsText)) {
-      await clipboard.write(contentAsText);
+    console.time("setClipboardContent");
+    try {
+      if (_.isString(contentAsText)) {
+        await clipboard.write(contentAsText);
+      }
+    } finally {
+      console.timeEnd("setClipboardContent");
     }
   },
 };

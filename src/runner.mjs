@@ -1,4 +1,5 @@
 import ora from "ora";
+import notifier from "node-notifier";
 import prepareClipboard from "./clipboard/prepare/index.mjs";
 import finishClipboard from "./clipboard/finish/index.mjs";
 import showPrompt from "./ui/main.mjs";
@@ -27,6 +28,11 @@ listen((message) => {
   if (message === "run") {
     run();
   }
+});
+
+notifier.notify({
+  title: "META-x",
+  message: "META-x is ready",
 });
 
 spinner.start();

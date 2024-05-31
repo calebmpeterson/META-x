@@ -1,4 +1,5 @@
 import ora from 'ora';
+import notifier from 'node-notifier';
 import { keyboard, Key } from '@nut-tree/nut-js';
 import _ from 'lodash';
 import { createRequire } from 'module';
@@ -94,19 +95,24 @@ var prompt = (...args) =>
 
 const exported = {
   async getCurrentSelection() {
-    console.time("get selection");
+    console.time("getCurrentSelection");
     try {
       // This will read the selected text on Linux and the
       // current clipboard contents on macOS and Windows
       return clipboard.read();
     } finally {
-      console.timeEnd("get selection");
+      console.timeEnd("getCurrentSelection");
     }
   },
 
   async setClipboardContent(contentAsText) {
-    if (_.isString(contentAsText)) {
-      await clipboard.write(contentAsText);
+    console.time("setClipboardContent");
+    try {
+      if (_.isString(contentAsText)) {
+        await clipboard.write(contentAsText);
+      }
+    } finally {
+      console.timeEnd("setClipboardContent");
     }
   },
 };
@@ -676,6 +682,11 @@ listen((message) => {
   if (message === "run") {
     run();
   }
+});
+
+notifier.notify({
+  title: "META-x",
+  message: "META-x is ready",
 });
 
 spinner.start();
