@@ -12,7 +12,7 @@ import fs from 'fs';
 import fs$1 from 'node:fs';
 import * as path from 'node:path';
 import path__default from 'node:path';
-import { execa } from 'execa';
+import { execa, execaSync } from 'execa';
 import cocoaDialog from 'cocoa-dialog';
 import vm from 'node:vm';
 import dotenv from 'dotenv';
@@ -124,6 +124,7 @@ const MANAGE_SCRIPTS_PREFIX = "⛮";
 const FOLDER_PREFIX = "⌂";
 const APPLICATION_PREFIX = "⌬";
 const SYSTEM_PREFIX = "⚙︎";
+const SHORTCUT_PREFIX = "⌘";
 
 const BUILT_IN_COMMANDS = {
   "to-upper": _.toUpper,
@@ -370,6 +371,30 @@ const getScriptCommands = () =>
       value: command,
     }));
 
+const getShortcuts = () => {
+  try {
+    const shortcuts = execaSync("shortcuts", ["list"])
+      .stdout.split("\n")
+      .filter(Boolean)
+      .map((shortcut) => {
+        return {
+          title: `${SHORTCUT_PREFIX} ${shortcut}`,
+          invoke: async () => {
+            try {
+              await execaSync("shortcuts", ["run", title]);
+            } catch (error) {
+              console.error(`Failed to run shortcut: ${error.message}`);
+            }
+          },
+        };
+      });
+    return shortcuts;
+  } catch (error) {
+    console.error(`Failed to get shortcuts: ${error.message}`);
+    return [];
+  }
+};
+
 const getCommandFilename$1 = (commandFilename) =>
   path$1.join(getConfigDir(), commandFilename);
 
@@ -409,6 +434,7 @@ const getAllCommands = () => {
       ),
       ...getManageScriptCommands(),
       ...getFolders(),
+      ...getShortcuts(),
       ..._.chain([
         // Applications can live in multiple locations on macOS
         // Source: https://unix.stackexchange.com/a/583843

@@ -9,6 +9,7 @@ import { getSystemCommands } from "../catalog/system.mjs";
 import { getConfigDir } from "./getConfigDir.mjs";
 import { getManageScriptCommands } from "../catalog/manage-scripts.mjs";
 import { getScriptCommands } from "../catalog/scripts.mjs";
+import { getShortcuts } from "../catalog/shortcuts.mjs";
 
 const getCommandFilename = (commandFilename) =>
   path.join(getConfigDir(), commandFilename);
@@ -49,6 +50,7 @@ const getAllCommands = () => {
       ),
       ...getManageScriptCommands(),
       ...getFolders(),
+      ...getShortcuts(),
       ..._.chain([
         // Applications can live in multiple locations on macOS
         // Source: https://unix.stackexchange.com/a/583843
