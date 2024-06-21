@@ -11,7 +11,7 @@ export const getShortcuts = () => {
           title: `${SHORTCUT_PREFIX} ${shortcut}`,
           invoke: async () => {
             try {
-              await execaSync("shortcuts", ["run", title]);
+              await execaSync("shortcuts", ["run", shortcut]);
             } catch (error) {
               console.error(`Failed to run shortcut: ${error.message}`);
             }
