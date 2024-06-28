@@ -45,7 +45,7 @@ var promptDarwin = (commands) =>
   new Promise((resolve, reject) => {
     const choices = commands.map(({ title }) => title).join("\n");
     const toShow = Math.min(20, _.size(commands));
-    const cmd = `echo "${choices}" | choose -b 000000 -c 222222 -w 30 -s 18 -m -n ${toShow}`;
+    const cmd = `echo "${choices}" | choose -f "System Font" -b 000000 -c 222222 -w 30 -s 18 -m -n ${toShow}`;
 
     exec(cmd, (error, stdout, stderr) => {
       if (stdout) {
@@ -381,7 +381,7 @@ const getShortcuts = () => {
           title: `${SHORTCUT_PREFIX} ${shortcut}`,
           invoke: async () => {
             try {
-              await execaSync("shortcuts", ["run", title]);
+              await execaSync("shortcuts", ["run", shortcut]);
             } catch (error) {
               console.error(`Failed to run shortcut: ${error.message}`);
             }
