@@ -5,6 +5,7 @@ import _ from 'lodash';
 import { createRequire } from 'module';
 import open, { openApp } from 'open';
 import { exec } from 'child_process';
+import { execa, execaSync } from 'execa';
 import clipboard from 'clipboardy';
 import path$1 from 'path';
 import os from 'os';
@@ -12,7 +13,6 @@ import fs from 'fs';
 import fs$1 from 'node:fs';
 import * as path from 'node:path';
 import path__default from 'node:path';
-import { execa, execaSync } from 'execa';
 import cocoaDialog from 'cocoa-dialog';
 import vm from 'node:vm';
 import dotenv from 'dotenv';
@@ -500,10 +500,8 @@ const showCommandErrorDialog = async (commandFilename, error) => {
 
 const getConfigPath = (filename) => path.join(getConfigDir(), filename);
 
-const resultToString = (result) =>
-  _.isArray(result) || _.isObject(result)
-    ? JSON.stringify(result, null, "  ")
-    : _.toString(result);
+const processInvokeScriptResult = (result) =>
+  _.isArray(result) || _.isObject(result) ? result : _.toString(result);
 
 const wrapCommandSource = (commandSource) => `
 const module = {};
@@ -520,6 +518,7 @@ const invokeScript = async (commandFilename, selection) => {
   dotenv.config({ path: getConfigPath(".env"), processEnv: ENV });
 
   const commandContext = {
+    _,
     selection,
     require,
     console,
@@ -543,7 +542,7 @@ const invokeScript = async (commandFilename, selection) => {
     const result = await commandScript.runInNewContext(commandContext);
 
     if (!_.isUndefined(result)) {
-      return resultToString(result);
+      return processInvokeScriptResult(result);
     }
   } catch (error) {
     console.error(`Failed to execute ${commandFilename}`, error);
@@ -569,7 +568,7 @@ var showPrompt = async () => {
 
   const item = await prompt(commands);
 
-  let resultAsText;
+  let result;
 
   const require = createRequire(import.meta.url);
   Object.assign(global, { open, require });
@@ -585,7 +584,7 @@ var showPrompt = async () => {
   }
   // Handle built-in functions
   else if (_.isFunction(item.value)) {
-    resultAsText = item.value(selection);
+    result = item.value(selection);
   }
   // Invoke
   else if (_.isFunction(item.invoke)) {
@@ -600,7 +599,7 @@ var showPrompt = async () => {
     // Attempt to calculate
     const calculated = calculate(item.query);
     if (didCalculate(calculated)) {
-      resultAsText = String(calculated);
+      result = String(calculated);
       await showCalculationResultDialog(item.query);
     }
     // Execute default handler
@@ -617,7 +616,7 @@ var showPrompt = async () => {
         );
 
         if (!_.isUndefined(result)) {
-          resultAsText = resultToString(result);
+          result = processInvokeScriptResult(result);
         }
       } catch (e) {
         console.error(`Failed to execute ${commandFilename}`, e);
@@ -628,19 +627,26 @@ var showPrompt = async () => {
   else {
     const commandFilename = getCommandFilename$1(item.value);
 
-    resultAsText = await invokeScript(commandFilename, selection);
+    result = await invokeScript(commandFilename, selection);
   }
 
-  if (resultAsText && _.isString(resultAsText)) {
-    console.log(`Result: ${resultAsText}`);
+  if (result && _.isString(result)) {
+    console.log(`Result: ${result}`);
     // Update to reflect the command execution result
-    await setClipboardContent(stripKeystrokes(resultAsText));
+    await setClipboardContent(stripKeystrokes(result));
 
-    if (resultAsText.endsWith(ENTER)) {
+    if (result.endsWith(ENTER)) {
       await pressEnter();
     }
 
     return true;
+  } else if (result && _.isObject(result) && "shortcut" in result) {
+    const { shortcut, input } = result;
+    try {
+      await execaSync("shortcuts", ["run", shortcut, "-i", input]);
+    } catch (error) {
+      console.error(`Failed to run shortcut: ${error.message}`);
+    }
   }
 
   return false;

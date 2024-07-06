@@ -63,6 +63,23 @@ module.exports = (selection) => {
 };
 ```
 
+#### Shortcut Commands
+
+To run a shortcut with the output of the command:
+
+```js
+module.exports = (selection) => {
+  // The current selection will not be transformed.
+  //
+  // Instead, "Your Shortcut" will be run with the
+  // provided input.
+  return {
+    shortcut: "Your Shortcut",
+    input: selection.toUpperCase(),
+  };
+};
+```
+
 #### Command Not Found Fallback
 
 If the event that your query does not match a known command, the raw query string will be passed to `~/.meta-x/fallback-handler.js` if it exists:
@@ -96,6 +113,7 @@ In addition to the `selection`, each command function is invoked within the "com
 
 The "command context" API includes:
 
+- [`_` the Lodash library](https://lodash.com/docs/)
 - [`open` API](https://www.npmjs.com/package/open) ↗
 - `get`/`put`/`post`/`patch`/`delete` methods from [`axios`](https://www.npmjs.com/package/axios#request-method-aliases) ↗
 - `ENV` which is loaded from the `~/.meta-x/.env` file if it exists

@@ -2,6 +2,7 @@ import _ from "lodash";
 import { createRequire } from "module";
 import open from "open";
 import prompt from "./prompt/index.mjs";
+import { execaSync } from "execa";
 import {
   getCurrentSelection,
   setClipboardContent,
@@ -15,7 +16,7 @@ import { stripKeystrokes } from "../utils/stripKeystrokes.mjs";
 import { ENTER } from "../keystrokes/constants.mjs";
 import pressEnter from "../keystrokes/pressEnter.mjs";
 import { invokeScript } from "../utils/invokeScript.mjs";
-import { resultToString } from "../utils/resultToString.mjs";
+import { processInvokeScriptResult } from "../utils/processInvokeScriptResult.mjs";
 import { showCalculationResultDialog } from "../utils/showCalculationResultDialog.mjs";
 
 export default async () => {
@@ -25,7 +26,7 @@ export default async () => {
 
   const item = await prompt(commands);
 
-  let resultAsText;
+  let result;
 
   const require = createRequire(import.meta.url);
   Object.assign(global, { open, require });
@@ -41,7 +42,7 @@ export default async () => {
   }
   // Handle built-in functions
   else if (_.isFunction(item.value)) {
-    resultAsText = item.value(selection);
+    result = item.value(selection);
   }
   // Invoke
   else if (_.isFunction(item.invoke)) {
@@ -56,8 +57,8 @@ export default async () => {
     // Attempt to calculate
     const calculated = calculate(item.query);
     if (didCalculate(calculated)) {
-      resultAsText = String(calculated);
-      await showCalculationResultDialog(item.query, resultAsText);
+      result = String(calculated);
+      await showCalculationResultDialog(item.query, result);
     }
     // Execute default handler
     else {
@@ -73,7 +74,7 @@ export default async () => {
         );
 
         if (!_.isUndefined(result)) {
-          resultAsText = resultToString(result);
+          result = processInvokeScriptResult(result);
         }
       } catch (e) {
         console.error(`Failed to execute ${commandFilename}`, e);
@@ -84,19 +85,26 @@ export default async () => {
   else {
     const commandFilename = getCommandFilename(item.value);
 
-    resultAsText = await invokeScript(commandFilename, selection);
+    result = await invokeScript(commandFilename, selection);
   }
 
-  if (resultAsText && _.isString(resultAsText)) {
-    console.log(`Result: ${resultAsText}`);
+  if (result && _.isString(result)) {
+    console.log(`Result: ${result}`);
     // Update to reflect the command execution result
-    await setClipboardContent(stripKeystrokes(resultAsText));
+    await setClipboardContent(stripKeystrokes(result));
 
-    if (resultAsText.endsWith(ENTER)) {
+    if (result.endsWith(ENTER)) {
       await pressEnter();
     }
 
     return true;
+  } else if (result && _.isObject(result) && "shortcut" in result) {
+    const { shortcut, input } = result;
+    try {
+      await execaSync("shortcuts", ["run", shortcut, "-i", input]);
+    } catch (error) {
+      console.error(`Failed to run shortcut: ${error.message}`);
+    }
   }
 
   return false;

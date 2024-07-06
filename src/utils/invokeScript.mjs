@@ -8,7 +8,7 @@ import axios from "axios";
 import { ENTER } from "../keystrokes/constants.mjs";
 import { showCommandErrorDialog } from "./showCommandErrorDialog.mjs";
 import { getConfigPath } from "./getConfigPath.mjs";
-import { resultToString } from "./resultToString.mjs";
+import { processInvokeScriptResult } from "./processInvokeScriptResult.mjs";
 
 const wrapCommandSource = (commandSource) => `
 const module = {};
@@ -25,6 +25,7 @@ export const invokeScript = async (commandFilename, selection) => {
   dotenv.config({ path: getConfigPath(".env"), processEnv: ENV });
 
   const commandContext = {
+    _,
     selection,
     require,
     console,
@@ -48,7 +49,7 @@ export const invokeScript = async (commandFilename, selection) => {
     const result = await commandScript.runInNewContext(commandContext);
 
     if (!_.isUndefined(result)) {
-      return resultToString(result);
+      return processInvokeScriptResult(result);
     }
   } catch (error) {
     console.error(`Failed to execute ${commandFilename}`, error);
