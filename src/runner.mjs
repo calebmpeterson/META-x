@@ -25,8 +25,10 @@ const run = async () => {
 };
 
 listen((message) => {
-  if (message === "run") {
+  if (message.trim() === "run") {
     run();
+  } else {
+    console.log(`Unknown message: "${message}"`);
   }
 });
 

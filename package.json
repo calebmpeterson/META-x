@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development node --cpu-prof src/runner.mjs",
     "start": "cross-env NODE_ENV=production node bin/runner.mjs",
-    "launch": "node bin/launcher.mjs",
+    "launch": "./bin/launch",
     "build:runner": "rollup src/runner.mjs --file bin/runner.mjs --format es",
     "build:launcher": "rollup src/launcher.mjs --file bin/launcher.mjs --format es",
     "build": "yarn build:runner && yarn build:launcher",

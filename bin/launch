@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# Send "run" to the Unix socket that the runner is listening on
+echo run | nc -U /tmp/meta-x.socket

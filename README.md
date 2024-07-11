@@ -26,7 +26,7 @@ Emacs-esque `M-x` commands for your entire OS.
 
 ```
 # ⌘SPACE to launch Meta-x on the current text selection in the active window
-cmd - space : node <meta-x-root-dir>/src/launcher.js
+cmd - space : <meta-x-root-dir>/bin/launch
 ```
 
 ## Configuration
@@ -144,4 +144,4 @@ Issues and Pull Requests are welcome!
 - [x] Add built-in commands
 - [x] Document installation instructions
 - [x] Improve UI performance (with `choose` on macOS and `dmenu` on Linux)
-- [ ] Publish to NPM
+- [ ] Periodically re-build command catalog in the background rather than re-building when launched
