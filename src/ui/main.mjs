@@ -7,10 +7,6 @@ import {
   getCurrentSelection,
   setClipboardContent,
 } from "../clipboard/utils.mjs";
-import {
-  getCommandFilename,
-  getAllCommands,
-} from "../utils/getAllCommands.mjs";
 import { calculate, didCalculate } from "../utils/calculate.mjs";
 import { stripKeystrokes } from "../utils/stripKeystrokes.mjs";
 import { ENTER } from "../keystrokes/constants.mjs";
@@ -18,11 +14,13 @@ import pressEnter from "../keystrokes/pressEnter.mjs";
 import { invokeScript } from "../utils/invokeScript.mjs";
 import { processInvokeScriptResult } from "../utils/processInvokeScriptResult.mjs";
 import { showCalculationResultDialog } from "../utils/showCalculationResultDialog.mjs";
+import { getCommandsCatalog } from "../state/commands.mjs";
+import { getCommandFilename } from "../utils/getAllCommands.mjs";
 
 export default async () => {
   const selection = await getCurrentSelection();
 
-  const commands = getAllCommands();
+  const commands = getCommandsCatalog();
 
   const item = await prompt(commands);
 

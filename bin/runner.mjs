@@ -1,32 +1,46 @@
 import ora from 'ora';
 import notifier from 'node-notifier';
-import { keyboard, Key } from '@nut-tree/nut-js';
+import { Key, keyboard } from '@nut-tree/nut-js';
 import _ from 'lodash';
 import { createRequire } from 'module';
 import open, { openApp } from 'open';
 import { exec } from 'child_process';
 import { execa, execaSync } from 'execa';
 import clipboard from 'clipboardy';
-import path$1 from 'path';
-import os from 'os';
-import fs from 'fs';
-import fs$1 from 'node:fs';
-import * as path from 'node:path';
-import path__default from 'node:path';
-import cocoaDialog from 'cocoa-dialog';
 import vm from 'node:vm';
+import fs from 'node:fs';
 import dotenv from 'dotenv';
 import axios from 'axios';
+import cocoaDialog from 'cocoa-dialog';
+import * as path from 'node:path';
+import path__default from 'node:path';
+import os from 'os';
+import path$1 from 'path';
 import os$1 from 'node:os';
+import fs$1 from 'fs';
 import net from 'node:net';
 
 const delay = (timeout) =>
   new Promise((resolve) => setTimeout(resolve, timeout));
 
-var prepareDarwin$1 = async () => {
+const clock =
+  (label, work) =>
+  (...args) => {
+    try {
+      console.time(label);
+
+      const result = work(...args);
+
+      return result;
+    } finally {
+      console.timeEnd(label);
+    }
+  };
+
+var prepareDarwin$1 = clock("prepare", async () => {
   await keyboard.type(Key.LeftSuper, Key.C);
   await delay(20);
-};
+});
 
 var prepareClipboard = () =>
   process.platform === "darwin" ? prepareDarwin$1() : Promise.resolve();
@@ -94,30 +108,141 @@ var prompt = (...args) =>
   process.platform === "darwin" ? promptDarwin(...args) : promptLinux(...args);
 
 const exported = {
-  async getCurrentSelection() {
-    console.time("getCurrentSelection");
-    try {
-      // This will read the selected text on Linux and the
-      // current clipboard contents on macOS and Windows
-      return clipboard.read();
-    } finally {
-      console.timeEnd("getCurrentSelection");
-    }
-  },
+  getCurrentSelection: clock("getCurrentSelection", async () => {
+    // This will read the selected text on Linux and the
+    // current clipboard contents on macOS and Windows
+    return clipboard.read();
+  }),
 
-  async setClipboardContent(contentAsText) {
-    console.time("setClipboardContent");
-    try {
-      if (_.isString(contentAsText)) {
-        await clipboard.write(contentAsText);
-      }
-    } finally {
-      console.timeEnd("setClipboardContent");
+  setClipboardContent: clock("setClipboardContent", async (contentAsText) => {
+    if (_.isString(contentAsText)) {
+      await clipboard.write(contentAsText);
     }
-  },
+  }),
 };
 
 const { getCurrentSelection, setClipboardContent } = exported;
+
+const INCALCULABLE = Symbol("incalculable");
+
+const calculate = (input) => {
+  try {
+    const script = new vm.Script(input);
+    const result = script.runInNewContext();
+    console.log(`Calculated ${input} as ${result}`);
+    return result;
+  } catch {
+    return INCALCULABLE;
+  }
+};
+
+const didCalculate = (result) => result !== INCALCULABLE;
+
+const ENTER = "{ENTER}";
+
+const stripKeystrokes = (text) =>
+  text.endsWith(ENTER) ? text.slice(0, -ENTER.length) : text;
+
+var pressEnter = async () => {
+  console.log("pressEnter");
+  await delay(1000);
+  await keyboard.pressKey(Key.Enter);
+  await delay(10);
+  await keyboard.releaseKey(Key.Enter);
+};
+
+const getPathnameWithExtension = (pathname) =>
+  pathname.endsWith(".js") ? pathname : `${pathname}.js`;
+
+const editScript = async (pathname) => {
+  await execa(process.env.EDITOR, [getPathnameWithExtension(pathname)]);
+};
+
+const showCommandErrorDialog = async (commandFilename, error) => {
+  const result = await cocoaDialog("msgbox", {
+    title: `Error in ${commandFilename}`,
+    text: error.stack,
+    button1: "Edit",
+    button2: "Dismiss",
+  });
+
+  if (result === "1") {
+    await editScript(commandFilename);
+  }
+};
+
+const getConfigDir = () => path$1.join(os.homedir(), ".meta-x");
+
+const getConfigPath = (filename) => path.join(getConfigDir(), filename);
+
+const processInvokeScriptResult = (result) =>
+  _.isArray(result) || _.isObject(result) ? result : _.toString(result);
+
+const wrapCommandSource = (commandSource) => `
+const module = {};
+
+${commandSource};
+
+module.exports(selection);
+`;
+
+const invokeScript = async (commandFilename, selection) => {
+  const require = createRequire(commandFilename);
+
+  const ENV = {};
+  dotenv.config({ path: getConfigPath(".env"), processEnv: ENV });
+
+  const commandContext = {
+    _,
+    selection,
+    require,
+    console,
+    open,
+    get: axios.get,
+    post: axios.post,
+    put: axios.put,
+    patch: axios.patch,
+    delete: axios.delete,
+    ENV,
+    ENTER,
+  };
+
+  try {
+    const commandSource = fs.readFileSync(commandFilename, "utf8");
+
+    const wrappedCommandSource = wrapCommandSource(commandSource);
+
+    const commandScript = new vm.Script(wrappedCommandSource);
+
+    const result = await commandScript.runInNewContext(commandContext);
+
+    if (!_.isUndefined(result)) {
+      return processInvokeScriptResult(result);
+    }
+  } catch (error) {
+    console.error(`Failed to execute ${commandFilename}`, error);
+    await showCommandErrorDialog(commandFilename, error);
+  }
+};
+
+const showCalculationResultDialog = async (query, result) => {
+  const cwd = path__default.join(os$1.homedir(), "Tools", "quickulator", "app");
+  const target = path__default.join(cwd, "dist", "quickulator");
+
+  try {
+    await execa(target, [...query], { cwd, preferLocal: true });
+  } catch (error) {
+    console.error(`Failed to show calculation result`, error);
+  }
+};
+
+let commandsState = [];
+
+const getCommandsCatalog = () => commandsState;
+
+const setCommandsCatalog = (newCommandsState) => {
+  commandsState = newCommandsState;
+};
 
 const SCRIPT_PREFIX = "ƒո";
 const MANAGE_SCRIPTS_PREFIX = "⛮";
@@ -162,13 +287,11 @@ const getFolders = () =>
     })
   );
 
-const getConfigDir = () => path$1.join(os.homedir(), ".meta-x");
-
 const getApplicationUsageHistory = () =>
   path$1.join(getConfigDir(), ".application-usage");
 
 const persistApplicationUsage = (values) => {
-  fs.writeFileSync(
+  fs$1.writeFileSync(
     getApplicationUsageHistory(),
     _.takeRight(values, 100).join("\n"),
     "utf8"
@@ -177,7 +300,7 @@ const persistApplicationUsage = (values) => {
 
 const restoreApplicationUsage = () => {
   try {
-    return fs.readFileSync(getApplicationUsageHistory(), "utf8").split("\n");
+    return fs$1.readFileSync(getApplicationUsageHistory(), "utf8").split("\n");
   } catch {
     // The file doesn't exist yet
     return [];
@@ -193,18 +316,18 @@ const getApplications = (rootDir = "/Applications") => {
   const history = restoreApplicationUsage();
   const scores = _.countBy(history, _.identity);
 
-  const applications = fs
+  const applications = fs$1
     .readdirSync(rootDir)
     .filter((filename) => {
       const pathname = path$1.join(rootDir, filename);
-      const stats = fs.statSync(pathname);
+      const stats = fs$1.statSync(pathname);
       if (stats.isDirectory() && !filename.endsWith(".app")) {
         return false;
       }
 
       try {
         // If this doesn't throw, then the file is executable
-        fs.accessSync(pathname, fs.constants.X_OK);
+        fs$1.accessSync(pathname, fs$1.constants.X_OK);
         return true;
       } catch {
         return false;
@@ -236,7 +359,7 @@ const getApplications = (rootDir = "/Applications") => {
 const PREFERENCE_PANE_ROOT_DIR = "/System/Library/PreferencePanes";
 
 const getPreferencePanes = () =>
-  fs$1
+  fs
     .readdirSync(PREFERENCE_PANE_ROOT_DIR)
     .map((filename) => path__default.parse(filename).name);
 
@@ -252,6 +375,18 @@ const getSystemPreferences = () =>
   }));
 
 const getSystemCommands = () => [
+  {
+    title: `${SYSTEM_PREFIX} Shutdown`,
+    invoke: async () => {
+      await execa("pmset", ["halt"]);
+    },
+  },
+  {
+    title: `${SYSTEM_PREFIX} Restart`,
+    invoke: async () => {
+      await execa("pmset", ["restart"]);
+    },
+  },
   {
     title: `${SYSTEM_PREFIX} Sleep`,
     invoke: async () => {
@@ -272,9 +407,6 @@ const getSystemCommands = () => [
   },
 ];
 
-const getPathnameWithExtension = (pathname) =>
-  pathname.endsWith(".js") ? pathname : `${pathname}.js`;
-
 const TEMPLATE$1 = `
 module.exports = (selection) => {
   // \`this\` is bound to the Command Context. API documentation can be
@@ -291,13 +423,9 @@ module.exports = (selection) => {
 const createEmptyScript = (pathname) => {
   const nameWithExtension = getPathnameWithExtension(pathname);
 
-  if (!fs$1.existsSync(nameWithExtension)) {
-    fs$1.writeFileSync(nameWithExtension, TEMPLATE$1, "utf8");
+  if (!fs.existsSync(nameWithExtension)) {
+    fs.writeFileSync(nameWithExtension, TEMPLATE$1, "utf8");
   }
-};
-
-const editScript = async (pathname) => {
-  await execa(process.env.EDITOR, [getPathnameWithExtension(pathname)]);
 };
 
 const TEMPLATE = `
@@ -315,8 +443,8 @@ module.exports.suggestions = function () {
 const ensureEmptyFallbackHandler = () => {
   const fallbackHandlerFilename = getCommandFilename("fallback-handler.js");
 
-  if (!fs$1.existsSync(fallbackHandlerFilename)) {
-    fs$1.writeFileSync(fallbackHandlerFilename, TEMPLATE, "utf8");
+  if (!fs.existsSync(fallbackHandlerFilename)) {
+    fs.writeFileSync(fallbackHandlerFilename, TEMPLATE, "utf8");
   }
 };
 
@@ -361,7 +489,7 @@ const getManageScriptCommands = () => [
 ];
 
 const getScriptCommands = () =>
-  fs
+  fs$1
     .readdirSync(getConfigDir())
     .filter(
       (file) => file.endsWith(".js") && !file.includes("fallback-handler")
@@ -423,148 +551,38 @@ const commandComparator = ({ title }) => title;
 
 const applicationComparator = ({ score }) => -score;
 
-const getAllCommands = () => {
-  try {
-    console.time("getAllCommands");
+const getAllCommands = clock("getAllCommands", () => {
+  const allCommands = [
+    ..._.sortBy(
+      [...getScriptCommands(), ...getBuiltInCommands()],
+      commandComparator
+    ),
+    ...getManageScriptCommands(),
+    ...getFolders(),
+    ...getShortcuts(),
+    ..._.chain([
+      // Applications can live in multiple locations on macOS
+      // Source: https://unix.stackexchange.com/a/583843
+      ...getApplications("/Applications"),
+      ...getApplications("/Applications/Utilities"),
+      ...getApplications("/System/Applications"),
+      ...getApplications("/System/Applications/Utilities"),
+    ])
+      .sortBy(commandComparator)
+      .sortBy(applicationComparator)
+      .value(),
+    ...getSystemCommands(),
+    ...getSystemPreferences(),
+    ...getCommandsFromFallbackHandler(),
+  ];
 
-    const allCommands = [
-      ..._.sortBy(
-        [...getScriptCommands(), ...getBuiltInCommands()],
-        commandComparator
-      ),
-      ...getManageScriptCommands(),
-      ...getFolders(),
-      ...getShortcuts(),
-      ..._.chain([
-        // Applications can live in multiple locations on macOS
-        // Source: https://unix.stackexchange.com/a/583843
-        ...getApplications("/Applications"),
-        ...getApplications("/Applications/Utilities"),
-        ...getApplications("/System/Applications"),
-        ...getApplications("/System/Applications/Utilities"),
-      ])
-        .sortBy(commandComparator)
-        .sortBy(applicationComparator)
-        .value(),
-      ...getSystemCommands(),
-      ...getSystemPreferences(),
-      ...getCommandsFromFallbackHandler(),
-    ];
-
-    return allCommands;
-  } finally {
-    console.timeEnd("getAllCommands");
-  }
-};
-
-const INCALCULABLE = Symbol("incalculable");
-
-const calculate = (input) => {
-  try {
-    const script = new vm.Script(input);
-    const result = script.runInNewContext();
-    console.log(`Calculated ${input} as ${result}`);
-    return result;
-  } catch {
-    return INCALCULABLE;
-  }
-};
-
-const didCalculate = (result) => result !== INCALCULABLE;
-
-const ENTER = "{ENTER}";
-
-const stripKeystrokes = (text) =>
-  text.endsWith(ENTER) ? text.slice(0, -ENTER.length) : text;
-
-var pressEnter = async () => {
-  console.log("pressEnter");
-  await delay(1000);
-  await keyboard.pressKey(Key.Enter);
-  await delay(10);
-  await keyboard.releaseKey(Key.Enter);
-};
-
-const showCommandErrorDialog = async (commandFilename, error) => {
-  const result = await cocoaDialog("msgbox", {
-    title: `Error in ${commandFilename}`,
-    text: error.stack,
-    button1: "Edit",
-    button2: "Dismiss",
-  });
-
-  if (result === "1") {
-    await editScript(commandFilename);
-  }
-};
-
-const getConfigPath = (filename) => path.join(getConfigDir(), filename);
-
-const processInvokeScriptResult = (result) =>
-  _.isArray(result) || _.isObject(result) ? result : _.toString(result);
-
-const wrapCommandSource = (commandSource) => `
-const module = {};
-
-${commandSource};
-
-module.exports(selection);
-`;
-
-const invokeScript = async (commandFilename, selection) => {
-  const require = createRequire(commandFilename);
-
-  const ENV = {};
-  dotenv.config({ path: getConfigPath(".env"), processEnv: ENV });
-
-  const commandContext = {
-    _,
-    selection,
-    require,
-    console,
-    open,
-    get: axios.get,
-    post: axios.post,
-    put: axios.put,
-    patch: axios.patch,
-    delete: axios.delete,
-    ENV,
-    ENTER,
-  };
-
-  try {
-    const commandSource = fs$1.readFileSync(commandFilename, "utf8");
-
-    const wrappedCommandSource = wrapCommandSource(commandSource);
-
-    const commandScript = new vm.Script(wrappedCommandSource);
-
-    const result = await commandScript.runInNewContext(commandContext);
-
-    if (!_.isUndefined(result)) {
-      return processInvokeScriptResult(result);
-    }
-  } catch (error) {
-    console.error(`Failed to execute ${commandFilename}`, error);
-    await showCommandErrorDialog(commandFilename, error);
-  }
-};
-
-const showCalculationResultDialog = async (query, result) => {
-  const cwd = path__default.join(os$1.homedir(), "Tools", "quickulator", "app");
-  const target = path__default.join(cwd, "dist", "quickulator");
-
-  try {
-    await execa(target, [...query], { cwd, preferLocal: true });
-  } catch (error) {
-    console.error(`Failed to show calculation result`, error);
-  }
-};
+  return allCommands;
+});
 
 var showPrompt = async () => {
   const selection = await getCurrentSelection();
 
-  const commands = getAllCommands();
+  const commands = getCommandsCatalog();
 
   const item = await prompt(commands);
 
@@ -676,9 +694,9 @@ const createServer = (socket, onMessage) => {
 
 const listen = (onMessage) => {
   // Remove any stale socket file
-  const lockExists = fs$1.existsSync(SOCKET_FILE);
+  const lockExists = fs.existsSync(SOCKET_FILE);
   if (lockExists) {
-    fs$1.unlinkSync(SOCKET_FILE);
+    fs.unlinkSync(SOCKET_FILE);
   }
 
   const server = createServer(SOCKET_FILE, onMessage);
@@ -691,6 +709,11 @@ const listen = (onMessage) => {
   process.on("SIGINT", cleanup);
 };
 
+const rebuildCatalog = () => {
+  console.log("Rebuilding commands catalog...");
+  setCommandsCatalog(getAllCommands());
+};
+
 const spinner = ora({
   text: "Ready",
   interval: 500,
@@ -700,15 +723,33 @@ const spinner = ora({
 const run = async () => {
   spinner.stop();
 
-  console.log("Meta-x triggered");
-  await prepareClipboard();
-  const result = await showPrompt();
-  if (result) {
-    await finishClipboard();
+  try {
+    console.log("Meta-x triggered");
+
+    await prepareClipboard();
+    const result = await showPrompt();
+    if (result) {
+      await finishClipboard();
+    }
+  } catch (error) {
+    console.error(error);
+
+    notifier.notify({
+      title: "META-x",
+      message: "META-x encountered an error: " + error.message,
+    });
   }
 
   spinner.start();
 };
+
+rebuildCatalog();
+
+setInterval(() => {
+  spinner.stop();
+  rebuildCatalog();
+  spinner.start();
+}, 1000 * 60);
 
 listen((message) => {
   if (message.trim() === "run") {

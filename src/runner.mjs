@@ -4,6 +4,7 @@ import prepareClipboard from "./clipboard/prepare/index.mjs";
 import finishClipboard from "./clipboard/finish/index.mjs";
 import showPrompt from "./ui/main.mjs";
 import { listen } from "./bridge.mjs";
+import { rebuildCatalog } from "./state/rebuildCatalog.mjs";
 
 const spinner = ora({
   text: "Ready",
@@ -14,15 +15,33 @@ const spinner = ora({
 const run = async () => {
   spinner.stop();
 
-  console.log("Meta-x triggered");
-  await prepareClipboard();
-  const result = await showPrompt();
-  if (result) {
-    await finishClipboard();
+  try {
+    console.log("Meta-x triggered");
+
+    await prepareClipboard();
+    const result = await showPrompt();
+    if (result) {
+      await finishClipboard();
+    }
+  } catch (error) {
+    console.error(error);
+
+    notifier.notify({
+      title: "META-x",
+      message: "META-x encountered an error: " + error.message,
+    });
   }
 
   spinner.start();
 };
+
+rebuildCatalog();
+
+setInterval(() => {
+  spinner.stop();
+  rebuildCatalog();
+  spinner.start();
+}, 1000 * 60);
 
 listen((message) => {
   if (message.trim() === "run") {

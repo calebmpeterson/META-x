@@ -3,6 +3,18 @@ import { SYSTEM_PREFIX } from "./_constants.mjs";
 
 export const getSystemCommands = () => [
   {
+    title: `${SYSTEM_PREFIX} Shutdown`,
+    invoke: async () => {
+      await execa("pmset", ["halt"]);
+    },
+  },
+  {
+    title: `${SYSTEM_PREFIX} Restart`,
+    invoke: async () => {
+      await execa("pmset", ["restart"]);
+    },
+  },
+  {
     title: `${SYSTEM_PREFIX} Sleep`,
     invoke: async () => {
       await execa("pmset", ["sleepnow"]);

@@ -144,4 +144,5 @@ Issues and Pull Requests are welcome!
 - [x] Add built-in commands
 - [x] Document installation instructions
 - [x] Improve UI performance (with `choose` on macOS and `dmenu` on Linux)
-- [ ] Periodically re-build command catalog in the background rather than re-building when launched
+- [x] Periodically re-build command catalog in the background rather than re-building when launched
+- [x] Add shutdown/restart commands

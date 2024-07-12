@@ -10,8 +10,9 @@ import { getConfigDir } from "./getConfigDir.mjs";
 import { getManageScriptCommands } from "../catalog/manage-scripts.mjs";
 import { getScriptCommands } from "../catalog/scripts.mjs";
 import { getShortcuts } from "../catalog/shortcuts.mjs";
+import { clock } from "./clock.mjs";
 
-const getCommandFilename = (commandFilename) =>
+export const getCommandFilename = (commandFilename) =>
   path.join(getConfigDir(), commandFilename);
 
 const getCommandsFromFallbackHandler = () => {
@@ -39,38 +40,30 @@ const commandComparator = ({ title }) => title;
 
 const applicationComparator = ({ score }) => -score;
 
-const getAllCommands = () => {
-  try {
-    console.time("getAllCommands");
+export const getAllCommands = clock("getAllCommands", () => {
+  const allCommands = [
+    ..._.sortBy(
+      [...getScriptCommands(), ...getBuiltInCommands()],
+      commandComparator
+    ),
+    ...getManageScriptCommands(),
+    ...getFolders(),
+    ...getShortcuts(),
+    ..._.chain([
+      // Applications can live in multiple locations on macOS
+      // Source: https://unix.stackexchange.com/a/583843
+      ...getApplications("/Applications"),
+      ...getApplications("/Applications/Utilities"),
+      ...getApplications("/System/Applications"),
+      ...getApplications("/System/Applications/Utilities"),
+    ])
+      .sortBy(commandComparator)
+      .sortBy(applicationComparator)
+      .value(),
+    ...getSystemCommands(),
+    ...getSystemPreferences(),
+    ...getCommandsFromFallbackHandler(),
+  ];
 
-    const allCommands = [
-      ..._.sortBy(
-        [...getScriptCommands(), ...getBuiltInCommands()],
-        commandComparator
-      ),
-      ...getManageScriptCommands(),
-      ...getFolders(),
-      ...getShortcuts(),
-      ..._.chain([
-        // Applications can live in multiple locations on macOS
-        // Source: https://unix.stackexchange.com/a/583843
-        ...getApplications("/Applications"),
-        ...getApplications("/Applications/Utilities"),
-        ...getApplications("/System/Applications"),
-        ...getApplications("/System/Applications/Utilities"),
-      ])
-        .sortBy(commandComparator)
-        .sortBy(applicationComparator)
-        .value(),
-      ...getSystemCommands(),
-      ...getSystemPreferences(),
-      ...getCommandsFromFallbackHandler(),
-    ];
-
-    return allCommands;
-  } finally {
-    console.timeEnd("getAllCommands");
-  }
-};
-
-export { getAllCommands, getCommandFilename };
+  return allCommands;
+});
