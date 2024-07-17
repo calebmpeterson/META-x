@@ -58,7 +58,7 @@ var finishClipboard = () =>
 var promptDarwin = (commands) =>
   new Promise((resolve, reject) => {
     const choices = commands.map(({ title }) => title).join("\n");
-    const toShow = Math.min(20, _.size(commands));
+    const toShow = Math.min(40, _.size(commands));
     const cmd = `echo "${choices}" | choose -b 000000 -c 222222 -w 30 -s 18 -m -n ${toShow}`;
 
     exec(cmd, (error, stdout, stderr) => {
@@ -245,7 +245,7 @@ const setCommandsCatalog = (newCommandsState) => {
 };
 
 const SCRIPT_PREFIX = "ƒո";
-const MANAGE_SCRIPTS_PREFIX = "⛮";
+const MANAGE_SCRIPTS_PREFIX = "␥";
 const FOLDER_PREFIX = "⌂";
 const APPLICATION_PREFIX = "⌬";
 const SYSTEM_PREFIX = "⚙︎";
