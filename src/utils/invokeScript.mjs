@@ -9,6 +9,7 @@ import { ENTER } from "../keystrokes/constants.mjs";
 import { showCommandErrorDialog } from "./showCommandErrorDialog.mjs";
 import { getConfigPath } from "./getConfigPath.mjs";
 import { processInvokeScriptResult } from "./processInvokeScriptResult.mjs";
+import { execa, $ } from "execa";
 
 const wrapCommandSource = (commandSource) => `
 const module = {};
@@ -37,6 +38,8 @@ export const invokeScript = async (commandFilename, selection) => {
     delete: axios.delete,
     ENV,
     ENTER,
+    execa,
+    $,
   };
 
   try {

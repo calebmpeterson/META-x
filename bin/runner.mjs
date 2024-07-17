@@ -5,7 +5,7 @@ import _ from 'lodash';
 import { createRequire } from 'module';
 import open, { openApp } from 'open';
 import { exec } from 'child_process';
-import { execa, execaSync } from 'execa';
+import { execa, $, execaSync } from 'execa';
 import clipboard from 'clipboardy';
 import vm from 'node:vm';
 import fs from 'node:fs';
@@ -205,6 +205,8 @@ const invokeScript = async (commandFilename, selection) => {
     delete: axios.delete,
     ENV,
     ENTER,
+    execa,
+    $,
   };
 
   try {

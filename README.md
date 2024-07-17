@@ -116,6 +116,7 @@ The "command context" API includes:
 - [`_` the Lodash library](https://lodash.com/docs/)
 - [`open` API](https://www.npmjs.com/package/open) ↗
 - `get`/`put`/`post`/`patch`/`delete` methods from [`axios`](https://www.npmjs.com/package/axios#request-method-aliases) ↗
+- `$`/`execa` methods from [`execa`](https://www.npmjs.com/package/execa)
 - `ENV` which is loaded from the `~/.meta-x/.env` file if it exists
 
 #### Using NPM Packages
