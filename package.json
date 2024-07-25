@@ -10,9 +10,8 @@
     "dev": "cross-env NODE_ENV=development node --cpu-prof src/runner.mjs",
     "start": "cross-env NODE_ENV=production node bin/runner.mjs",
     "launch": "./bin/launch",
-    "build:runner": "rollup src/runner.mjs --file bin/runner.mjs --format es",
-    "build:launcher": "rollup src/launcher.mjs --file bin/launcher.mjs --format es",
-    "build": "yarn build:runner && yarn build:launcher",
+    "build:runner": "esbuild src/runner.mjs --bundle --platform=node --format=esm --outfile=bin/runner.mjs --packages=external",
+    "build": "yarn build:runner",
     "docs:build": "node scripts/build-docs.mjs",
     "postinstall": "yarn build",
     "tail-logs": "tail -f /tmp/skhd_$USER.out.log",
@@ -20,7 +19,7 @@
   },
   "devDependencies": {
     "cross-env": "^7.0.2",
-    "rollup": "^4.9.0",
+    "esbuild": "^0.23.0",
     "showdown": "^1.9.1"
   },
   "dependencies": {

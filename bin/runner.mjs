@@ -1,132 +1,123 @@
-import ora from 'ora';
-import notifier from 'node-notifier';
-import { Key, keyboard } from '@nut-tree/nut-js';
-import _ from 'lodash';
-import { createRequire } from 'module';
-import open, { openApp } from 'open';
-import { exec } from 'child_process';
-import { execa, $, execaSync } from 'execa';
-import clipboard from 'clipboardy';
-import vm from 'node:vm';
-import dotenv from 'dotenv';
-import fs from 'node:fs';
-import axios from 'axios';
-import * as path from 'node:path';
-import path__default from 'node:path';
-import os from 'os';
-import path$1 from 'path';
-import { runAppleScript } from 'run-applescript';
-import cocoaDialog from 'cocoa-dialog';
-import os$1 from 'node:os';
-import fs$1 from 'fs';
-import net from 'node:net';
+// src/runner.mjs
+import ora from "ora";
+import notifier from "node-notifier";
 
-const delay = (timeout) =>
-  new Promise((resolve) => setTimeout(resolve, timeout));
+// src/clipboard/prepare/darwin.mjs
+import { keyboard, Key } from "@nut-tree/nut-js";
 
-const clock =
-  (label, work) =>
-  (...args) => {
-    try {
-      console.time(label);
+// src/utils/delay.mjs
+var delay = (timeout) => new Promise((resolve) => setTimeout(resolve, timeout));
 
-      const result = work(...args);
+// src/utils/clock.mjs
+var clock = (label, work) => (...args) => {
+  try {
+    console.time(label);
+    const result = work(...args);
+    return result;
+  } finally {
+    console.timeEnd(label);
+  }
+};
 
-      return result;
-    } finally {
-      console.timeEnd(label);
-    }
-  };
-
-var prepareDarwin$1 = clock("prepare", async () => {
+// src/clipboard/prepare/darwin.mjs
+var darwin_default = clock("prepare", async () => {
   await keyboard.type(Key.LeftSuper, Key.C);
   await delay(20);
 });
 
-var prepareClipboard = () =>
-  process.platform === "darwin" ? prepareDarwin$1() : Promise.resolve();
+// src/clipboard/prepare/index.mjs
+var prepare_default = () => process.platform === "darwin" ? darwin_default() : Promise.resolve();
 
-var prepareDarwin = async () => {
+// src/clipboard/finish/darwin.mjs
+import { keyboard as keyboard2, Key as Key2 } from "@nut-tree/nut-js";
+var darwin_default2 = async () => {
   await delay(20);
-  await keyboard.type(Key.LeftSuper, Key.V);
+  await keyboard2.type(Key2.LeftSuper, Key2.V);
 };
 
-var finishClipboard = () =>
-  process.platform === "darwin" ? prepareDarwin() : Promise.resolve();
+// src/clipboard/finish/index.mjs
+var finish_default = () => process.platform === "darwin" ? darwin_default2() : Promise.resolve();
 
-// Uses choose: https://github.com/chipsenkbeil/choose
-// brew install choose-gui
-var promptDarwin = (commands) =>
-  new Promise((resolve, reject) => {
-    const choices = commands.map(({ title }) => title).join("\n");
-    const toShow = Math.min(40, _.size(commands));
-    const cmd = `echo "${choices}" | choose -b 000000 -c 222222 -w 30 -s 18 -m -n ${toShow}`;
+// src/ui/main.mjs
+import _11 from "lodash";
+import { createRequire as createRequire4 } from "module";
+import open4 from "open";
 
-    exec(cmd, (error, stdout, stderr) => {
-      if (stdout) {
-        const query = _.trim(stdout);
-        const rawQueryCommand = {
-          isUnhandled: true,
-          query,
-        };
-        const command =
-          commands.find(
-            ({ title, isFallback }) => title === query && !isFallback
-          ) || rawQueryCommand;
-        resolve(command);
-      } else {
-        if (error && process.env.NODE_ENV === "development") {
-          console.error(error.stack);
-        }
-        resolve({
-          isUnknown: true,
-        });
+// src/ui/prompt/darwin.mjs
+import { exec } from "child_process";
+import _ from "lodash";
+var darwin_default3 = (commands) => new Promise((resolve, reject) => {
+  const choices = commands.map(({ title }) => title).join("\n");
+  const toShow = Math.min(40, _.size(commands));
+  const cmd = `echo "${choices}" | choose -b 000000 -c 222222 -w 30 -s 18 -m -n ${toShow}`;
+  exec(cmd, (error, stdout, stderr) => {
+    if (stdout) {
+      const query = _.trim(stdout);
+      const rawQueryCommand = {
+        isUnhandled: true,
+        query
+      };
+      const command = commands.find(
+        ({ title, isFallback }) => title === query && !isFallback
+      ) || rawQueryCommand;
+      resolve(command);
+    } else {
+      if (error && process.env.NODE_ENV === "development") {
+        console.error(error.stack);
       }
-    });
+      resolve({
+        isUnknown: true
+      });
+    }
   });
+});
 
-// Uses dmenu
-var promptLinux = (commands) =>
-  new Promise((resolve, reject) => {
-    const choices = commands.map(({ title }) => title).join("\n");
-    const cmd = `echo "${choices}" | dmenu -i -b`;
-    exec(cmd, (error, stdout, stderr) => {
-      if (stdout) {
-        const query = _.trim(stdout);
-        resolve(commands.find(({ title }) => title === query));
-      } else {
-        if (error) {
-          console.error(error);
-        }
-        resolve({
-          isUnknown: true,
-        });
+// src/ui/prompt/linux.mjs
+import { exec as exec2 } from "child_process";
+import _2 from "lodash";
+var linux_default = (commands) => new Promise((resolve, reject) => {
+  const choices = commands.map(({ title }) => title).join("\n");
+  const cmd = `echo "${choices}" | dmenu -i -b`;
+  exec2(cmd, (error, stdout, stderr) => {
+    if (stdout) {
+      const query = _2.trim(stdout);
+      resolve(commands.find(({ title }) => title === query));
+    } else {
+      if (error) {
+        console.error(error);
       }
-    });
+      resolve({
+        isUnknown: true
+      });
+    }
   });
+});
 
-var prompt = (...args) =>
-  process.platform === "darwin" ? promptDarwin(...args) : promptLinux(...args);
+// src/ui/prompt/index.mjs
+var prompt_default = (...args) => process.platform === "darwin" ? darwin_default3(...args) : linux_default(...args);
 
-const exported = {
+// src/ui/main.mjs
+import { execaSync as execaSync2 } from "execa";
+
+// src/clipboard/utils.mjs
+import _3 from "lodash";
+import clipboard from "clipboardy";
+var exported = {
   getCurrentSelection: clock("getCurrentSelection", async () => {
-    // This will read the selected text on Linux and the
-    // current clipboard contents on macOS and Windows
     return clipboard.read();
   }),
-
   setClipboardContent: clock("setClipboardContent", async (contentAsText) => {
-    if (_.isString(contentAsText)) {
+    if (_3.isString(contentAsText)) {
       await clipboard.write(contentAsText);
     }
-  }),
+  })
 };
+var { getCurrentSelection, setClipboardContent } = exported;
 
-const { getCurrentSelection, setClipboardContent } = exported;
-
-const INCALCULABLE = Symbol("incalculable");
-
-const calculate = (input) => {
+// src/utils/calculate.mjs
+import vm from "node:vm";
+var INCALCULABLE = Symbol("incalculable");
+var calculate = (input) => {
   try {
     const script = new vm.Script(input);
     const result = script.runInNewContext();
@@ -136,36 +127,60 @@ const calculate = (input) => {
     return INCALCULABLE;
   }
 };
+var didCalculate = (result) => result !== INCALCULABLE;
 
-const didCalculate = (result) => result !== INCALCULABLE;
+// src/keystrokes/constants.mjs
+var ENTER = "{ENTER}";
 
-const ENTER = "{ENTER}";
+// src/utils/stripKeystrokes.mjs
+var stripKeystrokes = (text) => text.endsWith(ENTER) ? text.slice(0, -ENTER.length) : text;
 
-const stripKeystrokes = (text) =>
-  text.endsWith(ENTER) ? text.slice(0, -ENTER.length) : text;
-
-var pressEnter = async () => {
+// src/keystrokes/pressEnter.mjs
+import { keyboard as keyboard3, Key as Key3 } from "@nut-tree/nut-js";
+var pressEnter_default = async () => {
   console.log("pressEnter");
-  await delay(1000);
-  await keyboard.pressKey(Key.Enter);
+  await delay(1e3);
+  await keyboard3.pressKey(Key3.Enter);
   await delay(10);
-  await keyboard.releaseKey(Key.Enter);
+  await keyboard3.releaseKey(Key3.Enter);
 };
 
-const getConfigDir = () => path$1.join(os.homedir(), ".meta-x");
+// src/utils/invokeScript.mjs
+import _6 from "lodash";
+import dotenv2 from "dotenv";
+import fs from "node:fs";
+import vm2 from "node:vm";
+import { createRequire as createRequire2 } from "module";
 
-const getConfigPath = (filename) => path.join(getConfigDir(), filename);
+// src/utils/createScriptContext.mjs
+import { createRequire } from "module";
+import _4 from "lodash";
+import open from "open";
+import dotenv from "dotenv";
+import axios from "axios";
 
-const createScriptContext = (commandFilename, selection) => {
-  const require = createRequire(commandFilename);
+// src/utils/getConfigPath.mjs
+import * as path2 from "node:path";
 
+// src/utils/getConfigDir.mjs
+import os from "os";
+import path from "path";
+var getConfigDir = () => path.join(os.homedir(), ".meta-x");
+
+// src/utils/getConfigPath.mjs
+var getConfigPath = (filename) => path2.join(getConfigDir(), filename);
+
+// src/utils/createScriptContext.mjs
+import { execa, $ } from "execa";
+import { runAppleScript } from "run-applescript";
+var createScriptContext = (commandFilename, selection) => {
+  const require2 = createRequire(commandFilename);
   const ENV = {};
   dotenv.config({ path: getConfigPath(".env"), processEnv: ENV });
-
   const commandContext = {
-    _,
+    _: _4,
     selection,
-    require,
+    require: require2,
     console,
     open,
     get: axios.get,
@@ -177,61 +192,61 @@ const createScriptContext = (commandFilename, selection) => {
     ENTER,
     execa,
     $,
-    osascript: runAppleScript,
+    osascript: runAppleScript
   };
-
   return commandContext;
 };
 
-const processInvokeScriptResult = (result) =>
-  _.isArray(result) || _.isObject(result) ? result : _.toString(result);
+// src/utils/processInvokeScriptResult.mjs
+import _5 from "lodash";
+var processInvokeScriptResult = (result) => _5.isArray(result) || _5.isObject(result) ? result : _5.toString(result);
 
-const getPathnameWithExtension = (pathname) =>
-  pathname.endsWith(".js") ? pathname : `${pathname}.js`;
+// src/utils/showCommandErrorDialog.mjs
+import cocoaDialog from "cocoa-dialog";
 
-const editScript = async (pathname) => {
-  await execa(process.env.EDITOR, [getPathnameWithExtension(pathname)]);
+// src/utils/editScript.mjs
+import { execa as execa2 } from "execa";
+
+// src/utils/getPathnameWithExtension.mjs
+var getPathnameWithExtension = (pathname) => pathname.endsWith(".js") ? pathname : `${pathname}.js`;
+
+// src/utils/editScript.mjs
+var editScript = async (pathname) => {
+  await execa2(process.env.EDITOR, [getPathnameWithExtension(pathname)]);
 };
 
-const showCommandErrorDialog = async (commandFilename, error) => {
+// src/utils/showCommandErrorDialog.mjs
+var showCommandErrorDialog = async (commandFilename, error) => {
   const result = await cocoaDialog("msgbox", {
     title: `Error in ${commandFilename}`,
     text: error.stack,
     button1: "Edit",
-    button2: "Dismiss",
+    button2: "Dismiss"
   });
-
   if (result === "1") {
     await editScript(commandFilename);
   }
 };
 
-const wrapCommandSource = (commandSource) => `
+// src/utils/invokeScript.mjs
+var wrapCommandSource = (commandSource) => `
 const module = {};
 
 ${commandSource};
 
 module.exports(selection);
 `;
-
-const invokeScript = async (commandFilename, selection) => {
-  createRequire(commandFilename);
-
+var invokeScript = async (commandFilename, selection) => {
+  const require2 = createRequire2(commandFilename);
   const ENV = {};
-  dotenv.config({ path: getConfigPath(".env"), processEnv: ENV });
-
+  dotenv2.config({ path: getConfigPath(".env"), processEnv: ENV });
   const commandContext = createScriptContext(commandFilename, selection);
-
   try {
     const commandSource = fs.readFileSync(commandFilename, "utf8");
-
     const wrappedCommandSource = wrapCommandSource(commandSource);
-
-    const commandScript = new vm.Script(wrappedCommandSource);
-
+    const commandScript = new vm2.Script(wrappedCommandSource);
     const result = await commandScript.runInNewContext(commandContext);
-
-    if (!_.isUndefined(result)) {
+    if (!_6.isUndefined(result)) {
       return processInvokeScriptResult(result);
     }
   } catch (error) {
@@ -240,121 +255,126 @@ const invokeScript = async (commandFilename, selection) => {
   }
 };
 
-const showCalculationResultDialog = async (query, result) => {
-  const cwd = path__default.join(os$1.homedir(), "Tools", "quickulator", "app");
-  const target = path__default.join(cwd, "dist", "quickulator");
-
+// src/utils/showCalculationResultDialog.mjs
+import { execa as execa3 } from "execa";
+import os2 from "node:os";
+import path3 from "node:path";
+var showCalculationResultDialog = async (query, result) => {
+  const cwd = path3.join(os2.homedir(), "Tools", "quickulator", "app");
+  const target = path3.join(cwd, "dist", "quickulator");
   try {
-    await execa(target, [...query], { cwd, preferLocal: true });
+    await execa3(target, [...query], { cwd, preferLocal: true });
   } catch (error) {
     console.error(`Failed to show calculation result`, error);
   }
 };
 
-let commandsState = [];
-
-const getCommandsCatalog = () => commandsState;
-
-const setCommandsCatalog = (newCommandsState) => {
+// src/state/commands.mjs
+var commandsState = [];
+var getCommandsCatalog = () => commandsState;
+var setCommandsCatalog = (newCommandsState) => {
   commandsState = newCommandsState;
 };
 
-const SCRIPT_PREFIX = "ƒո";
-const MANAGE_SCRIPTS_PREFIX = "␥";
-const FOLDER_PREFIX = "⌂";
-const APPLICATION_PREFIX = "⌬";
-const SYSTEM_PREFIX = "⚙︎";
-const SHORTCUT_PREFIX = "⌘";
+// src/utils/getAllCommands.mjs
+import path8 from "path";
+import _10 from "lodash";
+import { createRequire as createRequire3 } from "module";
 
-const BUILT_IN_COMMANDS = {
-  "to-upper": _.toUpper,
-  "to-lower": _.toLower,
-  "camel-case": _.camelCase,
-  capitalize: _.capitalize,
-  "kebab-case": _.kebabCase,
-  "snake-case": _.snakeCase,
-  "start-case": _.startCase,
-  deburr: _.deburr,
+// src/catalog/built-ins.mjs
+import _7 from "lodash";
+
+// src/catalog/_constants.mjs
+var SCRIPT_PREFIX = "\u0192\u0578";
+var MANAGE_SCRIPTS_PREFIX = "\u2425";
+var FOLDER_PREFIX = "\u2302";
+var APPLICATION_PREFIX = "\u232C";
+var SYSTEM_PREFIX = "\u2699\uFE0E";
+var SHORTCUT_PREFIX = "\u2318";
+
+// src/catalog/built-ins.mjs
+var BUILT_IN_COMMANDS = {
+  "to-upper": _7.toUpper,
+  "to-lower": _7.toLower,
+  "camel-case": _7.camelCase,
+  capitalize: _7.capitalize,
+  "kebab-case": _7.kebabCase,
+  "snake-case": _7.snakeCase,
+  "start-case": _7.startCase,
+  deburr: _7.deburr
 };
+var getBuiltInCommands = () => _7.map(BUILT_IN_COMMANDS, (command, name) => ({
+  label: name,
+  title: `${SCRIPT_PREFIX} ${name}`,
+  value: command
+}));
 
-const getBuiltInCommands = () =>
-  _.map(BUILT_IN_COMMANDS, (command, name) => ({
-    label: name,
-    title: `${SCRIPT_PREFIX} ${name}`,
-    value: command,
-  }));
+// src/catalog/folders.mjs
+import os3 from "os";
+import path4 from "path";
+import open2 from "open";
+var getFolders = () => ["Applications", "Documents", "Downloads", "Home", "Pictures"].map(
+  (folder) => ({
+    title: `${FOLDER_PREFIX} ${folder}`,
+    value: folder,
+    invoke: async () => {
+      if (folder === "Applications") {
+        await open2("/Applications");
+      } else if (folder === "Home") {
+        await open2(os3.homedir());
+      } else {
+        const dirname = path4.join(os3.homedir(), folder);
+        await open2(dirname);
+      }
+    }
+  })
+);
 
-const getFolders = () =>
-  ["Applications", "Documents", "Downloads", "Home", "Pictures"].map(
-    (folder) => ({
-      title: `${FOLDER_PREFIX} ${folder}`,
-      value: folder,
-      invoke: async () => {
-        if (folder === "Applications") {
-          await open("/Applications");
-        } else if (folder === "Home") {
-          await open(os.homedir());
-        } else {
-          const dirname = path$1.join(os.homedir(), folder);
-          await open(dirname);
-        }
-      },
-    })
-  );
-
-const getApplicationUsageHistory = () =>
-  path$1.join(getConfigDir(), ".application-usage");
-
-const persistApplicationUsage = (values) => {
-  fs$1.writeFileSync(
+// src/catalog/applications.mjs
+import fs2 from "fs";
+import path5 from "path";
+import _8 from "lodash";
+import { openApp } from "open";
+var getApplicationUsageHistory = () => path5.join(getConfigDir(), ".application-usage");
+var persistApplicationUsage = (values) => {
+  fs2.writeFileSync(
     getApplicationUsageHistory(),
-    _.takeRight(values, 100).join("\n"),
+    _8.takeRight(values, 100).join("\n"),
     "utf8"
   );
 };
-
-const restoreApplicationUsage = () => {
+var restoreApplicationUsage = () => {
   try {
-    return fs$1.readFileSync(getApplicationUsageHistory(), "utf8").split("\n");
+    return fs2.readFileSync(getApplicationUsageHistory(), "utf8").split("\n");
   } catch {
-    // The file doesn't exist yet
     return [];
   }
 };
-
-const trackApplicationUsage = (value) => {
+var trackApplicationUsage = (value) => {
   const history = restoreApplicationUsage();
   persistApplicationUsage([...history, value]);
 };
-
-const getApplications = (rootDir = "/Applications") => {
+var getApplications = (rootDir = "/Applications") => {
   const history = restoreApplicationUsage();
-  const scores = _.countBy(history, _.identity);
-
-  const applications = fs$1
-    .readdirSync(rootDir)
-    .filter((filename) => {
-      const pathname = path$1.join(rootDir, filename);
-      const stats = fs$1.statSync(pathname);
-      if (stats.isDirectory() && !filename.endsWith(".app")) {
-        return false;
-      }
-
-      try {
-        // If this doesn't throw, then the file is executable
-        fs$1.accessSync(pathname, fs$1.constants.X_OK);
-        return true;
-      } catch {
-        return false;
-      }
-    })
-    .filter((filename) => !filename.startsWith("."));
-
+  const scores = _8.countBy(history, _8.identity);
+  const applications = fs2.readdirSync(rootDir).filter((filename) => {
+    const pathname = path5.join(rootDir, filename);
+    const stats = fs2.statSync(pathname);
+    if (stats.isDirectory() && !filename.endsWith(".app")) {
+      return false;
+    }
+    try {
+      fs2.accessSync(pathname, fs2.constants.X_OK);
+      return true;
+    } catch {
+      return false;
+    }
+  }).filter((filename) => !filename.startsWith("."));
   const items = applications.map((application) => {
-    const value = path$1.join(rootDir, application);
+    const value = path5.join(rootDir, application);
     return {
-      title: `${APPLICATION_PREFIX} ${_.get(
-        path$1.parse(application),
+      title: `${APPLICATION_PREFIX} ${_8.get(
+        path5.parse(application),
         "name",
         application
       )}`,
@@ -364,65 +384,69 @@ const getApplications = (rootDir = "/Applications") => {
         console.log(`Opening ${application}`);
         trackApplicationUsage(value);
         await openApp(value);
-      },
+      }
     };
   });
-
   return items;
 };
 
-const PREFERENCE_PANE_ROOT_DIR = "/System/Library/PreferencePanes";
+// src/catalog/system-preferences.mjs
+import fs3 from "node:fs";
+import path6 from "node:path";
+import open3 from "open";
+var PREFERENCE_PANE_ROOT_DIR = "/System/Library/PreferencePanes";
+var getPreferencePanes = () => fs3.readdirSync(PREFERENCE_PANE_ROOT_DIR).map((filename) => path6.parse(filename).name);
+var getPane = (pane) => `${PREFERENCE_PANE_ROOT_DIR}/${pane}.prefPane`;
+var getSystemPreferences = () => getPreferencePanes().map((pane) => ({
+  title: `${SYSTEM_PREFIX} ${pane}`,
+  value: pane,
+  invoke: async () => {
+    await open3(getPane(pane));
+  }
+}));
 
-const getPreferencePanes = () =>
-  fs
-    .readdirSync(PREFERENCE_PANE_ROOT_DIR)
-    .map((filename) => path__default.parse(filename).name);
-
-const getPane = (pane) => `${PREFERENCE_PANE_ROOT_DIR}/${pane}.prefPane`;
-
-const getSystemPreferences = () =>
-  getPreferencePanes().map((pane) => ({
-    title: `${SYSTEM_PREFIX} ${pane}`,
-    value: pane,
-    invoke: async () => {
-      await open(getPane(pane));
-    },
-  }));
-
-const getSystemCommands = () => [
+// src/catalog/system.mjs
+import { execa as execa4 } from "execa";
+var getSystemCommands = () => [
   {
     title: `${SYSTEM_PREFIX} Shutdown`,
     invoke: async () => {
-      await execa("pmset", ["halt"]);
-    },
+      await execa4("pmset", ["halt"]);
+    }
   },
   {
     title: `${SYSTEM_PREFIX} Restart`,
     invoke: async () => {
-      await execa("pmset", ["restart"]);
-    },
+      await execa4("pmset", ["restart"]);
+    }
   },
   {
     title: `${SYSTEM_PREFIX} Sleep`,
     invoke: async () => {
-      await execa("pmset", ["sleepnow"]);
-    },
+      await execa4("pmset", ["sleepnow"]);
+    }
   },
   {
     title: `${SYSTEM_PREFIX} Sleep Displays`,
     invoke: async () => {
-      await execa("pmset", ["displaysleepnow"]);
-    },
+      await execa4("pmset", ["displaysleepnow"]);
+    }
   },
   {
     title: `${SYSTEM_PREFIX} About This Mac`,
     invoke: async () => {
-      await execa("open", ["-a", "About This Mac"]);
-    },
-  },
+      await execa4("open", ["-a", "About This Mac"]);
+    }
+  }
 ];
 
-const TEMPLATE$1 = `
+// src/catalog/manage-scripts.mjs
+import cocoaDialog2 from "cocoa-dialog";
+import _9 from "lodash";
+
+// src/utils/createEmptyScript.mjs
+import fs4 from "node:fs";
+var TEMPLATE = `
 module.exports = (selection) => {
   // \`this\` is bound to the Command Context. API documentation can be
   // found at https://github.com/calebmpeterson/META-x#command-context.
@@ -434,16 +458,16 @@ module.exports = (selection) => {
   return selection.toUpperCase();
 };
 `.trim();
-
-const createEmptyScript = (pathname) => {
+var createEmptyScript = (pathname) => {
   const nameWithExtension = getPathnameWithExtension(pathname);
-
-  if (!fs.existsSync(nameWithExtension)) {
-    fs.writeFileSync(nameWithExtension, TEMPLATE$1, "utf8");
+  if (!fs4.existsSync(nameWithExtension)) {
+    fs4.writeFileSync(nameWithExtension, TEMPLATE, "utf8");
   }
 };
 
-const TEMPLATE = `
+// src/utils/ensureEmptyFallbackHandler.mjs
+import fs5 from "node:fs";
+var TEMPLATE2 = `
 module.exports = function (selection, query) {
   // Do something with the currently selected
   // text and/or the raw query string
@@ -454,83 +478,76 @@ module.exports.suggestions = function () {
   return ["suggestion one", "suggestion two", "suggestion three"];
 };
 `.trim();
-
-const ensureEmptyFallbackHandler = () => {
+var ensureEmptyFallbackHandler = () => {
   const fallbackHandlerFilename = getCommandFilename("fallback-handler.js");
-
-  if (!fs.existsSync(fallbackHandlerFilename)) {
-    fs.writeFileSync(fallbackHandlerFilename, TEMPLATE, "utf8");
+  if (!fs5.existsSync(fallbackHandlerFilename)) {
+    fs5.writeFileSync(fallbackHandlerFilename, TEMPLATE2, "utf8");
   }
 };
 
-const getManageScriptCommands = () => [
+// src/catalog/manage-scripts.mjs
+var getManageScriptCommands = () => [
   {
     title: `${MANAGE_SCRIPTS_PREFIX} Create Script`,
     invoke: async () => {
-      const result = await cocoaDialog("filesave", {
+      const result = await cocoaDialog2("filesave", {
         title: "Save Script As...",
-        withDirectory: getConfigDir(),
+        withDirectory: getConfigDir()
       });
-
-      if (!_.isEmpty(result)) {
+      if (!_9.isEmpty(result)) {
         createEmptyScript(result);
         await editScript(result);
       }
-    },
+    }
   },
   {
     title: `${MANAGE_SCRIPTS_PREFIX} Edit Script`,
     invoke: async () => {
-      const result = await cocoaDialog("fileselect", {
+      const result = await cocoaDialog2("fileselect", {
         title: "Choose Script To Edit...",
-        withDirectory: getConfigDir(),
+        withDirectory: getConfigDir()
       });
-
-      if (!_.isEmpty(result)) {
+      if (!_9.isEmpty(result)) {
         await editScript(result);
       }
-    },
+    }
   },
   {
     title: `${MANAGE_SCRIPTS_PREFIX} Edit Fallback Handler`,
     invoke: async () => {
       const fallbackHandlerFilename = getCommandFilename("fallback-handler.js");
-
       ensureEmptyFallbackHandler();
-
       await editScript(fallbackHandlerFilename);
-    },
-  },
+    }
+  }
 ];
 
-const getScriptCommands = () =>
-  fs$1
-    .readdirSync(getConfigDir())
-    .filter(
-      (file) => file.endsWith(".js") && !file.includes("fallback-handler")
-    )
-    .map((command) => ({
-      title: `${SCRIPT_PREFIX} ${path$1.basename(command, ".js")}`,
-      value: command,
-    }));
+// src/catalog/scripts.mjs
+import fs6 from "fs";
+import path7 from "path";
+var getScriptCommands = () => fs6.readdirSync(getConfigDir()).filter(
+  (file) => file.endsWith(".js") && !file.includes("fallback-handler")
+).map((command) => ({
+  title: `${SCRIPT_PREFIX} ${path7.basename(command, ".js")}`,
+  value: command
+}));
 
-const getShortcuts = () => {
+// src/catalog/shortcuts.mjs
+import { execaSync } from "execa";
+var getShortcuts = () => {
   try {
-    const shortcuts = execaSync("shortcuts", ["list"])
-      .stdout.split("\n")
-      .filter(Boolean)
-      .map((shortcut) => {
-        return {
-          title: `${SHORTCUT_PREFIX} ${shortcut}`,
-          invoke: async () => {
-            try {
-              await execaSync("shortcuts", ["run", shortcut]);
-            } catch (error) {
-              console.error(`Failed to run shortcut: ${error.message}`);
-            }
-          },
-        };
-      });
+    const shortcuts = execaSync("shortcuts", ["list"]).stdout.split("\n").filter(Boolean).map((shortcut) => {
+      return {
+        title: `${SHORTCUT_PREFIX} ${shortcut}`,
+        invoke: async () => {
+          try {
+            await execaSync("shortcuts", ["run", shortcut]);
+          } catch (error) {
+            console.error(`Failed to run shortcut: ${error.message}`);
+          }
+        }
+      };
+    });
     return shortcuts;
   } catch (error) {
     console.error(`Failed to get shortcuts: ${error.message}`);
@@ -538,234 +555,182 @@ const getShortcuts = () => {
   }
 };
 
-const getCommandFilename$1 = (commandFilename) =>
-  path$1.join(getConfigDir(), commandFilename);
-
-const getCommandsFromFallbackHandler = () => {
-  const commandFilename = getCommandFilename$1("fallback-handler.js");
+// src/utils/getAllCommands.mjs
+var getCommandFilename2 = (commandFilename) => path8.join(getConfigDir(), commandFilename);
+var getCommandsFromFallbackHandler = () => {
+  const commandFilename = getCommandFilename2("fallback-handler.js");
   try {
-    const require = createRequire(import.meta.url);
-    const fallbackHandler = require(commandFilename);
-
-    const fallbackCommands =
-      fallbackHandler.suggestions && fallbackHandler.suggestions.call();
-
+    const require2 = createRequire3(import.meta.url);
+    const fallbackHandler = require2(commandFilename);
+    const fallbackCommands = fallbackHandler.suggestions && fallbackHandler.suggestions.call();
     return fallbackCommands.map((fallbackCommand) => ({
       label: fallbackCommand,
       title: fallbackCommand,
       value: fallbackCommand,
-      isFallback: true,
+      isFallback: true
     }));
   } catch (e) {
     console.error(`Failed to run fallback handler: ${e.message}`);
     return [];
   }
 };
-
-const commandComparator = ({ title }) => title;
-
-const applicationComparator = ({ score }) => -score;
-
-const getAllCommands = clock("getAllCommands", () => {
+var commandComparator = ({ title }) => title;
+var applicationComparator = ({ score }) => -score;
+var getAllCommands = clock("getAllCommands", () => {
   const allCommands = [
-    ..._.sortBy(
+    ..._10.sortBy(
       [...getScriptCommands(), ...getBuiltInCommands()],
       commandComparator
     ),
     ...getManageScriptCommands(),
     ...getFolders(),
     ...getShortcuts(),
-    ..._.chain([
+    ..._10.chain([
       // Applications can live in multiple locations on macOS
       // Source: https://unix.stackexchange.com/a/583843
       ...getApplications("/Applications"),
       ...getApplications("/Applications/Utilities"),
       ...getApplications("/System/Applications"),
-      ...getApplications("/System/Applications/Utilities"),
-    ])
-      .sortBy(commandComparator)
-      .sortBy(applicationComparator)
-      .value(),
+      ...getApplications("/System/Applications/Utilities")
+    ]).sortBy(commandComparator).sortBy(applicationComparator).value(),
     ...getSystemCommands(),
     ...getSystemPreferences(),
-    ...getCommandsFromFallbackHandler(),
+    ...getCommandsFromFallbackHandler()
   ];
-
   return allCommands;
 });
 
-var showPrompt = async () => {
+// src/ui/main.mjs
+var main_default = async () => {
   const selection = await getCurrentSelection();
-
   const commands = getCommandsCatalog();
-
-  const item = await prompt(commands);
-
+  const item = await prompt_default(commands);
   let result;
-
-  const require = createRequire(import.meta.url);
-  Object.assign(global, { open, require });
-
+  const require2 = createRequire4(import.meta.url);
+  Object.assign(global, { open: open4, require: require2 });
   const commandContext = {
-    open,
-    ENTER,
+    open: open4,
+    ENTER
   };
-
-  // Execute built-in command
   if (item.isUnknown) {
     console.warn(`Unknown command`);
-  }
-  // Handle built-in functions
-  else if (_.isFunction(item.value)) {
+  } else if (_11.isFunction(item.value)) {
     result = item.value(selection);
-  }
-  // Invoke
-  else if (_.isFunction(item.invoke)) {
+  } else if (_11.isFunction(item.invoke)) {
     await item.invoke();
-  }
-  // Unhandled command:
-  // 1. attempt to treat as a calculation
-  // 2. defer to the fallback handler, if it exists
-  else if (item.isUnhandled) {
+  } else if (item.isUnhandled) {
     console.warn(`Unhandled command: ${item.query}`);
-
-    // Attempt to calculate
     const calculated = calculate(item.query);
     if (didCalculate(calculated)) {
       result = String(calculated);
-      await showCalculationResultDialog(item.query);
-    }
-    // Execute default handler
-    else {
-      const commandFilename = getCommandFilename$1("fallback-handler.js");
-
+      await showCalculationResultDialog(item.query, result);
+    } else {
+      const commandFilename = getCommandFilename2("fallback-handler.js");
       try {
-        const fallbackHandler = require(commandFilename);
-
-        const result = fallbackHandler.call(
+        const fallbackHandler = require2(commandFilename);
+        const resultFromFallback = fallbackHandler.call(
           commandContext,
           selection,
           item.query
         );
-
-        if (!_.isUndefined(result)) {
-          result = processInvokeScriptResult(result);
+        if (!_11.isUndefined(resultFromFallback)) {
+          result = processInvokeScriptResult(resultFromFallback);
         }
       } catch (e) {
         console.error(`Failed to execute ${commandFilename}`, e);
       }
     }
-  }
-  // Execute custom module-based command
-  else {
-    const commandFilename = getCommandFilename$1(item.value);
-
+  } else {
+    const commandFilename = getCommandFilename2(item.value);
     result = await invokeScript(commandFilename, selection);
   }
-
-  if (result && _.isString(result)) {
+  if (result && _11.isString(result)) {
     console.log(`Result: ${result}`);
-    // Update to reflect the command execution result
     await setClipboardContent(stripKeystrokes(result));
-
     if (result.endsWith(ENTER)) {
-      await pressEnter();
+      await pressEnter_default();
     }
-
     return true;
-  } else if (result && _.isObject(result) && "shortcut" in result) {
+  } else if (result && _11.isObject(result) && "shortcut" in result) {
     const { shortcut, input } = result;
     try {
-      await execaSync("shortcuts", ["run", shortcut, "-i", input]);
+      await execaSync2("shortcuts", ["run", shortcut, "-i", input]);
     } catch (error) {
       console.error(`Failed to run shortcut: ${error.message}`);
     }
   }
-
   return false;
 };
 
-const SOCKET_FILE = "/tmp/meta-x.socket";
-
-const createServer = (socket, onMessage) => {
-  const server = net
-    .createServer((stream) => {
-      stream.on("data", (buffer) => {
-        const message = buffer.toString();
-        try {
-          onMessage(message);
-        } catch (error) {
-          console.error(
-            `Error encountered while handling message "${message}"`,
-            error
-          );
-        }
-      });
-    })
-    .listen(socket);
-
+// src/bridge.mjs
+import net from "node:net";
+import fs7 from "node:fs";
+var SOCKET_FILE = "/tmp/meta-x.socket";
+var createServer = (socket, onMessage) => {
+  const server = net.createServer((stream) => {
+    stream.on("data", (buffer) => {
+      const message = buffer.toString();
+      try {
+        onMessage(message);
+      } catch (error) {
+        console.error(
+          `Error encountered while handling message "${message}"`,
+          error
+        );
+      }
+    });
+  }).listen(socket);
   return server;
 };
-
-const listen = (onMessage) => {
-  // Remove any stale socket file
-  const lockExists = fs.existsSync(SOCKET_FILE);
+var listen = (onMessage) => {
+  const lockExists = fs7.existsSync(SOCKET_FILE);
   if (lockExists) {
-    fs.unlinkSync(SOCKET_FILE);
+    fs7.unlinkSync(SOCKET_FILE);
   }
-
   const server = createServer(SOCKET_FILE, onMessage);
-
   const cleanup = () => {
     server.close();
     process.exit(0);
   };
-
   process.on("SIGINT", cleanup);
 };
 
-const rebuildCatalog = () => {
+// src/state/rebuildCatalog.mjs
+var rebuildCatalog = () => {
   console.log("Rebuilding commands catalog...");
   setCommandsCatalog(getAllCommands());
 };
 
-const spinner = ora({
+// src/runner.mjs
+var spinner = ora({
   text: "Ready",
   interval: 500,
-  spinner: "dots",
+  spinner: "dots"
 });
-
-const run = async () => {
+var run = async () => {
   spinner.stop();
-
   try {
     console.log("Meta-x triggered");
-
-    await prepareClipboard();
-    const result = await showPrompt();
+    await prepare_default();
+    const result = await main_default();
     if (result) {
-      await finishClipboard();
+      await finish_default();
     }
   } catch (error) {
     console.error(error);
-
     notifier.notify({
       title: "META-x",
-      message: "META-x encountered an error: " + error.message,
+      message: "META-x encountered an error: " + error.message
     });
   }
-
   spinner.start();
 };
-
 rebuildCatalog();
-
 setInterval(() => {
   spinner.stop();
   rebuildCatalog();
   spinner.start();
-}, 1000 * 60);
-
+}, 1e3 * 60);
 listen((message) => {
   if (message.trim() === "run") {
     run();
@@ -773,10 +738,8 @@ listen((message) => {
     console.log(`Unknown message: "${message}"`);
   }
 });
-
 notifier.notify({
   title: "META-x",
-  message: "META-x is ready",
+  message: "META-x is ready"
 });
-
 spinner.start();

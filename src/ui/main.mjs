@@ -65,14 +65,14 @@ export default async () => {
       try {
         const fallbackHandler = require(commandFilename);
 
-        const result = fallbackHandler.call(
+        const resultFromFallback = fallbackHandler.call(
           commandContext,
           selection,
           item.query
         );
 
-        if (!_.isUndefined(result)) {
-          result = processInvokeScriptResult(result);
+        if (!_.isUndefined(resultFromFallback)) {
+          result = processInvokeScriptResult(resultFromFallback);
         }
       } catch (e) {
         console.error(`Failed to execute ${commandFilename}`, e);
