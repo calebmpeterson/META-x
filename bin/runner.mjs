@@ -156,7 +156,7 @@ const getConfigDir = () => path$1.join(os.homedir(), ".meta-x");
 
 const getConfigPath = (filename) => path.join(getConfigDir(), filename);
 
-const createScriptContext = (commandFilename) => {
+const createScriptContext = (commandFilename, selection) => {
   const require = createRequire(commandFilename);
 
   const ENV = {};
@@ -220,7 +220,7 @@ const invokeScript = async (commandFilename, selection) => {
   const ENV = {};
   dotenv.config({ path: getConfigPath(".env"), processEnv: ENV });
 
-  const commandContext = createScriptContext(commandFilename);
+  const commandContext = createScriptContext(commandFilename, selection);
 
   try {
     const commandSource = fs.readFileSync(commandFilename, "utf8");
@@ -660,7 +660,7 @@ var showPrompt = async () => {
   else {
     const commandFilename = getCommandFilename$1(item.value);
 
-    result = await invokeScript(commandFilename);
+    result = await invokeScript(commandFilename, selection);
   }
 
   if (result && _.isString(result)) {

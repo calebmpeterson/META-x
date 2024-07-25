@@ -22,7 +22,7 @@ export const invokeScript = async (commandFilename, selection) => {
   const ENV = {};
   dotenv.config({ path: getConfigPath(".env"), processEnv: ENV });
 
-  const commandContext = createScriptContext(commandFilename);
+  const commandContext = createScriptContext(commandFilename, selection);
 
   try {
     const commandSource = fs.readFileSync(commandFilename, "utf8");

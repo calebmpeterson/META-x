@@ -8,7 +8,7 @@ import { getConfigPath } from "./getConfigPath.mjs";
 import { execa, $ } from "execa";
 import { runAppleScript } from "run-applescript";
 
-export const createScriptContext = (commandFilename) => {
+export const createScriptContext = (commandFilename, selection) => {
   const require = createRequire(commandFilename);
 
   const ENV = {};
