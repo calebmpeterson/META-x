@@ -8,14 +8,14 @@ import {
   setClipboardContent,
 } from "../clipboard/utils.mjs";
 import { calculate, didCalculate } from "../utils/calculate.mjs";
-import { stripKeystrokes } from "../utils/stripKeystrokes.mjs";
-import { ENTER } from "../keystrokes/constants.mjs";
+import { stripKeystrokes } from "../utils/stripKeystrokes";
+import { ENTER } from "../keystrokes/constants";
 import pressEnter from "../keystrokes/pressEnter.mjs";
 import { invokeScript } from "../utils/invokeScript.mjs";
 import { processInvokeScriptResult } from "../utils/processInvokeScriptResult.mjs";
 import { showCalculationResultDialog } from "../utils/showCalculationResultDialog.mjs";
 import { getCommandsCatalog } from "../state/commands.mjs";
-import { getCommandFilename } from "../utils/getAllCommands.mjs";
+import { getCommandFilename } from "../utils/getCommandFilename";
 
 export default async () => {
   const selection = await getCurrentSelection();

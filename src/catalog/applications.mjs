@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import _ from "lodash";
 import { openApp } from "open";
-import { getConfigDir } from "../utils/getConfigDir.mjs";
+import { getConfigDir } from "../utils/getConfigDir";
 import { APPLICATION_PREFIX } from "./_constants.mjs";
 
 const getApplicationUsageHistory = () =>

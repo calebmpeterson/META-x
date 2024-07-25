@@ -39,9 +39,9 @@ var darwin_default2 = async () => {
 var finish_default = () => process.platform === "darwin" ? darwin_default2() : Promise.resolve();
 
 // src/ui/main.mjs
-import _11 from "lodash";
-import { createRequire as createRequire4 } from "module";
-import open4 from "open";
+import _7 from "lodash";
+import { createRequire as createRequire3 } from "module";
+import open2 from "open";
 
 // src/ui/prompt/darwin.mjs
 import { exec } from "child_process";
@@ -97,7 +97,7 @@ var linux_default = (commands) => new Promise((resolve, reject) => {
 var prompt_default = (...args) => process.platform === "darwin" ? darwin_default3(...args) : linux_default(...args);
 
 // src/ui/main.mjs
-import { execaSync as execaSync2 } from "execa";
+import { execaSync } from "execa";
 
 // src/clipboard/utils.mjs
 import _3 from "lodash";
@@ -129,10 +129,10 @@ var calculate = (input) => {
 };
 var didCalculate = (result) => result !== INCALCULABLE;
 
-// src/keystrokes/constants.mjs
+// src/keystrokes/constants.ts
 var ENTER = "{ENTER}";
 
-// src/utils/stripKeystrokes.mjs
+// src/utils/stripKeystrokes.ts
 var stripKeystrokes = (text) => text.endsWith(ENTER) ? text.slice(0, -ENTER.length) : text;
 
 // src/keystrokes/pressEnter.mjs
@@ -152,25 +152,25 @@ import fs from "node:fs";
 import vm2 from "node:vm";
 import { createRequire as createRequire2 } from "module";
 
-// src/utils/createScriptContext.mjs
+// src/utils/createScriptContext.ts
 import { createRequire } from "module";
 import _4 from "lodash";
 import open from "open";
 import dotenv from "dotenv";
 import axios from "axios";
 
-// src/utils/getConfigPath.mjs
+// src/utils/getConfigPath.ts
 import * as path2 from "node:path";
 
-// src/utils/getConfigDir.mjs
+// src/utils/getConfigDir.ts
 import os from "os";
 import path from "path";
 var getConfigDir = () => path.join(os.homedir(), ".meta-x");
 
-// src/utils/getConfigPath.mjs
+// src/utils/getConfigPath.ts
 var getConfigPath = (filename) => path2.join(getConfigDir(), filename);
 
-// src/utils/createScriptContext.mjs
+// src/utils/createScriptContext.ts
 import { execa, $ } from "execa";
 import { runAppleScript } from "run-applescript";
 var createScriptContext = (commandFilename, selection) => {
@@ -204,15 +204,17 @@ var processInvokeScriptResult = (result) => _5.isArray(result) || _5.isObject(re
 // src/utils/showCommandErrorDialog.mjs
 import cocoaDialog from "cocoa-dialog";
 
-// src/utils/editScript.mjs
+// src/utils/editScript.ts
 import { execa as execa2 } from "execa";
 
-// src/utils/getPathnameWithExtension.mjs
+// src/utils/getPathnameWithExtension.ts
 var getPathnameWithExtension = (pathname) => pathname.endsWith(".js") ? pathname : `${pathname}.js`;
 
-// src/utils/editScript.mjs
+// src/utils/editScript.ts
 var editScript = async (pathname) => {
-  await execa2(process.env.EDITOR, [getPathnameWithExtension(pathname)]);
+  if (process.env.EDITOR) {
+    await execa2(process.env.EDITOR, [getPathnameWithExtension(pathname)]);
+  }
 };
 
 // src/utils/showCommandErrorDialog.mjs
@@ -276,13 +278,111 @@ var setCommandsCatalog = (newCommandsState) => {
   commandsState = newCommandsState;
 };
 
+// src/utils/getCommandFilename.ts
+import path4 from "node:path";
+var getCommandFilename2 = (commandFilename) => path4.join(getConfigDir(), commandFilename);
+
+// src/ui/main.mjs
+var main_default = async () => {
+  const selection = await getCurrentSelection();
+  const commands = getCommandsCatalog();
+  const item = await prompt_default(commands);
+  let result;
+  const require2 = createRequire3(import.meta.url);
+  Object.assign(global, { open: open2, require: require2 });
+  const commandContext = {
+    open: open2,
+    ENTER
+  };
+  if (item.isUnknown) {
+    console.warn(`Unknown command`);
+  } else if (_7.isFunction(item.value)) {
+    result = item.value(selection);
+  } else if (_7.isFunction(item.invoke)) {
+    await item.invoke();
+  } else if (item.isUnhandled) {
+    console.warn(`Unhandled command: ${item.query}`);
+    const calculated = calculate(item.query);
+    if (didCalculate(calculated)) {
+      result = String(calculated);
+      await showCalculationResultDialog(item.query, result);
+    } else {
+      const commandFilename = getCommandFilename2("fallback-handler.js");
+      try {
+        const fallbackHandler = require2(commandFilename);
+        const resultFromFallback = fallbackHandler.call(
+          commandContext,
+          selection,
+          item.query
+        );
+        if (!_7.isUndefined(resultFromFallback)) {
+          result = processInvokeScriptResult(resultFromFallback);
+        }
+      } catch (e) {
+        console.error(`Failed to execute ${commandFilename}`, e);
+      }
+    }
+  } else {
+    const commandFilename = getCommandFilename2(item.value);
+    result = await invokeScript(commandFilename, selection);
+  }
+  if (result && _7.isString(result)) {
+    console.log(`Result: ${result}`);
+    await setClipboardContent(stripKeystrokes(result));
+    if (result.endsWith(ENTER)) {
+      await pressEnter_default();
+    }
+    return true;
+  } else if (result && _7.isObject(result) && "shortcut" in result) {
+    const { shortcut, input } = result;
+    try {
+      await execaSync("shortcuts", ["run", shortcut, "-i", input]);
+    } catch (error) {
+      console.error(`Failed to run shortcut: ${error.message}`);
+    }
+  }
+  return false;
+};
+
+// src/bridge.mjs
+import net from "node:net";
+import fs2 from "node:fs";
+var SOCKET_FILE = "/tmp/meta-x.socket";
+var createServer = (socket, onMessage) => {
+  const server = net.createServer((stream) => {
+    stream.on("data", (buffer) => {
+      const message = buffer.toString();
+      try {
+        onMessage(message);
+      } catch (error) {
+        console.error(
+          `Error encountered while handling message "${message}"`,
+          error
+        );
+      }
+    });
+  }).listen(socket);
+  return server;
+};
+var listen = (onMessage) => {
+  const lockExists = fs2.existsSync(SOCKET_FILE);
+  if (lockExists) {
+    fs2.unlinkSync(SOCKET_FILE);
+  }
+  const server = createServer(SOCKET_FILE, onMessage);
+  const cleanup = () => {
+    server.close();
+    process.exit(0);
+  };
+  process.on("SIGINT", cleanup);
+};
+
 // src/utils/getAllCommands.mjs
-import path8 from "path";
-import _10 from "lodash";
-import { createRequire as createRequire3 } from "module";
+import _11 from "lodash";
+import { createRequire as createRequire4 } from "module";
 
 // src/catalog/built-ins.mjs
-import _7 from "lodash";
+import _8 from "lodash";
 
 // src/catalog/_constants.mjs
 var SCRIPT_PREFIX = "\u0192\u0578";
@@ -294,16 +394,16 @@ var SHORTCUT_PREFIX = "\u2318";
 
 // src/catalog/built-ins.mjs
 var BUILT_IN_COMMANDS = {
-  "to-upper": _7.toUpper,
-  "to-lower": _7.toLower,
-  "camel-case": _7.camelCase,
-  capitalize: _7.capitalize,
-  "kebab-case": _7.kebabCase,
-  "snake-case": _7.snakeCase,
-  "start-case": _7.startCase,
-  deburr: _7.deburr
+  "to-upper": _8.toUpper,
+  "to-lower": _8.toLower,
+  "camel-case": _8.camelCase,
+  capitalize: _8.capitalize,
+  "kebab-case": _8.kebabCase,
+  "snake-case": _8.snakeCase,
+  "start-case": _8.startCase,
+  deburr: _8.deburr
 };
-var getBuiltInCommands = () => _7.map(BUILT_IN_COMMANDS, (command, name) => ({
+var getBuiltInCommands = () => _8.map(BUILT_IN_COMMANDS, (command, name) => ({
   label: name,
   title: `${SCRIPT_PREFIX} ${name}`,
   value: command
@@ -311,41 +411,41 @@ var getBuiltInCommands = () => _7.map(BUILT_IN_COMMANDS, (command, name) => ({
 
 // src/catalog/folders.mjs
 import os3 from "os";
-import path4 from "path";
-import open2 from "open";
+import path5 from "path";
+import open3 from "open";
 var getFolders = () => ["Applications", "Documents", "Downloads", "Home", "Pictures"].map(
   (folder) => ({
     title: `${FOLDER_PREFIX} ${folder}`,
     value: folder,
     invoke: async () => {
       if (folder === "Applications") {
-        await open2("/Applications");
+        await open3("/Applications");
       } else if (folder === "Home") {
-        await open2(os3.homedir());
+        await open3(os3.homedir());
       } else {
-        const dirname = path4.join(os3.homedir(), folder);
-        await open2(dirname);
+        const dirname = path5.join(os3.homedir(), folder);
+        await open3(dirname);
       }
     }
   })
 );
 
 // src/catalog/applications.mjs
-import fs2 from "fs";
-import path5 from "path";
-import _8 from "lodash";
+import fs3 from "fs";
+import path6 from "path";
+import _9 from "lodash";
 import { openApp } from "open";
-var getApplicationUsageHistory = () => path5.join(getConfigDir(), ".application-usage");
+var getApplicationUsageHistory = () => path6.join(getConfigDir(), ".application-usage");
 var persistApplicationUsage = (values) => {
-  fs2.writeFileSync(
+  fs3.writeFileSync(
     getApplicationUsageHistory(),
-    _8.takeRight(values, 100).join("\n"),
+    _9.takeRight(values, 100).join("\n"),
     "utf8"
   );
 };
 var restoreApplicationUsage = () => {
   try {
-    return fs2.readFileSync(getApplicationUsageHistory(), "utf8").split("\n");
+    return fs3.readFileSync(getApplicationUsageHistory(), "utf8").split("\n");
   } catch {
     return [];
   }
@@ -356,25 +456,25 @@ var trackApplicationUsage = (value) => {
 };
 var getApplications = (rootDir = "/Applications") => {
   const history = restoreApplicationUsage();
-  const scores = _8.countBy(history, _8.identity);
-  const applications = fs2.readdirSync(rootDir).filter((filename) => {
-    const pathname = path5.join(rootDir, filename);
-    const stats = fs2.statSync(pathname);
+  const scores = _9.countBy(history, _9.identity);
+  const applications = fs3.readdirSync(rootDir).filter((filename) => {
+    const pathname = path6.join(rootDir, filename);
+    const stats = fs3.statSync(pathname);
     if (stats.isDirectory() && !filename.endsWith(".app")) {
       return false;
     }
     try {
-      fs2.accessSync(pathname, fs2.constants.X_OK);
+      fs3.accessSync(pathname, fs3.constants.X_OK);
       return true;
     } catch {
       return false;
     }
   }).filter((filename) => !filename.startsWith("."));
   const items = applications.map((application) => {
-    const value = path5.join(rootDir, application);
+    const value = path6.join(rootDir, application);
     return {
-      title: `${APPLICATION_PREFIX} ${_8.get(
-        path5.parse(application),
+      title: `${APPLICATION_PREFIX} ${_9.get(
+        path6.parse(application),
         "name",
         application
       )}`,
@@ -391,17 +491,17 @@ var getApplications = (rootDir = "/Applications") => {
 };
 
 // src/catalog/system-preferences.mjs
-import fs3 from "node:fs";
-import path6 from "node:path";
-import open3 from "open";
+import fs4 from "node:fs";
+import path7 from "node:path";
+import open4 from "open";
 var PREFERENCE_PANE_ROOT_DIR = "/System/Library/PreferencePanes";
-var getPreferencePanes = () => fs3.readdirSync(PREFERENCE_PANE_ROOT_DIR).map((filename) => path6.parse(filename).name);
+var getPreferencePanes = () => fs4.readdirSync(PREFERENCE_PANE_ROOT_DIR).map((filename) => path7.parse(filename).name);
 var getPane = (pane) => `${PREFERENCE_PANE_ROOT_DIR}/${pane}.prefPane`;
 var getSystemPreferences = () => getPreferencePanes().map((pane) => ({
   title: `${SYSTEM_PREFIX} ${pane}`,
   value: pane,
   invoke: async () => {
-    await open3(getPane(pane));
+    await open4(getPane(pane));
   }
 }));
 
@@ -442,10 +542,10 @@ var getSystemCommands = () => [
 
 // src/catalog/manage-scripts.mjs
 import cocoaDialog2 from "cocoa-dialog";
-import _9 from "lodash";
+import _10 from "lodash";
 
 // src/utils/createEmptyScript.mjs
-import fs4 from "node:fs";
+import fs5 from "node:fs";
 var TEMPLATE = `
 module.exports = (selection) => {
   // \`this\` is bound to the Command Context. API documentation can be
@@ -460,13 +560,13 @@ module.exports = (selection) => {
 `.trim();
 var createEmptyScript = (pathname) => {
   const nameWithExtension = getPathnameWithExtension(pathname);
-  if (!fs4.existsSync(nameWithExtension)) {
-    fs4.writeFileSync(nameWithExtension, TEMPLATE, "utf8");
+  if (!fs5.existsSync(nameWithExtension)) {
+    fs5.writeFileSync(nameWithExtension, TEMPLATE, "utf8");
   }
 };
 
-// src/utils/ensureEmptyFallbackHandler.mjs
-import fs5 from "node:fs";
+// src/utils/ensureEmptyFallbackHandler.ts
+import fs6 from "node:fs";
 var TEMPLATE2 = `
 module.exports = function (selection, query) {
   // Do something with the currently selected
@@ -479,9 +579,9 @@ module.exports.suggestions = function () {
 };
 `.trim();
 var ensureEmptyFallbackHandler = () => {
-  const fallbackHandlerFilename = getCommandFilename("fallback-handler.js");
-  if (!fs5.existsSync(fallbackHandlerFilename)) {
-    fs5.writeFileSync(fallbackHandlerFilename, TEMPLATE2, "utf8");
+  const fallbackHandlerFilename = getCommandFilename2("fallback-handler.js");
+  if (!fs6.existsSync(fallbackHandlerFilename)) {
+    fs6.writeFileSync(fallbackHandlerFilename, TEMPLATE2, "utf8");
   }
 };
 
@@ -494,7 +594,7 @@ var getManageScriptCommands = () => [
         title: "Save Script As...",
         withDirectory: getConfigDir()
       });
-      if (!_9.isEmpty(result)) {
+      if (!_10.isEmpty(result)) {
         createEmptyScript(result);
         await editScript(result);
       }
@@ -507,7 +607,7 @@ var getManageScriptCommands = () => [
         title: "Choose Script To Edit...",
         withDirectory: getConfigDir()
       });
-      if (!_9.isEmpty(result)) {
+      if (!_10.isEmpty(result)) {
         await editScript(result);
       }
     }
@@ -523,25 +623,25 @@ var getManageScriptCommands = () => [
 ];
 
 // src/catalog/scripts.mjs
-import fs6 from "fs";
-import path7 from "path";
-var getScriptCommands = () => fs6.readdirSync(getConfigDir()).filter(
+import fs7 from "fs";
+import path8 from "path";
+var getScriptCommands = () => fs7.readdirSync(getConfigDir()).filter(
   (file) => file.endsWith(".js") && !file.includes("fallback-handler")
 ).map((command) => ({
-  title: `${SCRIPT_PREFIX} ${path7.basename(command, ".js")}`,
+  title: `${SCRIPT_PREFIX} ${path8.basename(command, ".js")}`,
   value: command
 }));
 
 // src/catalog/shortcuts.mjs
-import { execaSync } from "execa";
+import { execaSync as execaSync2 } from "execa";
 var getShortcuts = () => {
   try {
-    const shortcuts = execaSync("shortcuts", ["list"]).stdout.split("\n").filter(Boolean).map((shortcut) => {
+    const shortcuts = execaSync2("shortcuts", ["list"]).stdout.split("\n").filter(Boolean).map((shortcut) => {
       return {
         title: `${SHORTCUT_PREFIX} ${shortcut}`,
         invoke: async () => {
           try {
-            await execaSync("shortcuts", ["run", shortcut]);
+            await execaSync2("shortcuts", ["run", shortcut]);
           } catch (error) {
             console.error(`Failed to run shortcut: ${error.message}`);
           }
@@ -556,11 +656,10 @@ var getShortcuts = () => {
 };
 
 // src/utils/getAllCommands.mjs
-var getCommandFilename2 = (commandFilename) => path8.join(getConfigDir(), commandFilename);
 var getCommandsFromFallbackHandler = () => {
   const commandFilename = getCommandFilename2("fallback-handler.js");
   try {
-    const require2 = createRequire3(import.meta.url);
+    const require2 = createRequire4(import.meta.url);
     const fallbackHandler = require2(commandFilename);
     const fallbackCommands = fallbackHandler.suggestions && fallbackHandler.suggestions.call();
     return fallbackCommands.map((fallbackCommand) => ({
@@ -578,14 +677,14 @@ var commandComparator = ({ title }) => title;
 var applicationComparator = ({ score }) => -score;
 var getAllCommands = clock("getAllCommands", () => {
   const allCommands = [
-    ..._10.sortBy(
+    ..._11.sortBy(
       [...getScriptCommands(), ...getBuiltInCommands()],
       commandComparator
     ),
     ...getManageScriptCommands(),
     ...getFolders(),
     ...getShortcuts(),
-    ..._10.chain([
+    ..._11.chain([
       // Applications can live in multiple locations on macOS
       // Source: https://unix.stackexchange.com/a/583843
       ...getApplications("/Applications"),
@@ -599,101 +698,6 @@ var getAllCommands = clock("getAllCommands", () => {
   ];
   return allCommands;
 });
-
-// src/ui/main.mjs
-var main_default = async () => {
-  const selection = await getCurrentSelection();
-  const commands = getCommandsCatalog();
-  const item = await prompt_default(commands);
-  let result;
-  const require2 = createRequire4(import.meta.url);
-  Object.assign(global, { open: open4, require: require2 });
-  const commandContext = {
-    open: open4,
-    ENTER
-  };
-  if (item.isUnknown) {
-    console.warn(`Unknown command`);
-  } else if (_11.isFunction(item.value)) {
-    result = item.value(selection);
-  } else if (_11.isFunction(item.invoke)) {
-    await item.invoke();
-  } else if (item.isUnhandled) {
-    console.warn(`Unhandled command: ${item.query}`);
-    const calculated = calculate(item.query);
-    if (didCalculate(calculated)) {
-      result = String(calculated);
-      await showCalculationResultDialog(item.query, result);
-    } else {
-      const commandFilename = getCommandFilename2("fallback-handler.js");
-      try {
-        const fallbackHandler = require2(commandFilename);
-        const resultFromFallback = fallbackHandler.call(
-          commandContext,
-          selection,
-          item.query
-        );
-        if (!_11.isUndefined(resultFromFallback)) {
-          result = processInvokeScriptResult(resultFromFallback);
-        }
-      } catch (e) {
-        console.error(`Failed to execute ${commandFilename}`, e);
-      }
-    }
-  } else {
-    const commandFilename = getCommandFilename2(item.value);
-    result = await invokeScript(commandFilename, selection);
-  }
-  if (result && _11.isString(result)) {
-    console.log(`Result: ${result}`);
-    await setClipboardContent(stripKeystrokes(result));
-    if (result.endsWith(ENTER)) {
-      await pressEnter_default();
-    }
-    return true;
-  } else if (result && _11.isObject(result) && "shortcut" in result) {
-    const { shortcut, input } = result;
-    try {
-      await execaSync2("shortcuts", ["run", shortcut, "-i", input]);
-    } catch (error) {
-      console.error(`Failed to run shortcut: ${error.message}`);
-    }
-  }
-  return false;
-};
-
-// src/bridge.mjs
-import net from "node:net";
-import fs7 from "node:fs";
-var SOCKET_FILE = "/tmp/meta-x.socket";
-var createServer = (socket, onMessage) => {
-  const server = net.createServer((stream) => {
-    stream.on("data", (buffer) => {
-      const message = buffer.toString();
-      try {
-        onMessage(message);
-      } catch (error) {
-        console.error(
-          `Error encountered while handling message "${message}"`,
-          error
-        );
-      }
-    });
-  }).listen(socket);
-  return server;
-};
-var listen = (onMessage) => {
-  const lockExists = fs7.existsSync(SOCKET_FILE);
-  if (lockExists) {
-    fs7.unlinkSync(SOCKET_FILE);
-  }
-  const server = createServer(SOCKET_FILE, onMessage);
-  const cleanup = () => {
-    server.close();
-    process.exit(0);
-  };
-  process.on("SIGINT", cleanup);
-};
 
 // src/state/rebuildCatalog.mjs
 var rebuildCatalog = () => {

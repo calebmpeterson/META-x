@@ -3,8 +3,8 @@ import dotenv from "dotenv";
 import fs from "node:fs";
 import vm from "node:vm";
 import { createRequire } from "module";
-import { createScriptContext } from "./createScriptContext.mjs";
-import { getConfigPath } from "./getConfigPath.mjs";
+import { createScriptContext } from "./createScriptContext";
+import { getConfigPath } from "./getConfigPath.js";
 import { processInvokeScriptResult } from "./processInvokeScriptResult.mjs";
 import { showCommandErrorDialog } from "./showCommandErrorDialog.mjs";
 

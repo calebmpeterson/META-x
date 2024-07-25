@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import { getPathnameWithExtension } from "./getPathnameWithExtension.mjs";
+import { getPathnameWithExtension } from "./getPathnameWithExtension.js";
 
 const TEMPLATE = `
 module.exports = (selection) => {

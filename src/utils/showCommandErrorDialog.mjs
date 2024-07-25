@@ -1,5 +1,5 @@
 import cocoaDialog from "cocoa-dialog";
-import { editScript } from "./editScript.mjs";
+import { editScript } from "./editScript.js";
 
 export const showCommandErrorDialog = async (commandFilename, error) => {
   const result = await cocoaDialog("msgbox", {

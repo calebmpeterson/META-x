@@ -3,12 +3,15 @@ import _ from "lodash";
 import open from "open";
 import dotenv from "dotenv";
 import axios from "axios";
-import { ENTER } from "../keystrokes/constants.mjs";
-import { getConfigPath } from "./getConfigPath.mjs";
+import { ENTER } from "../keystrokes/constants";
+import { getConfigPath } from "./getConfigPath.js";
 import { execa, $ } from "execa";
 import { runAppleScript } from "run-applescript";
 
-export const createScriptContext = (commandFilename, selection) => {
+export const createScriptContext = (
+  commandFilename: string,
+  selection: string
+) => {
   const require = createRequire(commandFilename);
 
   const ENV = {};

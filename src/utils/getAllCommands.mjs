@@ -1,4 +1,3 @@
-import path from "path";
 import _ from "lodash";
 import { createRequire } from "module";
 import { getBuiltInCommands } from "../catalog/built-ins.mjs";
@@ -6,14 +5,11 @@ import { getFolders } from "../catalog/folders.mjs";
 import { getApplications } from "../catalog/applications.mjs";
 import { getSystemPreferences } from "../catalog/system-preferences.mjs";
 import { getSystemCommands } from "../catalog/system.mjs";
-import { getConfigDir } from "./getConfigDir.mjs";
 import { getManageScriptCommands } from "../catalog/manage-scripts.mjs";
 import { getScriptCommands } from "../catalog/scripts.mjs";
 import { getShortcuts } from "../catalog/shortcuts.mjs";
 import { clock } from "./clock.mjs";
-
-export const getCommandFilename = (commandFilename) =>
-  path.join(getConfigDir(), commandFilename);
+import { getCommandFilename } from "./getCommandFilename";
 
 const getCommandsFromFallbackHandler = () => {
   const commandFilename = getCommandFilename("fallback-handler.js");

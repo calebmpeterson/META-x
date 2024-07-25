@@ -10,17 +10,21 @@
     "dev": "cross-env NODE_ENV=development node --cpu-prof src/runner.mjs",
     "start": "cross-env NODE_ENV=production node bin/runner.mjs",
     "launch": "./bin/launch",
+    "typecheck:runner": "tsc --noEmit",
     "build:runner": "esbuild src/runner.mjs --bundle --platform=node --format=esm --outfile=bin/runner.mjs --packages=external",
-    "build": "yarn build:runner",
+    "build": "yarn typecheck:runner && yarn build:runner",
     "docs:build": "node scripts/build-docs.mjs",
     "postinstall": "yarn build",
     "tail-logs": "tail -f /tmp/skhd_$USER.out.log",
     "tail-errors": "tail -f /tmp/skhd_$USER.err.log"
   },
   "devDependencies": {
+    "@types/lodash": "^4.17.7",
+    "@types/node": "^20.14.12",
     "cross-env": "^7.0.2",
     "esbuild": "^0.23.0",
-    "showdown": "^1.9.1"
+    "showdown": "^1.9.1",
+    "typescript": "^5.5.4"
   },
   "dependencies": {
     "@nut-tree/nut-js": "^3.1.2",
