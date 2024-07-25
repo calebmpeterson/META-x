@@ -1,15 +1,12 @@
-import { createRequire } from "module";
+import _ from "lodash";
+import dotenv from "dotenv";
 import fs from "node:fs";
 import vm from "node:vm";
-import _ from "lodash";
-import open from "open";
-import dotenv from "dotenv";
-import axios from "axios";
-import { ENTER } from "../keystrokes/constants.mjs";
-import { showCommandErrorDialog } from "./showCommandErrorDialog.mjs";
+import { createRequire } from "module";
+import { createScriptContext } from "./createScriptContext.mjs";
 import { getConfigPath } from "./getConfigPath.mjs";
 import { processInvokeScriptResult } from "./processInvokeScriptResult.mjs";
-import { execa, $ } from "execa";
+import { showCommandErrorDialog } from "./showCommandErrorDialog.mjs";
 
 const wrapCommandSource = (commandSource) => `
 const module = {};
@@ -25,22 +22,7 @@ export const invokeScript = async (commandFilename, selection) => {
   const ENV = {};
   dotenv.config({ path: getConfigPath(".env"), processEnv: ENV });
 
-  const commandContext = {
-    _,
-    selection,
-    require,
-    console,
-    open,
-    get: axios.get,
-    post: axios.post,
-    put: axios.put,
-    patch: axios.patch,
-    delete: axios.delete,
-    ENV,
-    ENTER,
-    execa,
-    $,
-  };
+  const commandContext = createScriptContext(commandFilename);
 
   try {
     const commandSource = fs.readFileSync(commandFilename, "utf8");

@@ -117,6 +117,7 @@ The "command context" API includes:
 - [`open` API](https://www.npmjs.com/package/open) ↗
 - `get`/`put`/`post`/`patch`/`delete` methods from [`axios`](https://www.npmjs.com/package/axios#request-method-aliases) ↗
 - `$`/`execa` methods from [`execa`](https://www.npmjs.com/package/execa)
+- `osascript` method from ['run-applescript`](https://www.npmjs.com/package/run-applescript)
 - `ENV` which is loaded from the `~/.meta-x/.env` file if it exists
 
 #### Using NPM Packages

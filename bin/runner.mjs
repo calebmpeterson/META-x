@@ -8,14 +8,15 @@ import { exec } from 'child_process';
 import { execa, $, execaSync } from 'execa';
 import clipboard from 'clipboardy';
 import vm from 'node:vm';
-import fs from 'node:fs';
 import dotenv from 'dotenv';
+import fs from 'node:fs';
 import axios from 'axios';
-import cocoaDialog from 'cocoa-dialog';
 import * as path from 'node:path';
 import path__default from 'node:path';
 import os from 'os';
 import path$1 from 'path';
+import { runAppleScript } from 'run-applescript';
+import cocoaDialog from 'cocoa-dialog';
 import os$1 from 'node:os';
 import fs$1 from 'fs';
 import net from 'node:net';
@@ -151,42 +152,11 @@ var pressEnter = async () => {
   await keyboard.releaseKey(Key.Enter);
 };
 
-const getPathnameWithExtension = (pathname) =>
-  pathname.endsWith(".js") ? pathname : `${pathname}.js`;
-
-const editScript = async (pathname) => {
-  await execa(process.env.EDITOR, [getPathnameWithExtension(pathname)]);
-};
-
-const showCommandErrorDialog = async (commandFilename, error) => {
-  const result = await cocoaDialog("msgbox", {
-    title: `Error in ${commandFilename}`,
-    text: error.stack,
-    button1: "Edit",
-    button2: "Dismiss",
-  });
-
-  if (result === "1") {
-    await editScript(commandFilename);
-  }
-};
-
 const getConfigDir = () => path$1.join(os.homedir(), ".meta-x");
 
 const getConfigPath = (filename) => path.join(getConfigDir(), filename);
 
-const processInvokeScriptResult = (result) =>
-  _.isArray(result) || _.isObject(result) ? result : _.toString(result);
-
-const wrapCommandSource = (commandSource) => `
-const module = {};
-
-${commandSource};
-
-module.exports(selection);
-`;
-
-const invokeScript = async (commandFilename, selection) => {
+const createScriptContext = (commandFilename) => {
   const require = createRequire(commandFilename);
 
   const ENV = {};
@@ -207,7 +177,50 @@ const invokeScript = async (commandFilename, selection) => {
     ENTER,
     execa,
     $,
+    osascript: runAppleScript,
   };
+
+  return commandContext;
+};
+
+const processInvokeScriptResult = (result) =>
+  _.isArray(result) || _.isObject(result) ? result : _.toString(result);
+
+const getPathnameWithExtension = (pathname) =>
+  pathname.endsWith(".js") ? pathname : `${pathname}.js`;
+
+const editScript = async (pathname) => {
+  await execa(process.env.EDITOR, [getPathnameWithExtension(pathname)]);
+};
+
+const showCommandErrorDialog = async (commandFilename, error) => {
+  const result = await cocoaDialog("msgbox", {
+    title: `Error in ${commandFilename}`,
+    text: error.stack,
+    button1: "Edit",
+    button2: "Dismiss",
+  });
+
+  if (result === "1") {
+    await editScript(commandFilename);
+  }
+};
+
+const wrapCommandSource = (commandSource) => `
+const module = {};
+
+${commandSource};
+
+module.exports(selection);
+`;
+
+const invokeScript = async (commandFilename, selection) => {
+  createRequire(commandFilename);
+
+  const ENV = {};
+  dotenv.config({ path: getConfigPath(".env"), processEnv: ENV });
+
+  const commandContext = createScriptContext(commandFilename);
 
   try {
     const commandSource = fs.readFileSync(commandFilename, "utf8");
@@ -647,7 +660,7 @@ var showPrompt = async () => {
   else {
     const commandFilename = getCommandFilename$1(item.value);
 
-    result = await invokeScript(commandFilename, selection);
+    result = await invokeScript(commandFilename);
   }
 
   if (result && _.isString(result)) {
