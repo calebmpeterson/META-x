@@ -39,8 +39,8 @@ var darwin_default2 = async () => {
 var finish_default = () => process.platform === "darwin" ? darwin_default2() : Promise.resolve();
 
 // src/ui/main.mjs
-import _7 from "lodash";
-import { createRequire as createRequire3 } from "module";
+import _8 from "lodash";
+import { createRequire as createRequire2 } from "module";
 import open2 from "open";
 
 // src/ui/prompt/darwin.mjs
@@ -114,7 +114,7 @@ var exported = {
 };
 var { getCurrentSelection, setClipboardContent } = exported;
 
-// src/utils/calculate.mjs
+// src/utils/calculate.ts
 import vm from "node:vm";
 var INCALCULABLE = Symbol("incalculable");
 var calculate = (input) => {
@@ -145,12 +145,10 @@ var pressEnter_default = async () => {
   await keyboard3.releaseKey(Key3.Enter);
 };
 
-// src/utils/invokeScript.mjs
-import _6 from "lodash";
-import dotenv2 from "dotenv";
+// src/utils/invokeScript.ts
+import _7 from "lodash";
 import fs from "node:fs";
 import vm2 from "node:vm";
-import { createRequire as createRequire2 } from "module";
 
 // src/utils/createScriptContext.ts
 import { createRequire } from "module";
@@ -197,11 +195,11 @@ var createScriptContext = (commandFilename, selection) => {
   return commandContext;
 };
 
-// src/utils/processInvokeScriptResult.mjs
+// src/utils/processInvokeScriptResult.ts
 import _5 from "lodash";
 var processInvokeScriptResult = (result) => _5.isArray(result) || _5.isObject(result) ? result : _5.toString(result);
 
-// src/utils/showCommandErrorDialog.mjs
+// src/utils/showCommandErrorDialog.ts
 import cocoaDialog from "cocoa-dialog";
 
 // src/utils/editScript.ts
@@ -217,20 +215,23 @@ var editScript = async (pathname) => {
   }
 };
 
-// src/utils/showCommandErrorDialog.mjs
+// src/utils/showCommandErrorDialog.ts
+import _6 from "lodash";
 var showCommandErrorDialog = async (commandFilename, error) => {
-  const result = await cocoaDialog("msgbox", {
-    title: `Error in ${commandFilename}`,
-    text: error.stack,
-    button1: "Edit",
-    button2: "Dismiss"
-  });
-  if (result === "1") {
-    await editScript(commandFilename);
+  if (_6.isError(error)) {
+    const result = await cocoaDialog("msgbox", {
+      title: `Error in ${commandFilename}`,
+      text: error.stack,
+      button1: "Edit",
+      button2: "Dismiss"
+    });
+    if (result === "1") {
+      await editScript(commandFilename);
+    }
   }
 };
 
-// src/utils/invokeScript.mjs
+// src/utils/invokeScript.ts
 var wrapCommandSource = (commandSource) => `
 const module = {};
 
@@ -239,16 +240,13 @@ ${commandSource};
 module.exports(selection);
 `;
 var invokeScript = async (commandFilename, selection) => {
-  const require2 = createRequire2(commandFilename);
-  const ENV = {};
-  dotenv2.config({ path: getConfigPath(".env"), processEnv: ENV });
   const commandContext = createScriptContext(commandFilename, selection);
   try {
     const commandSource = fs.readFileSync(commandFilename, "utf8");
     const wrappedCommandSource = wrapCommandSource(commandSource);
     const commandScript = new vm2.Script(wrappedCommandSource);
     const result = await commandScript.runInNewContext(commandContext);
-    if (!_6.isUndefined(result)) {
+    if (!_7.isUndefined(result)) {
       return processInvokeScriptResult(result);
     }
   } catch (error) {
@@ -257,7 +255,7 @@ var invokeScript = async (commandFilename, selection) => {
   }
 };
 
-// src/utils/showCalculationResultDialog.mjs
+// src/utils/showCalculationResultDialog.ts
 import { execa as execa3 } from "execa";
 import os2 from "node:os";
 import path3 from "node:path";
@@ -288,7 +286,7 @@ var main_default = async () => {
   const commands = getCommandsCatalog();
   const item = await prompt_default(commands);
   let result;
-  const require2 = createRequire3(import.meta.url);
+  const require2 = createRequire2(import.meta.url);
   Object.assign(global, { open: open2, require: require2 });
   const commandContext = {
     open: open2,
@@ -296,9 +294,9 @@ var main_default = async () => {
   };
   if (item.isUnknown) {
     console.warn(`Unknown command`);
-  } else if (_7.isFunction(item.value)) {
+  } else if (_8.isFunction(item.value)) {
     result = item.value(selection);
-  } else if (_7.isFunction(item.invoke)) {
+  } else if (_8.isFunction(item.invoke)) {
     await item.invoke();
   } else if (item.isUnhandled) {
     console.warn(`Unhandled command: ${item.query}`);
@@ -315,7 +313,7 @@ var main_default = async () => {
           selection,
           item.query
         );
-        if (!_7.isUndefined(resultFromFallback)) {
+        if (!_8.isUndefined(resultFromFallback)) {
           result = processInvokeScriptResult(resultFromFallback);
         }
       } catch (e) {
@@ -326,14 +324,14 @@ var main_default = async () => {
     const commandFilename = getCommandFilename2(item.value);
     result = await invokeScript(commandFilename, selection);
   }
-  if (result && _7.isString(result)) {
+  if (result && _8.isString(result)) {
     console.log(`Result: ${result}`);
     await setClipboardContent(stripKeystrokes(result));
     if (result.endsWith(ENTER)) {
       await pressEnter_default();
     }
     return true;
-  } else if (result && _7.isObject(result) && "shortcut" in result) {
+  } else if (result && _8.isObject(result) && "shortcut" in result) {
     const { shortcut, input } = result;
     try {
       await execaSync("shortcuts", ["run", shortcut, "-i", input]);
@@ -378,11 +376,11 @@ var listen = (onMessage) => {
 };
 
 // src/utils/getAllCommands.mjs
-import _11 from "lodash";
-import { createRequire as createRequire4 } from "module";
+import _12 from "lodash";
+import { createRequire as createRequire3 } from "module";
 
 // src/catalog/built-ins.mjs
-import _8 from "lodash";
+import _9 from "lodash";
 
 // src/catalog/_constants.mjs
 var SCRIPT_PREFIX = "\u0192\u0578";
@@ -394,16 +392,16 @@ var SHORTCUT_PREFIX = "\u2318";
 
 // src/catalog/built-ins.mjs
 var BUILT_IN_COMMANDS = {
-  "to-upper": _8.toUpper,
-  "to-lower": _8.toLower,
-  "camel-case": _8.camelCase,
-  capitalize: _8.capitalize,
-  "kebab-case": _8.kebabCase,
-  "snake-case": _8.snakeCase,
-  "start-case": _8.startCase,
-  deburr: _8.deburr
+  "to-upper": _9.toUpper,
+  "to-lower": _9.toLower,
+  "camel-case": _9.camelCase,
+  capitalize: _9.capitalize,
+  "kebab-case": _9.kebabCase,
+  "snake-case": _9.snakeCase,
+  "start-case": _9.startCase,
+  deburr: _9.deburr
 };
-var getBuiltInCommands = () => _8.map(BUILT_IN_COMMANDS, (command, name) => ({
+var getBuiltInCommands = () => _9.map(BUILT_IN_COMMANDS, (command, name) => ({
   label: name,
   title: `${SCRIPT_PREFIX} ${name}`,
   value: command
@@ -433,13 +431,13 @@ var getFolders = () => ["Applications", "Documents", "Downloads", "Home", "Pictu
 // src/catalog/applications.mjs
 import fs3 from "fs";
 import path6 from "path";
-import _9 from "lodash";
+import _10 from "lodash";
 import { openApp } from "open";
 var getApplicationUsageHistory = () => path6.join(getConfigDir(), ".application-usage");
 var persistApplicationUsage = (values) => {
   fs3.writeFileSync(
     getApplicationUsageHistory(),
-    _9.takeRight(values, 100).join("\n"),
+    _10.takeRight(values, 100).join("\n"),
     "utf8"
   );
 };
@@ -456,7 +454,7 @@ var trackApplicationUsage = (value) => {
 };
 var getApplications = (rootDir = "/Applications") => {
   const history = restoreApplicationUsage();
-  const scores = _9.countBy(history, _9.identity);
+  const scores = _10.countBy(history, _10.identity);
   const applications = fs3.readdirSync(rootDir).filter((filename) => {
     const pathname = path6.join(rootDir, filename);
     const stats = fs3.statSync(pathname);
@@ -473,7 +471,7 @@ var getApplications = (rootDir = "/Applications") => {
   const items = applications.map((application) => {
     const value = path6.join(rootDir, application);
     return {
-      title: `${APPLICATION_PREFIX} ${_9.get(
+      title: `${APPLICATION_PREFIX} ${_10.get(
         path6.parse(application),
         "name",
         application
@@ -542,9 +540,9 @@ var getSystemCommands = () => [
 
 // src/catalog/manage-scripts.mjs
 import cocoaDialog2 from "cocoa-dialog";
-import _10 from "lodash";
+import _11 from "lodash";
 
-// src/utils/createEmptyScript.mjs
+// src/utils/createEmptyScript.ts
 import fs5 from "node:fs";
 var TEMPLATE = `
 module.exports = (selection) => {
@@ -594,7 +592,7 @@ var getManageScriptCommands = () => [
         title: "Save Script As...",
         withDirectory: getConfigDir()
       });
-      if (!_10.isEmpty(result)) {
+      if (!_11.isEmpty(result)) {
         createEmptyScript(result);
         await editScript(result);
       }
@@ -607,7 +605,7 @@ var getManageScriptCommands = () => [
         title: "Choose Script To Edit...",
         withDirectory: getConfigDir()
       });
-      if (!_10.isEmpty(result)) {
+      if (!_11.isEmpty(result)) {
         await editScript(result);
       }
     }
@@ -659,7 +657,7 @@ var getShortcuts = () => {
 var getCommandsFromFallbackHandler = () => {
   const commandFilename = getCommandFilename2("fallback-handler.js");
   try {
-    const require2 = createRequire4(import.meta.url);
+    const require2 = createRequire3(import.meta.url);
     const fallbackHandler = require2(commandFilename);
     const fallbackCommands = fallbackHandler.suggestions && fallbackHandler.suggestions.call();
     return fallbackCommands.map((fallbackCommand) => ({
@@ -677,14 +675,14 @@ var commandComparator = ({ title }) => title;
 var applicationComparator = ({ score }) => -score;
 var getAllCommands = clock("getAllCommands", () => {
   const allCommands = [
-    ..._11.sortBy(
+    ..._12.sortBy(
       [...getScriptCommands(), ...getBuiltInCommands()],
       commandComparator
     ),
     ...getManageScriptCommands(),
     ...getFolders(),
     ...getShortcuts(),
-    ..._11.chain([
+    ..._12.chain([
       // Applications can live in multiple locations on macOS
       // Source: https://unix.stackexchange.com/a/583843
       ...getApplications("/Applications"),

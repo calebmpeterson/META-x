@@ -7,13 +7,13 @@ import {
   getCurrentSelection,
   setClipboardContent,
 } from "../clipboard/utils.mjs";
-import { calculate, didCalculate } from "../utils/calculate.mjs";
+import { calculate, didCalculate } from "../utils/calculate";
 import { stripKeystrokes } from "../utils/stripKeystrokes";
 import { ENTER } from "../keystrokes/constants";
 import pressEnter from "../keystrokes/pressEnter.mjs";
-import { invokeScript } from "../utils/invokeScript.mjs";
-import { processInvokeScriptResult } from "../utils/processInvokeScriptResult.mjs";
-import { showCalculationResultDialog } from "../utils/showCalculationResultDialog.mjs";
+import { invokeScript } from "../utils/invokeScript.js";
+import { processInvokeScriptResult } from "../utils/processInvokeScriptResult";
+import { showCalculationResultDialog } from "../utils/showCalculationResultDialog";
 import { getCommandsCatalog } from "../state/commands.mjs";
 import { getCommandFilename } from "../utils/getCommandFilename";
 

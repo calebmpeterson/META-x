@@ -1,5 +1,5 @@
 import fs from "node:fs";
-import { getPathnameWithExtension } from "./getPathnameWithExtension.js";
+import { getPathnameWithExtension } from "./getPathnameWithExtension";
 
 const TEMPLATE = `
 module.exports = (selection) => {
@@ -14,7 +14,7 @@ module.exports = (selection) => {
 };
 `.trim();
 
-export const createEmptyScript = (pathname) => {
+export const createEmptyScript = (pathname: string) => {
   const nameWithExtension = getPathnameWithExtension(pathname);
 
   if (!fs.existsSync(nameWithExtension)) {

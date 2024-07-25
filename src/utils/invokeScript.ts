@@ -1,14 +1,11 @@
 import _ from "lodash";
-import dotenv from "dotenv";
 import fs from "node:fs";
 import vm from "node:vm";
-import { createRequire } from "module";
-import { createScriptContext } from "./createScriptContext";
-import { getConfigPath } from "./getConfigPath.js";
-import { processInvokeScriptResult } from "./processInvokeScriptResult.mjs";
-import { showCommandErrorDialog } from "./showCommandErrorDialog.mjs";
+import { createScriptContext } from "./createScriptContext.js";
+import { processInvokeScriptResult } from "./processInvokeScriptResult.js";
+import { showCommandErrorDialog } from "./showCommandErrorDialog";
 
-const wrapCommandSource = (commandSource) => `
+const wrapCommandSource = (commandSource: string) => `
 const module = {};
 
 ${commandSource};
@@ -16,12 +13,10 @@ ${commandSource};
 module.exports(selection);
 `;
 
-export const invokeScript = async (commandFilename, selection) => {
-  const require = createRequire(commandFilename);
-
-  const ENV = {};
-  dotenv.config({ path: getConfigPath(".env"), processEnv: ENV });
-
+export const invokeScript = async (
+  commandFilename: string,
+  selection: string
+) => {
   const commandContext = createScriptContext(commandFilename, selection);
 
   try {
@@ -36,7 +31,7 @@ export const invokeScript = async (commandFilename, selection) => {
     if (!_.isUndefined(result)) {
       return processInvokeScriptResult(result);
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(`Failed to execute ${commandFilename}`, error);
     await showCommandErrorDialog(commandFilename, error);
   }

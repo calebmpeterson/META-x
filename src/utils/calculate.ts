@@ -2,7 +2,7 @@ import vm from "node:vm";
 
 const INCALCULABLE = Symbol("incalculable");
 
-export const calculate = (input) => {
+export const calculate = (input: string) => {
   try {
     const script = new vm.Script(input);
     const result = script.runInNewContext();
@@ -13,4 +13,4 @@ export const calculate = (input) => {
   }
 };
 
-export const didCalculate = (result) => result !== INCALCULABLE;
+export const didCalculate = (result: unknown) => result !== INCALCULABLE;

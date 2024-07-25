@@ -1,6 +1,6 @@
 import cocoaDialog from "cocoa-dialog";
 import _ from "lodash";
-import { createEmptyScript } from "../utils/createEmptyScript.mjs";
+import { createEmptyScript } from "../utils/createEmptyScript.js";
 import { getConfigDir } from "../utils/getConfigDir";
 import { editScript } from "../utils/editScript.js";
 import { ensureEmptyFallbackHandler } from "../utils/ensureEmptyFallbackHandler";

@@ -2,7 +2,10 @@ import { execa } from "execa";
 import os from "node:os";
 import path from "node:path";
 
-export const showCalculationResultDialog = async (query, result) => {
+export const showCalculationResultDialog = async (
+  query: string,
+  result: string
+) => {
   const cwd = path.join(os.homedir(), "Tools", "quickulator", "app");
   const target = path.join(cwd, "dist", "quickulator");
 
