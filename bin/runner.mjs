@@ -391,14 +391,15 @@ var SHORTCUT_PREFIX = "\u2318";
 
 // src/catalog/built-ins.ts
 var BUILT_IN_COMMANDS = {
-  "to-upper": _9.toUpper,
-  "to-lower": _9.toLower,
   "camel-case": _9.camelCase,
-  capitalize: _9.capitalize,
   "kebab-case": _9.kebabCase,
   "snake-case": _9.snakeCase,
   "start-case": _9.startCase,
-  deburr: _9.deburr
+  "to-lower": _9.toLower,
+  "to-upper": _9.toUpper,
+  capitalize: _9.capitalize,
+  deburr: _9.deburr,
+  sort: (selection) => _9.chain(selection).split("\n").sort().join("\n").value()
 };
 var getBuiltInCommands = () => _9.map(BUILT_IN_COMMANDS, (command, name) => ({
   label: name,
