@@ -278,7 +278,7 @@ var setCommandsCatalog = (newCommandsState) => {
 
 // src/utils/getCommandFilename.ts
 import path4 from "node:path";
-var getCommandFilename2 = (commandFilename) => path4.join(getConfigDir(), commandFilename);
+var getCommandFilename = (commandFilename) => path4.join(getConfigDir(), commandFilename);
 
 // src/ui/main.mjs
 var main_default = async () => {
@@ -305,7 +305,7 @@ var main_default = async () => {
       result = String(calculated);
       await showCalculationResultDialog(item.query, result);
     } else {
-      const commandFilename = getCommandFilename2("fallback-handler.js");
+      const commandFilename = getCommandFilename("fallback-handler.js");
       try {
         const fallbackHandler = require2(commandFilename);
         const resultFromFallback = fallbackHandler.call(
@@ -321,7 +321,7 @@ var main_default = async () => {
       }
     }
   } else {
-    const commandFilename = getCommandFilename2(item.value);
+    const commandFilename = getCommandFilename(item.value);
     result = await invokeScript(commandFilename, selection);
   }
   if (result && _8.isString(result)) {
@@ -376,13 +376,13 @@ var listen = (onMessage) => {
 };
 
 // src/utils/getAllCommands.mjs
-import _12 from "lodash";
+import _13 from "lodash";
 import { createRequire as createRequire3 } from "module";
 
-// src/catalog/built-ins.mjs
+// src/catalog/built-ins.ts
 import _9 from "lodash";
 
-// src/catalog/_constants.mjs
+// src/catalog/_constants.ts
 var SCRIPT_PREFIX = "\u0192\u0578";
 var MANAGE_SCRIPTS_PREFIX = "\u2425";
 var FOLDER_PREFIX = "\u2302";
@@ -390,7 +390,7 @@ var APPLICATION_PREFIX = "\u232C";
 var SYSTEM_PREFIX = "\u2699\uFE0E";
 var SHORTCUT_PREFIX = "\u2318";
 
-// src/catalog/built-ins.mjs
+// src/catalog/built-ins.ts
 var BUILT_IN_COMMANDS = {
   "to-upper": _9.toUpper,
   "to-lower": _9.toLower,
@@ -407,7 +407,7 @@ var getBuiltInCommands = () => _9.map(BUILT_IN_COMMANDS, (command, name) => ({
   value: command
 }));
 
-// src/catalog/folders.mjs
+// src/catalog/folders.ts
 import os3 from "os";
 import path5 from "path";
 import open3 from "open";
@@ -428,7 +428,7 @@ var getFolders = () => ["Applications", "Documents", "Downloads", "Home", "Pictu
   })
 );
 
-// src/catalog/applications.mjs
+// src/catalog/applications.ts
 import fs3 from "fs";
 import path6 from "path";
 import _10 from "lodash";
@@ -488,7 +488,7 @@ var getApplications = (rootDir = "/Applications") => {
   return items;
 };
 
-// src/catalog/system-preferences.mjs
+// src/catalog/system-preferences.ts
 import fs4 from "node:fs";
 import path7 from "node:path";
 import open4 from "open";
@@ -503,7 +503,7 @@ var getSystemPreferences = () => getPreferencePanes().map((pane) => ({
   }
 }));
 
-// src/catalog/system.mjs
+// src/catalog/system.ts
 import { execa as execa4 } from "execa";
 var getSystemCommands = () => [
   {
@@ -538,7 +538,7 @@ var getSystemCommands = () => [
   }
 ];
 
-// src/catalog/manage-scripts.mjs
+// src/catalog/manage-scripts.ts
 import cocoaDialog2 from "cocoa-dialog";
 import _11 from "lodash";
 
@@ -577,13 +577,13 @@ module.exports.suggestions = function () {
 };
 `.trim();
 var ensureEmptyFallbackHandler = () => {
-  const fallbackHandlerFilename = getCommandFilename2("fallback-handler.js");
+  const fallbackHandlerFilename = getCommandFilename("fallback-handler.js");
   if (!fs6.existsSync(fallbackHandlerFilename)) {
     fs6.writeFileSync(fallbackHandlerFilename, TEMPLATE2, "utf8");
   }
 };
 
-// src/catalog/manage-scripts.mjs
+// src/catalog/manage-scripts.ts
 var getManageScriptCommands = () => [
   {
     title: `${MANAGE_SCRIPTS_PREFIX} Create Script`,
@@ -620,7 +620,7 @@ var getManageScriptCommands = () => [
   }
 ];
 
-// src/catalog/scripts.mjs
+// src/catalog/scripts.ts
 import fs7 from "fs";
 import path8 from "path";
 var getScriptCommands = () => fs7.readdirSync(getConfigDir()).filter(
@@ -630,8 +630,9 @@ var getScriptCommands = () => fs7.readdirSync(getConfigDir()).filter(
   value: command
 }));
 
-// src/catalog/shortcuts.mjs
+// src/catalog/shortcuts.ts
 import { execaSync as execaSync2 } from "execa";
+import _12 from "lodash";
 var getShortcuts = () => {
   try {
     const shortcuts = execaSync2("shortcuts", ["list"]).stdout.split("\n").filter(Boolean).map((shortcut) => {
@@ -639,23 +640,27 @@ var getShortcuts = () => {
         title: `${SHORTCUT_PREFIX} ${shortcut}`,
         invoke: async () => {
           try {
-            await execaSync2("shortcuts", ["run", shortcut]);
+            execaSync2("shortcuts", ["run", shortcut]);
           } catch (error) {
-            console.error(`Failed to run shortcut: ${error.message}`);
+            if (_12.isError(error)) {
+              console.error(`Failed to run shortcut: ${error.message}`);
+            }
           }
         }
       };
     });
     return shortcuts;
   } catch (error) {
-    console.error(`Failed to get shortcuts: ${error.message}`);
+    if (_12.isError(error)) {
+      console.error(`Failed to get shortcuts: ${error.message}`);
+    }
     return [];
   }
 };
 
 // src/utils/getAllCommands.mjs
 var getCommandsFromFallbackHandler = () => {
-  const commandFilename = getCommandFilename2("fallback-handler.js");
+  const commandFilename = getCommandFilename("fallback-handler.js");
   try {
     const require2 = createRequire3(import.meta.url);
     const fallbackHandler = require2(commandFilename);
@@ -675,14 +680,14 @@ var commandComparator = ({ title }) => title;
 var applicationComparator = ({ score }) => -score;
 var getAllCommands = clock("getAllCommands", () => {
   const allCommands = [
-    ..._12.sortBy(
+    ..._13.sortBy(
       [...getScriptCommands(), ...getBuiltInCommands()],
       commandComparator
     ),
     ...getManageScriptCommands(),
     ...getFolders(),
     ...getShortcuts(),
-    ..._12.chain([
+    ..._13.chain([
       // Applications can live in multiple locations on macOS
       // Source: https://unix.stackexchange.com/a/583843
       ...getApplications("/Applications"),

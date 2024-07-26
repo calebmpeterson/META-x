@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { SCRIPT_PREFIX } from "./_constants.mjs";
+import { SCRIPT_PREFIX } from "./_constants";
 
 const BUILT_IN_COMMANDS = {
   "to-upper": _.toUpper,

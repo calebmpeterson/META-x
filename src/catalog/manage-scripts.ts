@@ -1,10 +1,11 @@
 import cocoaDialog from "cocoa-dialog";
 import _ from "lodash";
 import { createEmptyScript } from "../utils/createEmptyScript.js";
-import { getConfigDir } from "../utils/getConfigDir";
+import { getConfigDir } from "../utils/getConfigDir.js";
 import { editScript } from "../utils/editScript.js";
-import { ensureEmptyFallbackHandler } from "../utils/ensureEmptyFallbackHandler";
-import { MANAGE_SCRIPTS_PREFIX } from "./_constants.mjs";
+import { ensureEmptyFallbackHandler } from "../utils/ensureEmptyFallbackHandler.js";
+import { MANAGE_SCRIPTS_PREFIX } from "./_constants.js";
+import { getCommandFilename } from "../utils/getCommandFilename.js";
 
 export const getManageScriptCommands = () => [
   {

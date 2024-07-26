@@ -1,5 +1,5 @@
 import { execa } from "execa";
-import { SYSTEM_PREFIX } from "./_constants.mjs";
+import { SYSTEM_PREFIX } from "./_constants";
 
 export const getSystemCommands = () => [
   {

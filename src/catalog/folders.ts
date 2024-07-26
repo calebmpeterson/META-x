@@ -1,7 +1,7 @@
 import os from "os";
 import path from "path";
 import open from "open";
-import { FOLDER_PREFIX } from "./_constants.mjs";
+import { FOLDER_PREFIX } from "./_constants";
 
 export const getFolders = () =>
   ["Applications", "Documents", "Downloads", "Home", "Pictures"].map(

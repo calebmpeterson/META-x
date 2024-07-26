@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { getConfigDir } from "../utils/getConfigDir";
-import { SCRIPT_PREFIX } from "./_constants.mjs";
+import { SCRIPT_PREFIX } from "./_constants";
 
 export const getScriptCommands = () =>
   fs

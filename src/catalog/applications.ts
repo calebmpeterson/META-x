@@ -3,12 +3,12 @@ import path from "path";
 import _ from "lodash";
 import { openApp } from "open";
 import { getConfigDir } from "../utils/getConfigDir";
-import { APPLICATION_PREFIX } from "./_constants.mjs";
+import { APPLICATION_PREFIX } from "./_constants";
 
 const getApplicationUsageHistory = () =>
   path.join(getConfigDir(), ".application-usage");
 
-const persistApplicationUsage = (values) => {
+const persistApplicationUsage = (values: string[]) => {
   fs.writeFileSync(
     getApplicationUsageHistory(),
     _.takeRight(values, 100).join("\n"),
@@ -25,7 +25,7 @@ const restoreApplicationUsage = () => {
   }
 };
 
-const trackApplicationUsage = (value) => {
+const trackApplicationUsage = (value: string) => {
   const history = restoreApplicationUsage();
   persistApplicationUsage([...history, value]);
 };

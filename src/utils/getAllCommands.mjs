@@ -1,13 +1,13 @@
 import _ from "lodash";
 import { createRequire } from "module";
-import { getBuiltInCommands } from "../catalog/built-ins.mjs";
-import { getFolders } from "../catalog/folders.mjs";
-import { getApplications } from "../catalog/applications.mjs";
-import { getSystemPreferences } from "../catalog/system-preferences.mjs";
-import { getSystemCommands } from "../catalog/system.mjs";
-import { getManageScriptCommands } from "../catalog/manage-scripts.mjs";
-import { getScriptCommands } from "../catalog/scripts.mjs";
-import { getShortcuts } from "../catalog/shortcuts.mjs";
+import { getBuiltInCommands } from "../catalog/built-ins";
+import { getFolders } from "../catalog/folders";
+import { getApplications } from "../catalog/applications";
+import { getSystemPreferences } from "../catalog/system-preferences";
+import { getSystemCommands } from "../catalog/system";
+import { getManageScriptCommands } from "../catalog/manage-scripts";
+import { getScriptCommands } from "../catalog/scripts";
+import { getShortcuts } from "../catalog/shortcuts";
 import { clock } from "./clock.mjs";
 import { getCommandFilename } from "./getCommandFilename";
 
