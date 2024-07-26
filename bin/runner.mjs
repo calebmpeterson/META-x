@@ -43,7 +43,7 @@ import _8 from "lodash";
 import { createRequire as createRequire2 } from "module";
 import open2 from "open";
 
-// src/ui/prompt/darwin.mjs
+// src/ui/prompt/darwin.ts
 import { exec } from "child_process";
 import _ from "lodash";
 var darwin_default3 = (commands) => new Promise((resolve, reject) => {
@@ -72,7 +72,7 @@ var darwin_default3 = (commands) => new Promise((resolve, reject) => {
   });
 });
 
-// src/ui/prompt/linux.mjs
+// src/ui/prompt/linux.ts
 import { exec as exec2 } from "child_process";
 import _2 from "lodash";
 var linux_default = (commands) => new Promise((resolve, reject) => {
@@ -93,8 +93,8 @@ var linux_default = (commands) => new Promise((resolve, reject) => {
   });
 });
 
-// src/ui/prompt/index.mjs
-var prompt_default = (...args) => process.platform === "darwin" ? darwin_default3(...args) : linux_default(...args);
+// src/ui/prompt/index.ts
+var prompt_default = (commands) => process.platform === "darwin" ? darwin_default3(commands) : linux_default(commands);
 
 // src/ui/main.mjs
 import { execaSync } from "execa";
@@ -135,10 +135,9 @@ var ENTER = "{ENTER}";
 // src/utils/stripKeystrokes.ts
 var stripKeystrokes = (text) => text.endsWith(ENTER) ? text.slice(0, -ENTER.length) : text;
 
-// src/keystrokes/pressEnter.mjs
+// src/keystrokes/pressEnter.ts
 import { keyboard as keyboard3, Key as Key3 } from "@nut-tree/nut-js";
 var pressEnter_default = async () => {
-  console.log("pressEnter");
   await delay(1e3);
   await keyboard3.pressKey(Key3.Enter);
   await delay(10);
@@ -269,7 +268,7 @@ var showCalculationResultDialog = async (query, result) => {
   }
 };
 
-// src/state/commands.mjs
+// src/state/commands.ts
 var commandsState = [];
 var getCommandsCatalog = () => commandsState;
 var setCommandsCatalog = (newCommandsState) => {
@@ -375,9 +374,9 @@ var listen = (onMessage) => {
   process.on("SIGINT", cleanup);
 };
 
-// src/utils/getAllCommands.mjs
+// src/utils/getAllCommands.ts
 import _13 from "lodash";
-import { createRequire as createRequire3 } from "module";
+import { createRequire as createRequire3 } from "node:module";
 
 // src/catalog/built-ins.ts
 import _9 from "lodash";
@@ -658,7 +657,7 @@ var getShortcuts = () => {
   }
 };
 
-// src/utils/getAllCommands.mjs
+// src/utils/getAllCommands.ts
 var getCommandsFromFallbackHandler = () => {
   const commandFilename = getCommandFilename("fallback-handler.js");
   try {
@@ -672,7 +671,9 @@ var getCommandsFromFallbackHandler = () => {
       isFallback: true
     }));
   } catch (e) {
-    console.error(`Failed to run fallback handler: ${e.message}`);
+    if (_13.isError(e)) {
+      console.error(`Failed to run fallback handler: ${e.message}`);
+    }
     return [];
   }
 };
@@ -702,7 +703,7 @@ var getAllCommands = clock("getAllCommands", () => {
   return allCommands;
 });
 
-// src/state/rebuildCatalog.mjs
+// src/state/rebuildCatalog.ts
 var rebuildCatalog = () => {
   console.log("Rebuilding commands catalog...");
   setCommandsCatalog(getAllCommands());

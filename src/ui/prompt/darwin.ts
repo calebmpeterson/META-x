@@ -1,9 +1,10 @@
 import { exec } from "child_process";
 import _ from "lodash";
+import { Command } from "../../catalog/types";
 
 // Uses choose: https://github.com/chipsenkbeil/choose
 // brew install choose-gui
-export default (commands) =>
+export default (commands: Command[]) =>
   new Promise((resolve, reject) => {
     const choices = commands.map(({ title }) => title).join("\n");
     const toShow = Math.min(40, _.size(commands));

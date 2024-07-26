@@ -4,7 +4,7 @@ import prepareClipboard from "./clipboard/prepare";
 import finishClipboard from "./clipboard/finish";
 import showPrompt from "./ui/main.mjs";
 import { listen } from "./bridge.mjs";
-import { rebuildCatalog } from "./state/rebuildCatalog.mjs";
+import { rebuildCatalog } from "./state/rebuildCatalog";
 
 const spinner = ora({
   text: "Ready",

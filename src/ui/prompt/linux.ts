@@ -1,8 +1,9 @@
-import { exec } from 'child_process';
-import _ from 'lodash';
+import { exec } from "child_process";
+import _ from "lodash";
+import { Command } from "../../catalog/types";
 
 // Uses dmenu
-export default (commands) =>
+export default (commands: Command[]) =>
   new Promise((resolve, reject) => {
     const choices = commands.map(({ title }) => title).join("\n");
     const cmd = `echo "${choices}" | dmenu -i -b`;

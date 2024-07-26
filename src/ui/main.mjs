@@ -1,20 +1,17 @@
 import _ from "lodash";
 import { createRequire } from "module";
 import open from "open";
-import prompt from "./prompt/index.mjs";
+import prompt from "./prompt";
 import { execaSync } from "execa";
-import {
-  getCurrentSelection,
-  setClipboardContent,
-} from "../clipboard/utils.js";
+import { getCurrentSelection, setClipboardContent } from "../clipboard/utils";
 import { calculate, didCalculate } from "../utils/calculate";
 import { stripKeystrokes } from "../utils/stripKeystrokes";
 import { ENTER } from "../keystrokes/constants";
-import pressEnter from "../keystrokes/pressEnter.mjs";
+import pressEnter from "../keystrokes/pressEnter";
 import { invokeScript } from "../utils/invokeScript";
 import { processInvokeScriptResult } from "../utils/processInvokeScriptResult";
 import { showCalculationResultDialog } from "../utils/showCalculationResultDialog";
-import { getCommandsCatalog } from "../state/commands.mjs";
+import { getCommandsCatalog } from "../state/commands";
 import { getCommandFilename } from "../utils/getCommandFilename";
 
 export default async () => {

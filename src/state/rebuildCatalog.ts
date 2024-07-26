@@ -1,5 +1,5 @@
-import { getAllCommands } from "../utils/getAllCommands.mjs";
-import { setCommandsCatalog } from "./commands.mjs";
+import { getAllCommands } from "../utils/getAllCommands";
+import { setCommandsCatalog } from "./commands";
 
 export const rebuildCatalog = () => {
   console.log("Rebuilding commands catalog...");

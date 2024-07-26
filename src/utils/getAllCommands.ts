@@ -1,8 +1,8 @@
 import _ from "lodash";
-import { createRequire } from "module";
+import { createRequire } from "node:module";
 import { getBuiltInCommands } from "../catalog/built-ins";
 import { getFolders } from "../catalog/folders";
-import { getApplications } from "../catalog/applications";
+import { ApplicationLauncher, getApplications } from "../catalog/applications";
 import { getSystemPreferences } from "../catalog/system-preferences";
 import { getSystemCommands } from "../catalog/system";
 import { getManageScriptCommands } from "../catalog/manage-scripts";
@@ -10,6 +10,7 @@ import { getScriptCommands } from "../catalog/scripts";
 import { getShortcuts } from "../catalog/shortcuts";
 import { clock } from "./clock";
 import { getCommandFilename } from "./getCommandFilename";
+import { Command } from "../catalog/types";
 
 const getCommandsFromFallbackHandler = () => {
   const commandFilename = getCommandFilename("fallback-handler.js");
@@ -20,21 +21,24 @@ const getCommandsFromFallbackHandler = () => {
     const fallbackCommands =
       fallbackHandler.suggestions && fallbackHandler.suggestions.call();
 
-    return fallbackCommands.map((fallbackCommand) => ({
+    return fallbackCommands.map((fallbackCommand: string) => ({
       label: fallbackCommand,
       title: fallbackCommand,
       value: fallbackCommand,
       isFallback: true,
     }));
-  } catch (e) {
-    console.error(`Failed to run fallback handler: ${e.message}`);
+  } catch (e: unknown) {
+    if (_.isError(e)) {
+      console.error(`Failed to run fallback handler: ${e.message}`);
+    }
+
     return [];
   }
 };
 
-const commandComparator = ({ title }) => title;
+const commandComparator = ({ title }: Command) => title;
 
-const applicationComparator = ({ score }) => -score;
+const applicationComparator = ({ score }: ApplicationLauncher) => -score;
 
 export const getAllCommands = clock("getAllCommands", () => {
   const allCommands = [

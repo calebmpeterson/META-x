@@ -4,6 +4,13 @@ import _ from "lodash";
 import { openApp } from "open";
 import { getConfigDir } from "../utils/getConfigDir";
 import { APPLICATION_PREFIX } from "./_constants";
+import { Command } from "./types";
+
+export type ApplicationLauncher = Command & {
+  value: string;
+  score: number;
+  invoke: () => Promise<void>;
+};
 
 const getApplicationUsageHistory = () =>
   path.join(getConfigDir(), ".application-usage");
@@ -30,7 +37,9 @@ const trackApplicationUsage = (value: string) => {
   persistApplicationUsage([...history, value]);
 };
 
-export const getApplications = (rootDir = "/Applications") => {
+export const getApplications = (
+  rootDir = "/Applications"
+): ApplicationLauncher[] => {
   const history = restoreApplicationUsage();
   const scores = _.countBy(history, _.identity);
 
