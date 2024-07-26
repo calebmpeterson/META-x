@@ -1,5 +1,5 @@
 import { keyboard, Key } from "@nut-tree/nut-js";
-import { delay } from "../utils/delay.mjs";
+import { delay } from "../utils/delay.js";
 
 export default async () => {
   console.log("pressEnter");

@@ -6,12 +6,12 @@ import { execaSync } from "execa";
 import {
   getCurrentSelection,
   setClipboardContent,
-} from "../clipboard/utils.mjs";
+} from "../clipboard/utils.js";
 import { calculate, didCalculate } from "../utils/calculate";
 import { stripKeystrokes } from "../utils/stripKeystrokes";
 import { ENTER } from "../keystrokes/constants";
 import pressEnter from "../keystrokes/pressEnter.mjs";
-import { invokeScript } from "../utils/invokeScript.js";
+import { invokeScript } from "../utils/invokeScript";
 import { processInvokeScriptResult } from "../utils/processInvokeScriptResult";
 import { showCalculationResultDialog } from "../utils/showCalculationResultDialog";
 import { getCommandsCatalog } from "../state/commands.mjs";

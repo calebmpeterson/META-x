@@ -1,7 +1,7 @@
 import ora from "ora";
 import notifier from "node-notifier";
-import prepareClipboard from "./clipboard/prepare/index.mjs";
-import finishClipboard from "./clipboard/finish/index.mjs";
+import prepareClipboard from "./clipboard/prepare";
+import finishClipboard from "./clipboard/finish";
 import showPrompt from "./ui/main.mjs";
 import { listen } from "./bridge.mjs";
 import { rebuildCatalog } from "./state/rebuildCatalog.mjs";

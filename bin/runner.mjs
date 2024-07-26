@@ -2,13 +2,13 @@
 import ora from "ora";
 import notifier from "node-notifier";
 
-// src/clipboard/prepare/darwin.mjs
+// src/clipboard/prepare/darwin.ts
 import { keyboard, Key } from "@nut-tree/nut-js";
 
-// src/utils/delay.mjs
+// src/utils/delay.ts
 var delay = (timeout) => new Promise((resolve) => setTimeout(resolve, timeout));
 
-// src/utils/clock.mjs
+// src/utils/clock.ts
 var clock = (label, work) => (...args) => {
   try {
     console.time(label);
@@ -19,23 +19,23 @@ var clock = (label, work) => (...args) => {
   }
 };
 
-// src/clipboard/prepare/darwin.mjs
+// src/clipboard/prepare/darwin.ts
 var darwin_default = clock("prepare", async () => {
   await keyboard.type(Key.LeftSuper, Key.C);
   await delay(20);
 });
 
-// src/clipboard/prepare/index.mjs
+// src/clipboard/prepare/index.ts
 var prepare_default = () => process.platform === "darwin" ? darwin_default() : Promise.resolve();
 
-// src/clipboard/finish/darwin.mjs
+// src/clipboard/finish/darwin.ts
 import { keyboard as keyboard2, Key as Key2 } from "@nut-tree/nut-js";
 var darwin_default2 = async () => {
   await delay(20);
   await keyboard2.type(Key2.LeftSuper, Key2.V);
 };
 
-// src/clipboard/finish/index.mjs
+// src/clipboard/finish/index.ts
 var finish_default = () => process.platform === "darwin" ? darwin_default2() : Promise.resolve();
 
 // src/ui/main.mjs
@@ -99,20 +99,20 @@ var prompt_default = (...args) => process.platform === "darwin" ? darwin_default
 // src/ui/main.mjs
 import { execaSync } from "execa";
 
-// src/clipboard/utils.mjs
+// src/clipboard/utils.ts
 import _3 from "lodash";
 import clipboard from "clipboardy";
-var exported = {
-  getCurrentSelection: clock("getCurrentSelection", async () => {
-    return clipboard.read();
-  }),
-  setClipboardContent: clock("setClipboardContent", async (contentAsText) => {
+var getCurrentSelection = clock("getCurrentSelection", async () => {
+  return clipboard.read();
+});
+var setClipboardContent = clock(
+  "setClipboardContent",
+  async (contentAsText) => {
     if (_3.isString(contentAsText)) {
       await clipboard.write(contentAsText);
     }
-  })
-};
-var { getCurrentSelection, setClipboardContent } = exported;
+  }
+);
 
 // src/utils/calculate.ts
 import vm from "node:vm";

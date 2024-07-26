@@ -8,7 +8,7 @@ import { getSystemCommands } from "../catalog/system";
 import { getManageScriptCommands } from "../catalog/manage-scripts";
 import { getScriptCommands } from "../catalog/scripts";
 import { getShortcuts } from "../catalog/shortcuts";
-import { clock } from "./clock.mjs";
+import { clock } from "./clock";
 import { getCommandFilename } from "./getCommandFilename";
 
 const getCommandsFromFallbackHandler = () => {

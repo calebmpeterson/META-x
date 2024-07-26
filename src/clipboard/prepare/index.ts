@@ -1,4 +1,4 @@
-import prepareDarwin from './darwin.mjs';
+import prepareDarwin from "./darwin";
 
 export default () =>
   process.platform === "darwin" ? prepareDarwin() : Promise.resolve();
