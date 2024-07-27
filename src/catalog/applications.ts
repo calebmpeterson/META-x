@@ -4,14 +4,7 @@ import _ from "lodash";
 import { openApp } from "open";
 import { getConfigDir } from "../utils/getConfigDir";
 import { APPLICATION_PREFIX } from "./_constants";
-import { Command } from "./types";
-
-export type ApplicationLauncher = Command & {
-  value: string;
-  score: number;
-  invoke: () => Promise<void>;
-};
-
+import { ApplicationLauncher } from "./types";
 const getApplicationUsageHistory = () =>
   path.join(getConfigDir(), ".application-usage");
 

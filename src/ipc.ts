@@ -3,7 +3,9 @@ import fs from "node:fs";
 
 const SOCKET_FILE = "/tmp/meta-x.socket";
 
-const createServer = (socket, onMessage) => {
+type OnMessage = (message: string) => void;
+
+const createServer = (socket: string, onMessage: OnMessage) => {
   const server = net
     .createServer((stream) => {
       stream.on("data", (buffer) => {
@@ -23,7 +25,7 @@ const createServer = (socket, onMessage) => {
   return server;
 };
 
-export const listen = (onMessage) => {
+export const listen = (onMessage: OnMessage) => {
   // Remove any stale socket file
   const lockExists = fs.existsSync(SOCKET_FILE);
   if (lockExists) {
@@ -40,7 +42,7 @@ export const listen = (onMessage) => {
   process.on("SIGINT", cleanup);
 };
 
-export const send = (message) => {
+export const send = (message: string) => {
   const client = net.createConnection(SOCKET_FILE);
   client.on("connect", () => {
     client.write(message);

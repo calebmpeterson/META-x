@@ -2,8 +2,9 @@ import fs from "fs";
 import path from "path";
 import { getConfigDir } from "../utils/getConfigDir";
 import { SCRIPT_PREFIX } from "./_constants";
+import { ScriptCommand } from "./types";
 
-export const getScriptCommands = () =>
+export const getScriptCommands = (): ScriptCommand[] =>
   fs
     .readdirSync(getConfigDir())
     .filter(

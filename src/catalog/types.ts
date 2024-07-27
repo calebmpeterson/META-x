@@ -6,3 +6,13 @@ export type Command = {
 export type BuiltInCommand = Command & {
   value: (selection: string) => string;
 };
+
+export type ScriptCommand = Command & {
+  value: string;
+};
+
+export type ApplicationLauncher = Command & {
+  value: string;
+  score: number;
+  invoke: () => Promise<void>;
+};

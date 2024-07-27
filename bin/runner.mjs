@@ -341,7 +341,7 @@ var main_default = async () => {
   return false;
 };
 
-// src/bridge.mjs
+// src/ipc.ts
 import net from "node:net";
 import fs2 from "node:fs";
 var SOCKET_FILE = "/tmp/meta-x.socket";
