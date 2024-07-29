@@ -2,7 +2,7 @@ import ora from "ora";
 import notifier from "node-notifier";
 import prepareClipboard from "./clipboard/prepare";
 import finishClipboard from "./clipboard/finish";
-import showPrompt from "./ui/main.mjs";
+import showPrompt from "./ui/main";
 import { listen } from "./ipc";
 import { rebuildCatalog } from "./state/rebuildCatalog";
 

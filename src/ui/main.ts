@@ -1,18 +1,20 @@
 import _ from "lodash";
-import { createRequire } from "module";
 import open from "open";
-import prompt from "./prompt";
-import { execaSync } from "execa";
-import { getCurrentSelection, setClipboardContent } from "../clipboard/utils";
-import { calculate, didCalculate } from "../utils/calculate";
-import { stripKeystrokes } from "../utils/stripKeystrokes";
-import { ENTER } from "../keystrokes/constants";
 import pressEnter from "../keystrokes/pressEnter";
+import prompt from "./prompt";
+import { ENTER } from "../keystrokes/constants";
+import { calculate, didCalculate } from "../utils/calculate";
+import { createRequire } from "module";
+import { execa } from "execa";
+import { getCommandFilename } from "../utils/getCommandFilename";
+import { getCommandsCatalog } from "../state/commands";
+import { getCurrentSelection, setClipboardContent } from "../clipboard/utils";
 import { invokeScript } from "../utils/invokeScript";
 import { processInvokeScriptResult } from "../utils/processInvokeScriptResult";
 import { showCalculationResultDialog } from "../utils/showCalculationResultDialog";
-import { getCommandsCatalog } from "../state/commands";
-import { getCommandFilename } from "../utils/getCommandFilename";
+import { stripKeystrokes } from "../utils/stripKeystrokes";
+import { isShortcutResult } from "../utils/isShortcutResult";
+import { invokeShortcut } from "../utils/invokeShortcut";
 
 export default async () => {
   const selection = await getCurrentSelection();
@@ -32,21 +34,21 @@ export default async () => {
   };
 
   // Execute built-in command
-  if (item.isUnknown) {
+  if ("isUnknown" in item) {
     console.warn(`Unknown command`);
   }
   // Handle built-in functions
-  else if (_.isFunction(item.value)) {
+  else if ("value" in item && _.isFunction(item.value)) {
     result = item.value(selection);
   }
   // Invoke
-  else if (_.isFunction(item.invoke)) {
+  else if ("invoke" in item && _.isFunction(item.invoke)) {
     await item.invoke();
   }
   // Unhandled command:
   // 1. attempt to treat as a calculation
   // 2. defer to the fallback handler, if it exists
-  else if (item.isUnhandled) {
+  else if ("isUnhandled" in item && item.isUnhandled) {
     console.warn(`Unhandled command: ${item.query}`);
 
     // Attempt to calculate
@@ -77,7 +79,7 @@ export default async () => {
     }
   }
   // Execute custom module-based command
-  else {
+  else if ("value" in item && _.isString(item.value)) {
     const commandFilename = getCommandFilename(item.value);
 
     result = await invokeScript(commandFilename, selection);
@@ -85,7 +87,8 @@ export default async () => {
 
   if (result && _.isString(result)) {
     console.log(`Result: ${result}`);
-    // Update to reflect the command execution result
+
+    // Update clipboard to reflect the command execution result
     await setClipboardContent(stripKeystrokes(result));
 
     if (result.endsWith(ENTER)) {
@@ -93,13 +96,8 @@ export default async () => {
     }
 
     return true;
-  } else if (result && _.isObject(result) && "shortcut" in result) {
-    const { shortcut, input } = result;
-    try {
-      await execaSync("shortcuts", ["run", shortcut, "-i", input]);
-    } catch (error) {
-      console.error(`Failed to run shortcut: ${error.message}`);
-    }
+  } else if (isShortcutResult(result)) {
+    await invokeShortcut(result);
   }
 
   return false;

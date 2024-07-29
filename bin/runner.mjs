@@ -38,10 +38,18 @@ var darwin_default2 = async () => {
 // src/clipboard/finish/index.ts
 var finish_default = () => process.platform === "darwin" ? darwin_default2() : Promise.resolve();
 
-// src/ui/main.mjs
-import _8 from "lodash";
-import { createRequire as createRequire2 } from "module";
+// src/ui/main.ts
+import _9 from "lodash";
 import open2 from "open";
+
+// src/keystrokes/pressEnter.ts
+import { keyboard as keyboard3, Key as Key3 } from "@nut-tree/nut-js";
+var pressEnter_default = async () => {
+  await delay(1e3);
+  await keyboard3.pressKey(Key3.Enter);
+  await delay(10);
+  await keyboard3.releaseKey(Key3.Enter);
+};
 
 // src/ui/prompt/darwin.ts
 import { exec } from "child_process";
@@ -72,47 +80,11 @@ var darwin_default3 = (commands) => new Promise((resolve, reject) => {
   });
 });
 
-// src/ui/prompt/linux.ts
-import { exec as exec2 } from "child_process";
-import _2 from "lodash";
-var linux_default = (commands) => new Promise((resolve, reject) => {
-  const choices = commands.map(({ title }) => title).join("\n");
-  const cmd = `echo "${choices}" | dmenu -i -b`;
-  exec2(cmd, (error, stdout, stderr) => {
-    if (stdout) {
-      const query = _2.trim(stdout);
-      resolve(commands.find(({ title }) => title === query));
-    } else {
-      if (error) {
-        console.error(error);
-      }
-      resolve({
-        isUnknown: true
-      });
-    }
-  });
-});
-
 // src/ui/prompt/index.ts
-var prompt_default = (commands) => process.platform === "darwin" ? darwin_default3(commands) : linux_default(commands);
+var prompt_default = (commands) => darwin_default3(commands);
 
-// src/ui/main.mjs
-import { execaSync } from "execa";
-
-// src/clipboard/utils.ts
-import _3 from "lodash";
-import clipboard from "clipboardy";
-var getCurrentSelection = clock("getCurrentSelection", async () => {
-  return clipboard.read();
-});
-var setClipboardContent = clock(
-  "setClipboardContent",
-  async (contentAsText) => {
-    if (_3.isString(contentAsText)) {
-      await clipboard.write(contentAsText);
-    }
-  }
-);
+// src/keystrokes/constants.ts
+var ENTER = "{ENTER}";
 
 // src/utils/calculate.ts
 import vm from "node:vm";
@@ -129,43 +101,57 @@ var calculate = (input) => {
 };
 var didCalculate = (result) => result !== INCALCULABLE;
 
-// src/keystrokes/constants.ts
-var ENTER = "{ENTER}";
+// src/ui/main.ts
+import { createRequire as createRequire2 } from "module";
 
-// src/utils/stripKeystrokes.ts
-var stripKeystrokes = (text) => text.endsWith(ENTER) ? text.slice(0, -ENTER.length) : text;
-
-// src/keystrokes/pressEnter.ts
-import { keyboard as keyboard3, Key as Key3 } from "@nut-tree/nut-js";
-var pressEnter_default = async () => {
-  await delay(1e3);
-  await keyboard3.pressKey(Key3.Enter);
-  await delay(10);
-  await keyboard3.releaseKey(Key3.Enter);
-};
-
-// src/utils/invokeScript.ts
-import _7 from "lodash";
-import fs from "node:fs";
-import vm2 from "node:vm";
-
-// src/utils/createScriptContext.ts
-import { createRequire } from "module";
-import _4 from "lodash";
-import open from "open";
-import dotenv from "dotenv";
-import axios from "axios";
-
-// src/utils/getConfigPath.ts
-import * as path2 from "node:path";
+// src/utils/getCommandFilename.ts
+import path2 from "node:path";
 
 // src/utils/getConfigDir.ts
 import os from "os";
 import path from "path";
 var getConfigDir = () => path.join(os.homedir(), ".meta-x");
 
+// src/utils/getCommandFilename.ts
+var getCommandFilename = (commandFilename) => path2.join(getConfigDir(), commandFilename);
+
+// src/state/commands.ts
+var commandsState = [];
+var getCommandsCatalog = () => commandsState;
+var setCommandsCatalog = (newCommandsState) => {
+  commandsState = newCommandsState;
+};
+
+// src/clipboard/utils.ts
+import _2 from "lodash";
+import clipboard from "clipboardy";
+var getCurrentSelection = clock("getCurrentSelection", async () => {
+  return clipboard.read();
+});
+var setClipboardContent = clock(
+  "setClipboardContent",
+  async (contentAsText) => {
+    if (_2.isString(contentAsText)) {
+      await clipboard.write(contentAsText);
+    }
+  }
+);
+
+// src/utils/invokeScript.ts
+import _6 from "lodash";
+import fs from "node:fs";
+import vm2 from "node:vm";
+
+// src/utils/createScriptContext.ts
+import { createRequire } from "module";
+import _3 from "lodash";
+import open from "open";
+import dotenv from "dotenv";
+import axios from "axios";
+
 // src/utils/getConfigPath.ts
-var getConfigPath = (filename) => path2.join(getConfigDir(), filename);
+import * as path3 from "node:path";
+var getConfigPath = (filename) => path3.join(getConfigDir(), filename);
 
 // src/utils/createScriptContext.ts
 import { execa, $ } from "execa";
@@ -175,7 +161,7 @@ var createScriptContext = (commandFilename, selection) => {
   const ENV = {};
   dotenv.config({ path: getConfigPath(".env"), processEnv: ENV });
   const commandContext = {
-    _: _4,
+    _: _3,
     selection,
     require: require2,
     console,
@@ -195,8 +181,8 @@ var createScriptContext = (commandFilename, selection) => {
 };
 
 // src/utils/processInvokeScriptResult.ts
-import _5 from "lodash";
-var processInvokeScriptResult = (result) => _5.isArray(result) || _5.isObject(result) ? result : _5.toString(result);
+import _4 from "lodash";
+var processInvokeScriptResult = (result) => _4.isArray(result) || _4.isObject(result) ? result : _4.toString(result);
 
 // src/utils/showCommandErrorDialog.ts
 import cocoaDialog from "cocoa-dialog";
@@ -215,9 +201,9 @@ var editScript = async (pathname) => {
 };
 
 // src/utils/showCommandErrorDialog.ts
-import _6 from "lodash";
+import _5 from "lodash";
 var showCommandErrorDialog = async (commandFilename, error) => {
-  if (_6.isError(error)) {
+  if (_5.isError(error)) {
     const result = await cocoaDialog("msgbox", {
       title: `Error in ${commandFilename}`,
       text: error.stack,
@@ -245,7 +231,7 @@ var invokeScript = async (commandFilename, selection) => {
     const wrappedCommandSource = wrapCommandSource(commandSource);
     const commandScript = new vm2.Script(wrappedCommandSource);
     const result = await commandScript.runInNewContext(commandContext);
-    if (!_7.isUndefined(result)) {
+    if (!_6.isUndefined(result)) {
       return processInvokeScriptResult(result);
     }
   } catch (error) {
@@ -257,10 +243,10 @@ var invokeScript = async (commandFilename, selection) => {
 // src/utils/showCalculationResultDialog.ts
 import { execa as execa3 } from "execa";
 import os2 from "node:os";
-import path3 from "node:path";
+import path4 from "node:path";
 var showCalculationResultDialog = async (query, result) => {
-  const cwd = path3.join(os2.homedir(), "Tools", "quickulator", "app");
-  const target = path3.join(cwd, "dist", "quickulator");
+  const cwd = path4.join(os2.homedir(), "Tools", "quickulator", "app");
+  const target = path4.join(cwd, "dist", "quickulator");
   try {
     await execa3(target, [...query], { cwd, preferLocal: true });
   } catch (error) {
@@ -268,18 +254,27 @@ var showCalculationResultDialog = async (query, result) => {
   }
 };
 
-// src/state/commands.ts
-var commandsState = [];
-var getCommandsCatalog = () => commandsState;
-var setCommandsCatalog = (newCommandsState) => {
-  commandsState = newCommandsState;
+// src/utils/stripKeystrokes.ts
+var stripKeystrokes = (text) => text.endsWith(ENTER) ? text.slice(0, -ENTER.length) : text;
+
+// src/utils/isShortcutResult.ts
+import _7 from "lodash";
+var isShortcutResult = (result) => Boolean(result) && _7.isObject(result) && "shortcut" in result && _7.isString(result.shortcut);
+
+// src/utils/invokeShortcut.ts
+import { execa as execa4 } from "execa";
+import _8 from "lodash";
+var invokeShortcut = async ({ shortcut, input }) => {
+  try {
+    await execa4("shortcuts", ["run", shortcut, "-i", input ?? ""]);
+  } catch (error) {
+    if (_8.isError(error)) {
+      console.error(`Failed to run shortcut: ${error.message}`);
+    }
+  }
 };
 
-// src/utils/getCommandFilename.ts
-import path4 from "node:path";
-var getCommandFilename = (commandFilename) => path4.join(getConfigDir(), commandFilename);
-
-// src/ui/main.mjs
+// src/ui/main.ts
 var main_default = async () => {
   const selection = await getCurrentSelection();
   const commands = getCommandsCatalog();
@@ -291,13 +286,13 @@ var main_default = async () => {
     open: open2,
     ENTER
   };
-  if (item.isUnknown) {
+  if ("isUnknown" in item) {
     console.warn(`Unknown command`);
-  } else if (_8.isFunction(item.value)) {
+  } else if ("value" in item && _9.isFunction(item.value)) {
     result = item.value(selection);
-  } else if (_8.isFunction(item.invoke)) {
+  } else if ("invoke" in item && _9.isFunction(item.invoke)) {
     await item.invoke();
-  } else if (item.isUnhandled) {
+  } else if ("isUnhandled" in item && item.isUnhandled) {
     console.warn(`Unhandled command: ${item.query}`);
     const calculated = calculate(item.query);
     if (didCalculate(calculated)) {
@@ -312,31 +307,26 @@ var main_default = async () => {
           selection,
           item.query
         );
-        if (!_8.isUndefined(resultFromFallback)) {
+        if (!_9.isUndefined(resultFromFallback)) {
           result = processInvokeScriptResult(resultFromFallback);
         }
       } catch (e) {
         console.error(`Failed to execute ${commandFilename}`, e);
       }
     }
-  } else {
+  } else if ("value" in item && _9.isString(item.value)) {
     const commandFilename = getCommandFilename(item.value);
     result = await invokeScript(commandFilename, selection);
   }
-  if (result && _8.isString(result)) {
+  if (result && _9.isString(result)) {
     console.log(`Result: ${result}`);
     await setClipboardContent(stripKeystrokes(result));
     if (result.endsWith(ENTER)) {
       await pressEnter_default();
     }
     return true;
-  } else if (result && _8.isObject(result) && "shortcut" in result) {
-    const { shortcut, input } = result;
-    try {
-      await execaSync("shortcuts", ["run", shortcut, "-i", input]);
-    } catch (error) {
-      console.error(`Failed to run shortcut: ${error.message}`);
-    }
+  } else if (isShortcutResult(result)) {
+    await invokeShortcut(result);
   }
   return false;
 };
@@ -375,11 +365,11 @@ var listen = (onMessage) => {
 };
 
 // src/utils/getAllCommands.ts
-import _13 from "lodash";
+import _14 from "lodash";
 import { createRequire as createRequire3 } from "node:module";
 
 // src/catalog/built-ins.ts
-import _9 from "lodash";
+import _10 from "lodash";
 
 // src/catalog/_constants.ts
 var SCRIPT_PREFIX = "\u0192\u0578";
@@ -391,17 +381,17 @@ var SHORTCUT_PREFIX = "\u2318";
 
 // src/catalog/built-ins.ts
 var BUILT_IN_COMMANDS = {
-  "camel-case": _9.camelCase,
-  "kebab-case": _9.kebabCase,
-  "snake-case": _9.snakeCase,
-  "start-case": _9.startCase,
-  "to-lower": _9.toLower,
-  "to-upper": _9.toUpper,
-  capitalize: _9.capitalize,
-  deburr: _9.deburr,
-  sort: (selection) => _9.chain(selection).split("\n").sort().join("\n").value()
+  "camel-case": _10.camelCase,
+  "kebab-case": _10.kebabCase,
+  "snake-case": _10.snakeCase,
+  "start-case": _10.startCase,
+  "to-lower": _10.toLower,
+  "to-upper": _10.toUpper,
+  capitalize: _10.capitalize,
+  deburr: _10.deburr,
+  sort: (selection) => _10.chain(selection).split("\n").sort().join("\n").value()
 };
-var getBuiltInCommands = () => _9.map(BUILT_IN_COMMANDS, (command, name) => ({
+var getBuiltInCommands = () => _10.map(BUILT_IN_COMMANDS, (command, name) => ({
   label: name,
   title: `${SCRIPT_PREFIX} ${name}`,
   value: command
@@ -431,13 +421,13 @@ var getFolders = () => ["Applications", "Documents", "Downloads", "Home", "Pictu
 // src/catalog/applications.ts
 import fs3 from "fs";
 import path6 from "path";
-import _10 from "lodash";
+import _11 from "lodash";
 import { openApp } from "open";
 var getApplicationUsageHistory = () => path6.join(getConfigDir(), ".application-usage");
 var persistApplicationUsage = (values) => {
   fs3.writeFileSync(
     getApplicationUsageHistory(),
-    _10.takeRight(values, 100).join("\n"),
+    _11.takeRight(values, 100).join("\n"),
     "utf8"
   );
 };
@@ -454,7 +444,7 @@ var trackApplicationUsage = (value) => {
 };
 var getApplications = (rootDir = "/Applications") => {
   const history = restoreApplicationUsage();
-  const scores = _10.countBy(history, _10.identity);
+  const scores = _11.countBy(history, _11.identity);
   const applications = fs3.readdirSync(rootDir).filter((filename) => {
     const pathname = path6.join(rootDir, filename);
     const stats = fs3.statSync(pathname);
@@ -471,7 +461,7 @@ var getApplications = (rootDir = "/Applications") => {
   const items = applications.map((application) => {
     const value = path6.join(rootDir, application);
     return {
-      title: `${APPLICATION_PREFIX} ${_10.get(
+      title: `${APPLICATION_PREFIX} ${_11.get(
         path6.parse(application),
         "name",
         application
@@ -504,43 +494,43 @@ var getSystemPreferences = () => getPreferencePanes().map((pane) => ({
 }));
 
 // src/catalog/system.ts
-import { execa as execa4 } from "execa";
+import { execa as execa5 } from "execa";
 var getSystemCommands = () => [
   {
     title: `${SYSTEM_PREFIX} Shutdown`,
     invoke: async () => {
-      await execa4("pmset", ["halt"]);
+      await execa5("pmset", ["halt"]);
     }
   },
   {
     title: `${SYSTEM_PREFIX} Restart`,
     invoke: async () => {
-      await execa4("pmset", ["restart"]);
+      await execa5("pmset", ["restart"]);
     }
   },
   {
     title: `${SYSTEM_PREFIX} Sleep`,
     invoke: async () => {
-      await execa4("pmset", ["sleepnow"]);
+      await execa5("pmset", ["sleepnow"]);
     }
   },
   {
     title: `${SYSTEM_PREFIX} Sleep Displays`,
     invoke: async () => {
-      await execa4("pmset", ["displaysleepnow"]);
+      await execa5("pmset", ["displaysleepnow"]);
     }
   },
   {
     title: `${SYSTEM_PREFIX} About This Mac`,
     invoke: async () => {
-      await execa4("open", ["-a", "About This Mac"]);
+      await execa5("open", ["-a", "About This Mac"]);
     }
   }
 ];
 
 // src/catalog/manage-scripts.ts
 import cocoaDialog2 from "cocoa-dialog";
-import _11 from "lodash";
+import _12 from "lodash";
 
 // src/utils/createEmptyScript.ts
 import fs5 from "node:fs";
@@ -592,7 +582,7 @@ var getManageScriptCommands = () => [
         title: "Save Script As...",
         withDirectory: getConfigDir()
       });
-      if (!_11.isEmpty(result)) {
+      if (!_12.isEmpty(result)) {
         createEmptyScript(result);
         await editScript(result);
       }
@@ -605,7 +595,7 @@ var getManageScriptCommands = () => [
         title: "Choose Script To Edit...",
         withDirectory: getConfigDir()
       });
-      if (!_11.isEmpty(result)) {
+      if (!_12.isEmpty(result)) {
         await editScript(result);
       }
     }
@@ -631,18 +621,18 @@ var getScriptCommands = () => fs7.readdirSync(getConfigDir()).filter(
 }));
 
 // src/catalog/shortcuts.ts
-import { execaSync as execaSync2 } from "execa";
-import _12 from "lodash";
+import { execaSync } from "execa";
+import _13 from "lodash";
 var getShortcuts = () => {
   try {
-    const shortcuts = execaSync2("shortcuts", ["list"]).stdout.split("\n").filter(Boolean).map((shortcut) => {
+    const shortcuts = execaSync("shortcuts", ["list"]).stdout.split("\n").filter(Boolean).map((shortcut) => {
       return {
         title: `${SHORTCUT_PREFIX} ${shortcut}`,
         invoke: async () => {
           try {
-            execaSync2("shortcuts", ["run", shortcut]);
+            execaSync("shortcuts", ["run", shortcut]);
           } catch (error) {
-            if (_12.isError(error)) {
+            if (_13.isError(error)) {
               console.error(`Failed to run shortcut: ${error.message}`);
             }
           }
@@ -651,7 +641,7 @@ var getShortcuts = () => {
     });
     return shortcuts;
   } catch (error) {
-    if (_12.isError(error)) {
+    if (_13.isError(error)) {
       console.error(`Failed to get shortcuts: ${error.message}`);
     }
     return [];
@@ -672,7 +662,7 @@ var getCommandsFromFallbackHandler = () => {
       isFallback: true
     }));
   } catch (e) {
-    if (_13.isError(e)) {
+    if (_14.isError(e)) {
       console.error(`Failed to run fallback handler: ${e.message}`);
     }
     return [];
@@ -682,14 +672,14 @@ var commandComparator = ({ title }) => title;
 var applicationComparator = ({ score }) => -score;
 var getAllCommands = clock("getAllCommands", () => {
   const allCommands = [
-    ..._13.sortBy(
+    ..._14.sortBy(
       [...getScriptCommands(), ...getBuiltInCommands()],
       commandComparator
     ),
     ...getManageScriptCommands(),
     ...getFolders(),
     ...getShortcuts(),
-    ..._13.chain([
+    ..._14.chain([
       // Applications can live in multiple locations on macOS
       // Source: https://unix.stackexchange.com/a/583843
       ...getApplications("/Applications"),
