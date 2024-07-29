@@ -7,11 +7,10 @@
   "private": false,
   "type": "module",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development node --cpu-prof src/runner.mjs",
     "start": "cross-env NODE_ENV=production node bin/runner.mjs",
     "launch": "./bin/launch",
     "typecheck:runner": "tsc --noEmit",
-    "build:runner": "esbuild src/runner.mjs --bundle --platform=node --format=esm --outfile=bin/runner.mjs --packages=external",
+    "build:runner": "esbuild src/runner.ts --bundle --platform=node --format=esm --outfile=bin/runner.mjs --packages=external",
     "build": "yarn typecheck:runner && yarn build:runner",
     "docs:build": "node scripts/build-docs.mjs",
     "postinstall": "yarn build",
@@ -21,6 +20,7 @@
   "devDependencies": {
     "@types/lodash": "^4.17.7",
     "@types/node": "^20.14.12",
+    "@types/node-notifier": "^8.0.5",
     "cross-env": "^7.0.2",
     "esbuild": "^0.23.0",
     "showdown": "^1.9.1",

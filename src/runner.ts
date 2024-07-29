@@ -5,6 +5,7 @@ import finishClipboard from "./clipboard/finish";
 import showPrompt from "./ui/main";
 import { listen } from "./ipc";
 import { rebuildCatalog } from "./state/rebuildCatalog";
+import _ from "lodash";
 
 const spinner = ora({
   text: "Ready",
@@ -23,13 +24,15 @@ const run = async () => {
     if (result) {
       await finishClipboard();
     }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(error);
 
-    notifier.notify({
-      title: "META-x",
-      message: "META-x encountered an error: " + error.message,
-    });
+    if (_.isError(error)) {
+      notifier.notify({
+        title: "META-x",
+        message: "META-x encountered an error: " + error.message,
+      });
+    }
   }
 
   spinner.start();

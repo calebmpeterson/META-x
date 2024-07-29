@@ -1,4 +1,4 @@
-// src/runner.mjs
+// src/runner.ts
 import ora from "ora";
 import notifier from "node-notifier";
 
@@ -270,6 +270,8 @@ var invokeShortcut = async ({ shortcut, input }) => {
   } catch (error) {
     if (_8.isError(error)) {
       console.error(`Failed to run shortcut: ${error.message}`);
+    } else {
+      console.error(`Failed to run shortcut: ${shortcut}`);
     }
   }
 };
@@ -700,7 +702,8 @@ var rebuildCatalog = () => {
   setCommandsCatalog(getAllCommands());
 };
 
-// src/runner.mjs
+// src/runner.ts
+import _15 from "lodash";
 var spinner = ora({
   text: "Ready",
   interval: 500,
@@ -717,10 +720,12 @@ var run = async () => {
     }
   } catch (error) {
     console.error(error);
-    notifier.notify({
-      title: "META-x",
-      message: "META-x encountered an error: " + error.message
-    });
+    if (_15.isError(error)) {
+      notifier.notify({
+        title: "META-x",
+        message: "META-x encountered an error: " + error.message
+      });
+    }
   }
   spinner.start();
 };
