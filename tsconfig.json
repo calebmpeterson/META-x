@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "es2022" /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */,
+    "lib": ["ES2022"],
+    "module": "esnext" /* Specify what module code is generated. */,
+    "moduleResolution": "bundler",
+    "isolatedModules": true,
+    "paths": {},
+    "rootDirs": ["src"],
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true /* Enable all strict type-checking options. */,
+    "skipLibCheck": true /* Skip type checking all .d.ts files. */,
+    "allowJs": true
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules"]
+}
