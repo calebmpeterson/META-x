@@ -63,9 +63,9 @@ module.exports = (selection) => {
 };
 ```
 
-#### Shortcut Commands
+#### macOS Shortcut Commands
 
-To run a shortcut with the output of the command:
+To run a macOS Shortcut with the output of the command:
 
 ```js
 module.exports = (selection) => {
@@ -82,7 +82,7 @@ module.exports = (selection) => {
 
 #### Command Not Found Fallback
 
-If the event that your query does not match a known command, the raw query string will be passed to `~/.meta-x/fallback-handler.js` if it exists:
+In the event that your query does not match a known command, the raw query string will be passed to `~/.meta-x/fallback-handler.js` if it exists:
 
 ```js
 module.exports = function (selection, query) {
@@ -96,12 +96,12 @@ module.exports = function (selection, query) {
 The `fallback-handler` can provide suggestions:
 
 ```js
-module.exports = function (selection, query) {
+module.exports = (selection, query) => {
   // Do something with the currently selected
   // text and/or the raw query string
 };
 
-module.exports.suggestions = function () {
+module.exports.suggestions = () => {
   // The suggestions should be an array of strings
   return ["suggestion one", "suggestion two", "suggestion three"];
 };
