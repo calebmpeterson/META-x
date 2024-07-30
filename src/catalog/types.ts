@@ -8,7 +8,7 @@ export type BuiltInCommand = Command & {
 };
 
 export type ScriptCommand = Command & {
-  value: string;
+  invoke: (selection: string) => Promise<unknown>;
 };
 
 export type ApplicationLauncher = Command & {

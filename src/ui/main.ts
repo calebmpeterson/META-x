@@ -43,7 +43,7 @@ export default async () => {
   }
   // Invoke
   else if ("invoke" in item && _.isFunction(item.invoke)) {
-    await item.invoke();
+    result = await item.invoke(selection);
   }
   // Unhandled command:
   // 1. attempt to treat as a calculation
@@ -77,12 +77,6 @@ export default async () => {
         console.error(`Failed to execute ${commandFilename}`, e);
       }
     }
-  }
-  // Execute custom module-based command
-  else if ("value" in item && _.isString(item.value)) {
-    const commandFilename = getCommandFilename(item.value);
-
-    result = await invokeScript(commandFilename, selection);
   }
 
   if (result && _.isString(result)) {
