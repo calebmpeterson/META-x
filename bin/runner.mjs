@@ -300,8 +300,8 @@ var getBuiltInCommands = () => _7.map(BUILT_IN_COMMANDS, (command, name) => ({
 // src/catalog/folders.ts
 import os3 from "os";
 import path4 from "path";
-import open2 from "open";
-var getFolders = () => ["Applications", "Documents", "Downloads", "Home", "Pictures"].map(
+import open2, { openApp } from "open";
+var getFolders = () => ["Finder", "Applications", "Documents", "Downloads", "Home", "Pictures"].map(
   (folder) => ({
     title: `${FOLDER_PREFIX} ${folder}`,
     value: folder,
@@ -310,6 +310,8 @@ var getFolders = () => ["Applications", "Documents", "Downloads", "Home", "Pictu
         await open2("/Applications");
       } else if (folder === "Home") {
         await open2(os3.homedir());
+      } else if (folder === "Finder") {
+        await openApp("Finder");
       } else {
         const dirname = path4.join(os3.homedir(), folder);
         await open2(dirname);
@@ -322,7 +324,7 @@ var getFolders = () => ["Applications", "Documents", "Downloads", "Home", "Pictu
 import fs2 from "fs";
 import path5 from "path";
 import _8 from "lodash";
-import { openApp } from "open";
+import { openApp as openApp2 } from "open";
 var getApplicationUsageHistory = () => path5.join(getConfigDir(), ".application-usage");
 var persistApplicationUsage = (values) => {
   fs2.writeFileSync(
@@ -371,7 +373,7 @@ var getApplications = (rootDir = "/Applications") => {
       invoke: async () => {
         console.log(`Opening ${application}`);
         trackApplicationUsage(value);
-        await openApp(value);
+        await openApp2(value);
       }
     };
   });

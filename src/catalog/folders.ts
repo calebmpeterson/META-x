@@ -1,15 +1,17 @@
 import os from "os";
 import path from "path";
-import open from "open";
+import open, { openApp } from "open";
 import { FOLDER_PREFIX } from "./_constants";
 
 export const getFolders = () =>
-  ["Applications", "Documents", "Downloads", "Home", "Pictures"].map(
+  ["Finder", "Applications", "Documents", "Downloads", "Home", "Pictures"].map(
     (folder) => ({
       title: `${FOLDER_PREFIX} ${folder}`,
       value: folder,
       invoke: async () => {
-        if (folder === "Applications") {
+        if (folder === "Finder") {
+          await openApp("Finder");
+        } else if (folder === "Applications") {
           await open("/Applications");
         } else if (folder === "Home") {
           await open(os.homedir());
