@@ -301,24 +301,30 @@ var getBuiltInCommands = () => _7.map(BUILT_IN_COMMANDS, (command, name) => ({
 import os3 from "os";
 import path4 from "path";
 import open2, { openApp } from "open";
-var getFolders = () => ["Finder", "Applications", "Documents", "Downloads", "Home", "Pictures"].map(
-  (folder) => ({
-    title: `${FOLDER_PREFIX} ${folder}`,
-    value: folder,
-    invoke: async () => {
-      if (folder === "Applications") {
-        await open2("/Applications");
-      } else if (folder === "Home") {
-        await open2(os3.homedir());
-      } else if (folder === "Finder") {
-        await openApp("Finder");
-      } else {
-        const dirname = path4.join(os3.homedir(), folder);
-        await open2(dirname);
-      }
+var getFolders = () => [
+  "Finder",
+  "Applications",
+  "Documents",
+  "Downloads",
+  "Home",
+  "Pictures",
+  "Workspace"
+].map((folder) => ({
+  title: `${FOLDER_PREFIX} ${folder}`,
+  value: folder,
+  invoke: async () => {
+    if (folder === "Finder") {
+      await openApp("Finder");
+    } else if (folder === "Applications") {
+      await open2("/Applications");
+    } else if (folder === "Home") {
+      await open2(os3.homedir());
+    } else {
+      const dirname = path4.join(os3.homedir(), folder);
+      await open2(dirname);
     }
-  })
-);
+  }
+}));
 
 // src/catalog/applications.ts
 import fs2 from "fs";
