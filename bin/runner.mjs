@@ -433,6 +433,15 @@ var getSystemCommands = () => [
     invoke: async () => {
       await execa3("open", ["-a", "About This Mac"]);
     }
+  },
+  {
+    title: `${SYSTEM_PREFIX} Lock Screen`,
+    invoke: async () => {
+      await execa3("open", [
+        "-a",
+        "/System/Library/CoreServices/ScreenSaverEngine.app"
+      ]);
+    }
   }
 ];
 
