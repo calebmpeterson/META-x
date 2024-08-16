@@ -1,11 +1,12 @@
-import { createRequire } from "module";
 import _ from "lodash";
-import open from "open";
-import dotenv from "dotenv";
 import axios from "axios";
+import dotenv from "dotenv";
+import open from "open";
 import { ENTER } from "../keystrokes/constants";
-import { getConfigPath } from "./getConfigPath.js";
+import { choose } from "./choose";
+import { createRequire } from "module";
 import { execa, $ } from "execa";
+import { getConfigPath } from "./getConfigPath.js";
 import { runAppleScript } from "run-applescript";
 
 export const createScriptContext = (
@@ -33,6 +34,7 @@ export const createScriptContext = (
     execa,
     $,
     osascript: runAppleScript,
+    choose,
   };
 
   return commandContext;

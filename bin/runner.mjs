@@ -265,7 +265,7 @@ var listen = (onMessage) => {
 };
 
 // src/utils/getAllCommands.ts
-import _14 from "lodash";
+import _15 from "lodash";
 import { createRequire as createRequire3 } from "node:module";
 
 // src/catalog/built-ins.ts
@@ -545,30 +545,52 @@ import fs7 from "fs";
 import path8 from "path";
 
 // src/utils/invokeScript.ts
-import _12 from "lodash";
+import _13 from "lodash";
 import fs6 from "node:fs";
 import vm2 from "node:vm";
 
 // src/utils/createScriptContext.ts
-import { createRequire as createRequire2 } from "module";
-import _10 from "lodash";
-import open4 from "open";
-import dotenv from "dotenv";
+import _11 from "lodash";
 import axios from "axios";
+import dotenv from "dotenv";
+import open4 from "open";
+
+// src/utils/choose.ts
+import { exec as exec2 } from "child_process";
+import _10 from "lodash";
+var choose = (options) => new Promise((resolve, reject) => {
+  const choices = options.join("\n");
+  const toShow = Math.max(5, Math.min(40, _10.size(options)));
+  const cmd = `echo "${choices}" | choose -b 000000 -c 222222 -w 30 -s 18 -m -n ${toShow}`;
+  exec2(cmd, (error, stdout, stderr) => {
+    if (stdout) {
+      const selection = _10.trim(stdout);
+      resolve(selection);
+    } else {
+      if (error && process.env.NODE_ENV === "development") {
+        console.error(error.stack);
+      }
+      resolve(void 0);
+    }
+  });
+});
+
+// src/utils/createScriptContext.ts
+import { createRequire as createRequire2 } from "module";
+import { execa as execa5, $ } from "execa";
 
 // src/utils/getConfigPath.ts
 import * as path7 from "node:path";
 var getConfigPath = (filename) => path7.join(getConfigDir(), filename);
 
 // src/utils/createScriptContext.ts
-import { execa as execa5, $ } from "execa";
 import { runAppleScript } from "run-applescript";
 var createScriptContext = (commandFilename, selection) => {
   const require2 = createRequire2(commandFilename);
   const ENV = {};
   dotenv.config({ path: getConfigPath(".env"), processEnv: ENV });
   const commandContext = {
-    _: _10,
+    _: _11,
     selection,
     require: require2,
     console,
@@ -582,16 +604,17 @@ var createScriptContext = (commandFilename, selection) => {
     ENTER,
     execa: execa5,
     $,
-    osascript: runAppleScript
+    osascript: runAppleScript,
+    choose
   };
   return commandContext;
 };
 
 // src/utils/showCommandErrorDialog.ts
 import cocoaDialog2 from "cocoa-dialog";
-import _11 from "lodash";
+import _12 from "lodash";
 var showCommandErrorDialog = async (commandFilename, error) => {
-  if (_11.isError(error)) {
+  if (_12.isError(error)) {
     const result = await cocoaDialog2("msgbox", {
       title: `Error in ${commandFilename}`,
       text: error.stack,
@@ -619,7 +642,7 @@ var invokeScript = async (commandFilename, selection) => {
     const wrappedCommandSource = wrapCommandSource(commandSource);
     const commandScript = new vm2.Script(wrappedCommandSource);
     const result = await commandScript.runInNewContext(commandContext);
-    if (!_12.isUndefined(result)) {
+    if (!_13.isUndefined(result)) {
       return processInvokeScriptResult(result);
     }
   } catch (error) {
@@ -641,7 +664,7 @@ var getScriptCommands = () => fs7.readdirSync(getConfigDir()).filter(
 
 // src/catalog/shortcuts.ts
 import { execaSync } from "execa";
-import _13 from "lodash";
+import _14 from "lodash";
 var getShortcuts = () => {
   try {
     const shortcuts = execaSync("shortcuts", ["list"]).stdout.split("\n").filter(Boolean).map((shortcut) => {
@@ -651,7 +674,7 @@ var getShortcuts = () => {
           try {
             execaSync("shortcuts", ["run", shortcut]);
           } catch (error) {
-            if (_13.isError(error)) {
+            if (_14.isError(error)) {
               console.error(`Failed to run shortcut: ${error.message}`);
             }
           }
@@ -660,7 +683,7 @@ var getShortcuts = () => {
     });
     return shortcuts;
   } catch (error) {
-    if (_13.isError(error)) {
+    if (_14.isError(error)) {
       console.error(`Failed to get shortcuts: ${error.message}`);
     }
     return [];
@@ -681,7 +704,7 @@ var getCommandsFromFallbackHandler = () => {
       isFallback: true
     }));
   } catch (e) {
-    if (_14.isError(e)) {
+    if (_15.isError(e)) {
       console.error(`Failed to run fallback handler: ${e.message}`);
     }
     return [];
@@ -691,14 +714,14 @@ var commandComparator = ({ title }) => title;
 var applicationComparator = ({ score }) => -score;
 var getAllCommands = clock("getAllCommands", () => {
   const allCommands = [
-    ..._14.sortBy(
+    ..._15.sortBy(
       [...getScriptCommands(), ...getBuiltInCommands()],
       commandComparator
     ),
     ...getManageScriptCommands(),
     ...getFolders(),
     ...getShortcuts(),
-    ..._14.chain([
+    ..._15.chain([
       // Applications can live in multiple locations on macOS
       // Source: https://unix.stackexchange.com/a/583843
       ...getApplications("/Applications"),
@@ -720,7 +743,7 @@ var rebuildCatalog = () => {
 };
 
 // src/runner.ts
-import _15 from "lodash";
+import _16 from "lodash";
 var spinner = ora({
   text: "Ready",
   interval: 500,
@@ -737,7 +760,7 @@ var run = async () => {
     }
   } catch (error) {
     console.error(error);
-    if (_15.isError(error)) {
+    if (_16.isError(error)) {
       notifier.notify({
         title: "META-x",
         message: "META-x encountered an error: " + error.message

@@ -119,6 +119,7 @@ The "command context" API includes:
 - `$`/`execa` methods from [`execa`](https://www.npmjs.com/package/execa)
 - `osascript` method from ['run-applescript`](https://www.npmjs.com/package/run-applescript)
 - `ENV` which is loaded from the `~/.meta-x/.env` file if it exists
+- `choose(['option A', 'option B', 'option C'])` which returns a `Promise` that resolves to the selected option or `undefined` if nothing was selected.
 
 #### Using NPM Packages
 
