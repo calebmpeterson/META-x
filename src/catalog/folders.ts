@@ -3,16 +3,18 @@ import path from "path";
 import open, { openApp } from "open";
 import { FOLDER_PREFIX } from "./_constants";
 
+const FOLDERS = [
+  "Finder",
+  "Applications",
+  "Documents",
+  "Downloads",
+  "Home",
+  "Pictures",
+  "Workspace",
+];
+
 export const getFolders = () =>
-  [
-    "Finder",
-    "Applications",
-    "Documents",
-    "Downloads",
-    "Home",
-    "Pictures",
-    "Workspace",
-  ].map((folder) => ({
+  FOLDERS.map((folder) => ({
     title: `${FOLDER_PREFIX} ${folder}`,
     value: folder,
     invoke: async () => {
