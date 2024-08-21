@@ -6,6 +6,9 @@ import showPrompt from "./ui/main";
 import { listen } from "./ipc";
 import { rebuildCatalog } from "./state/rebuildCatalog";
 import _ from "lodash";
+import { runClipboardHistory } from "./ui/clipboard-history";
+import { updateClipboardHistory } from "./state/clipboardHistory";
+import { getClipboardContent } from "./clipboard/utils";
 
 const spinner = ora({
   text: "Ready",
@@ -13,7 +16,7 @@ const spinner = ora({
   spinner: "dots",
 });
 
-const run = async () => {
+const runCommand = async () => {
   spinner.stop();
 
   try {
@@ -33,22 +36,28 @@ const run = async () => {
         message: "META-x encountered an error: " + error.message,
       });
     }
+  } finally {
+    spinner.start();
   }
-
-  spinner.start();
 };
 
 rebuildCatalog();
 
-setInterval(() => {
+setInterval(async () => {
   spinner.stop();
   rebuildCatalog();
   spinner.start();
 }, 1000 * 60);
 
+setInterval(async () => {
+  updateClipboardHistory(await getClipboardContent());
+}, 250);
+
 listen((message) => {
   if (message.trim() === "run") {
-    run();
+    runCommand();
+  } else if (message.trim() === "clipboard-history") {
+    runClipboardHistory();
   } else {
     console.log(`Unknown message: "${message}"`);
   }

@@ -16,3 +16,9 @@ export const setClipboardContent = clock(
     }
   }
 );
+
+export const getClipboardContent = async () => {
+  // This will read the selected text on Linux and the
+  // current clipboard contents on macOS and Windows
+  return clipboard.read();
+};

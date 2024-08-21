@@ -136,6 +136,9 @@ var setClipboardContent = clock(
     }
   }
 );
+var getClipboardContent = async () => {
+  return clipboard.read();
+};
 
 // src/utils/processInvokeScriptResult.ts
 import _3 from "lodash";
@@ -301,7 +304,7 @@ var getBuiltInCommands = () => _7.map(BUILT_IN_COMMANDS, (command, name) => ({
 import os3 from "os";
 import path4 from "path";
 import open2, { openApp } from "open";
-var getFolders = () => [
+var FOLDERS = [
   "Finder",
   "Applications",
   "Documents",
@@ -309,7 +312,8 @@ var getFolders = () => [
   "Home",
   "Pictures",
   "Workspace"
-].map((folder) => ({
+];
+var getFolders = () => FOLDERS.map((folder) => ({
   title: `${FOLDER_PREFIX} ${folder}`,
   value: folder,
   invoke: async () => {
@@ -435,7 +439,7 @@ var getSystemCommands = () => [
     }
   },
   {
-    title: `${SYSTEM_PREFIX} Lock Screen`,
+    title: `${SYSTEM_PREFIX} Lock Displays`,
     invoke: async () => {
       await execa3("open", [
         "-a",
@@ -558,13 +562,17 @@ import open4 from "open";
 // src/utils/choose.ts
 import { exec as exec2 } from "child_process";
 import _10 from "lodash";
-var choose = (options) => new Promise((resolve, reject) => {
-  const choices = options.join("\n");
-  const toShow = Math.max(5, Math.min(40, _10.size(options)));
-  const cmd = `echo "${choices}" | choose -b 000000 -c 222222 -w 30 -s 18 -m -n ${toShow}`;
+var choose = (items, options = {}) => new Promise((resolve) => {
+  const choices = items.join("\n");
+  const toShow = Math.max(5, Math.min(40, _10.size(items)));
+  const outputConfig = options.returnIndex ? "-i" : "";
+  const cmd = `echo "${choices}" | choose -b 000000 -c 222222 -w 30 -s 18 -m -n ${toShow} ${outputConfig}`;
   exec2(cmd, (error, stdout, stderr) => {
     if (stdout) {
       const selection = _10.trim(stdout);
+      if (options.returnIndex && selection === "-1") {
+        resolve(void 0);
+      }
       resolve(selection);
     } else {
       if (error && process.env.NODE_ENV === "development") {
@@ -743,13 +751,71 @@ var rebuildCatalog = () => {
 };
 
 // src/runner.ts
+import _18 from "lodash";
+
+// src/ui/clipboard-history/index.ts
+import _17 from "lodash";
+
+// src/state/clipboardHistory.ts
 import _16 from "lodash";
+
+// src/utils/isProbablyPassword.ts
+var isProbablyPassword = (password) => {
+  const minLength = 8;
+  const maxLength = 16;
+  const hasUpperCase = /[A-Z]/.test(password);
+  const hasLowerCase = /[a-z]/.test(password);
+  const hasDigit = /\d/.test(password);
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+  const lengthValid = password.length >= minLength && password.length <= maxLength;
+  let score = 0;
+  if (hasUpperCase) score++;
+  if (hasLowerCase) score++;
+  if (hasDigit) score++;
+  if (hasSpecialChar) score++;
+  return score >= 3 && lengthValid;
+};
+
+// src/state/clipboardHistory.ts
+var clipboardHistory = [];
+var updateClipboardHistory = (entry) => {
+  if (!isProbablyPassword(entry)) {
+    clipboardHistory = _16.take(_16.uniq([entry, ...clipboardHistory]), 10);
+  }
+};
+var getClipboardHistory = () => clipboardHistory;
+
+// src/ui/clipboard-history/index.ts
+var formatHistoryEntry = (entry) => {
+  const firstLine = entry.includes("\n") ? _17.truncate(
+    entry.split("\n").find((line) => !_17.isEmpty(line)),
+    { length: 50 }
+  ) : _17.truncate(entry, { length: 50 });
+  return _17.trim(firstLine);
+};
+var runClipboardHistory = async () => {
+  const history = getClipboardHistory();
+  const historyItems = _17.map(history, (entry) => formatHistoryEntry(entry));
+  const index = await choose(historyItems, {
+    returnIndex: true
+  });
+  if (index) {
+    const indexAsNumber = parseInt(index, 10);
+    const selection = history[indexAsNumber];
+    if (selection) {
+      await setClipboardContent(selection);
+      await finish_default();
+    }
+  }
+};
+
+// src/runner.ts
 var spinner = ora({
   text: "Ready",
   interval: 500,
   spinner: "dots"
 });
-var run = async () => {
+var runCommand = async () => {
   spinner.stop();
   try {
     console.log("Meta-x triggered");
@@ -760,24 +826,30 @@ var run = async () => {
     }
   } catch (error) {
     console.error(error);
-    if (_16.isError(error)) {
+    if (_18.isError(error)) {
       notifier.notify({
         title: "META-x",
         message: "META-x encountered an error: " + error.message
       });
     }
+  } finally {
+    spinner.start();
   }
-  spinner.start();
 };
 rebuildCatalog();
-setInterval(() => {
+setInterval(async () => {
   spinner.stop();
   rebuildCatalog();
   spinner.start();
 }, 1e3 * 60);
+setInterval(async () => {
+  updateClipboardHistory(await getClipboardContent());
+}, 250);
 listen((message) => {
   if (message.trim() === "run") {
-    run();
+    runCommand();
+  } else if (message.trim() === "clipboard-history") {
+    runClipboardHistory();
   } else {
     console.log(`Unknown message: "${message}"`);
   }

@@ -33,7 +33,7 @@ export const getSystemCommands = () => [
     },
   },
   {
-    title: `${SYSTEM_PREFIX} Lock Screen`,
+    title: `${SYSTEM_PREFIX} Lock Displays`,
     invoke: async () => {
       await execa("open", [
         "-a",

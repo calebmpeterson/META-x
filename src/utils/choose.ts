@@ -6,15 +6,24 @@ import _ from "lodash";
 
 type ChooseResult = string | undefined;
 
-export const choose = (options: string[]) =>
-  new Promise<ChooseResult>((resolve, reject) => {
-    const choices = options.join("\n");
-    const toShow = Math.max(5, Math.min(40, _.size(options)));
-    const cmd = `echo "${choices}" | choose -b 000000 -c 222222 -w 30 -s 18 -m -n ${toShow}`;
+type Options = {
+  returnIndex?: boolean;
+};
+
+export const choose = (items: string[], options: Options = {}) =>
+  new Promise<ChooseResult>((resolve) => {
+    const choices = items.join("\n");
+    const toShow = Math.max(5, Math.min(40, _.size(items)));
+    const outputConfig = options.returnIndex ? "-i" : "";
+    const cmd = `echo "${choices}" | choose -b 000000 -c 222222 -w 30 -s 18 -m -n ${toShow} ${outputConfig}`;
 
     exec(cmd, (error, stdout, stderr) => {
       if (stdout) {
         const selection = _.trim(stdout);
+
+        if (options.returnIndex && selection === "-1") {
+          resolve(undefined);
+        }
 
         resolve(selection);
       } else {

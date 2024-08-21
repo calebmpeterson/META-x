@@ -26,7 +26,11 @@ Emacs-esque `M-x` commands for your entire OS.
 
 ```
 # ⌘SPACE to launch Meta-x on the current text selection in the active window
-cmd - space : <meta-x-root-dir>/bin/launch
+alt - space: EDITOR=code ~/Tools/meta-x/bin/launch
+cmd - space: EDITOR=code ~/Tools/meta-x/bin/launch
+
+# CTRL+V to launch clipboard history
+ctrl - v: EDITOR=code ~/Tools/meta-x/bin/clipboard-history
 ```
 
 ## Configuration
