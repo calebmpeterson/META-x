@@ -57,7 +57,7 @@ import _ from "lodash";
 var darwin_default3 = (commands) => new Promise((resolve, reject) => {
   const choices = commands.map(({ title }) => title).join("\n");
   const toShow = Math.min(40, _.size(commands));
-  const cmd = `echo "${choices}" | choose -b 000000 -c 222222 -w 30 -s 18 -m -n ${toShow}`;
+  const cmd = `echo "${choices}" | choose -b 000000 -c 222222 -w 30 -s 18 -m -n ${toShow} -p "Run a command or open an application"`;
   exec(cmd, (error, stdout, stderr) => {
     if (stdout) {
       const query = _.trim(stdout);
@@ -565,7 +565,10 @@ import _10 from "lodash";
 var choose = (items, options = {}) => new Promise((resolve) => {
   const choices = items.join("\n");
   const toShow = Math.max(5, Math.min(40, _10.size(items)));
-  const outputConfig = options.returnIndex ? "-i" : "";
+  const outputConfig = [
+    options.returnIndex ? "-i" : "",
+    options.placeholder ? `-p "${options.placeholder}"` : ""
+  ].join(" ");
   const cmd = `echo "${choices}" | choose -b 000000 -c 222222 -w 30 -s 18 -m -n ${toShow} ${outputConfig}`;
   exec2(cmd, (error, stdout, stderr) => {
     if (stdout) {
@@ -761,19 +764,16 @@ import _16 from "lodash";
 
 // src/utils/isProbablyPassword.ts
 var isProbablyPassword = (password) => {
-  const minLength = 8;
-  const maxLength = 16;
   const hasUpperCase = /[A-Z]/.test(password);
   const hasLowerCase = /[a-z]/.test(password);
   const hasDigit = /\d/.test(password);
   const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-  const lengthValid = password.length >= minLength && password.length <= maxLength;
   let score = 0;
   if (hasUpperCase) score++;
   if (hasLowerCase) score++;
   if (hasDigit) score++;
   if (hasSpecialChar) score++;
-  return score >= 3 && lengthValid;
+  return score >= 3;
 };
 
 // src/state/clipboardHistory.ts
@@ -797,7 +797,8 @@ var runClipboardHistory = async () => {
   const history = getClipboardHistory();
   const historyItems = _17.map(history, (entry) => formatHistoryEntry(entry));
   const index = await choose(historyItems, {
-    returnIndex: true
+    returnIndex: true,
+    placeholder: "Clipboard history"
   });
   if (index) {
     const indexAsNumber = parseInt(index, 10);

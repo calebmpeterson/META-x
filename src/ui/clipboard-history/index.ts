@@ -22,6 +22,7 @@ export const runClipboardHistory = async () => {
 
   const index = await choose(historyItems, {
     returnIndex: true,
+    placeholder: "Clipboard history",
   });
 
   if (index) {
