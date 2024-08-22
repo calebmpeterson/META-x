@@ -14,7 +14,7 @@ export const setClipboardContent = clock(
     if (_.isString(contentAsText)) {
       await clipboard.write(contentAsText);
     }
-  }
+  },
 );
 
 export const getClipboardContent = async () => {

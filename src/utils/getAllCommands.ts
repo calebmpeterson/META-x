@@ -44,7 +44,7 @@ export const getAllCommands = clock("getAllCommands", () => {
   const allCommands = [
     ..._.sortBy(
       [...getScriptCommands(), ...getBuiltInCommands()],
-      commandComparator
+      commandComparator,
     ),
     ...getManageScriptCommands(),
     ...getFolders(),

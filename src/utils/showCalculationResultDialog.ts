@@ -4,7 +4,7 @@ import path from "node:path";
 
 export const showCalculationResultDialog = async (
   query: string,
-  result: string
+  result: string,
 ) => {
   const cwd = path.join(os.homedir(), "Tools", "quickulator", "app");
   const target = path.join(cwd, "dist", "quickulator");

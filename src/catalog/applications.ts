@@ -12,7 +12,7 @@ const persistApplicationUsage = (values: string[]) => {
   fs.writeFileSync(
     getApplicationUsageHistory(),
     _.takeRight(values, 100).join("\n"),
-    "utf8"
+    "utf8",
   );
 };
 
@@ -31,7 +31,7 @@ const trackApplicationUsage = (value: string) => {
 };
 
 export const getApplications = (
-  rootDir = "/Applications"
+  rootDir = "/Applications",
 ): ApplicationLauncher[] => {
   const history = restoreApplicationUsage();
   const scores = _.countBy(history, _.identity);
@@ -61,7 +61,7 @@ export const getApplications = (
       title: `${APPLICATION_PREFIX} ${_.get(
         path.parse(application),
         "name",
-        application
+        application,
       )}`,
       value,
       score: scores[value] ?? 0,

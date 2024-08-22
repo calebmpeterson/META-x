@@ -1,7 +1,7 @@
 export const clock =
   <Args extends unknown[], ReturnValue>(
     label: string,
-    work: (...args: Args) => ReturnValue
+    work: (...args: Args) => ReturnValue,
   ) =>
   (...args: Args): ReturnValue => {
     try {

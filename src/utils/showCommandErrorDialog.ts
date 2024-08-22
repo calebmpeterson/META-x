@@ -4,7 +4,7 @@ import _ from "lodash";
 
 export const showCommandErrorDialog = async (
   commandFilename: string,
-  error: unknown
+  error: unknown,
 ) => {
   if (_.isError(error)) {
     const result = await cocoaDialog("msgbox", {

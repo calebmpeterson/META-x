@@ -8,5 +8,5 @@ startup.create(
   "META-x",
   `/usr/local/bin/node`,
   [`${CWD}/bin/runner.mjs`],
-  `${CWD}/runner.log`
+  `${CWD}/runner.log`,
 );

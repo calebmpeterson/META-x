@@ -15,7 +15,7 @@ const createServer = (socket: string, onMessage: OnMessage) => {
         } catch (error) {
           console.error(
             `Error encountered while handling message "${message}"`,
-            error
+            error,
           );
         }
       });

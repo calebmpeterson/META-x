@@ -8,7 +8,7 @@ const formatHistoryEntry = (entry: string) => {
   const firstLine = entry.includes("\n")
     ? _.truncate(
         entry.split("\n").find((line) => !_.isEmpty(line)),
-        { length: 50 }
+        { length: 50 },
       )
     : _.truncate(entry, { length: 50 });
 

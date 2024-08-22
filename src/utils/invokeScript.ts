@@ -15,7 +15,7 @@ module.exports(selection);
 
 export const invokeScript = async (
   commandFilename: string,
-  selection: string
+  selection: string,
 ) => {
   const commandContext = createScriptContext(commandFilename, selection);
 

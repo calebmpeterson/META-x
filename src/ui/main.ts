@@ -67,7 +67,7 @@ export default async () => {
         const resultFromFallback = fallbackHandler.call(
           commandContext,
           selection,
-          item.query
+          item.query,
         );
 
         if (!_.isUndefined(resultFromFallback)) {

@@ -3,5 +3,5 @@ export const isPromise = (value: unknown): value is Promise<unknown> =>
     typeof value === "object" &&
       value &&
       "then" in value &&
-      typeof value.then === "function"
+      typeof value.then === "function",
   );

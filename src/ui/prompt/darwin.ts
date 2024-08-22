@@ -21,7 +21,7 @@ export default (commands: Command[]) =>
 
         const command =
           commands.find(
-            ({ title, isFallback }) => title === query && !isFallback
+            ({ title, isFallback }) => title === query && !isFallback,
           ) || rawQueryCommand;
 
         resolve(command);

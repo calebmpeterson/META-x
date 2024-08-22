@@ -11,7 +11,7 @@ import { runAppleScript } from "run-applescript";
 
 export const createScriptContext = (
   commandFilename: string,
-  selection: string
+  selection: string,
 ) => {
   const require = createRequire(commandFilename);
 

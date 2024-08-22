@@ -10,7 +10,7 @@ export const getScriptCommands = (): ScriptCommand[] =>
   fs
     .readdirSync(getConfigDir())
     .filter(
-      (file) => file.endsWith(".js") && !file.includes("fallback-handler")
+      (file) => file.endsWith(".js") && !file.includes("fallback-handler"),
     )
     .map((command) => ({
       title: `${SCRIPT_PREFIX} ${path.basename(command, ".js")}`,
