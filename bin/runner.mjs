@@ -626,9 +626,11 @@ import cocoaDialog2 from "cocoa-dialog";
 import _12 from "lodash";
 var showCommandErrorDialog = async (commandFilename, error) => {
   if (_12.isError(error)) {
-    const result = await cocoaDialog2("msgbox", {
+    const result = await cocoaDialog2("textbox", {
       title: `Error in ${commandFilename}`,
       text: error.stack,
+      height: 200,
+      width: 600,
       button1: "Edit",
       button2: "Dismiss"
     });
