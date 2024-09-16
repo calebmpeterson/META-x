@@ -765,17 +765,17 @@ import _17 from "lodash";
 import _16 from "lodash";
 
 // src/utils/isProbablyPassword.ts
-var isProbablyPassword = (password) => {
-  const hasUpperCase = /[A-Z]/.test(password);
-  const hasLowerCase = /[a-z]/.test(password);
-  const hasDigit = /\d/.test(password);
-  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+var isProbablyPassword = (text) => {
+  const hasUpperCase = /[A-Z]/.test(text);
+  const hasLowerCase = /[a-z]/.test(text);
+  const hasDigit = /\d/.test(text);
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(text);
   let score = 0;
   if (hasUpperCase) score++;
   if (hasLowerCase) score++;
   if (hasDigit) score++;
   if (hasSpecialChar) score++;
-  return score >= 3;
+  return score >= 3 && !text.startsWith("https://");
 };
 
 // src/state/clipboardHistory.ts

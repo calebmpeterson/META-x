@@ -1,8 +1,8 @@
-export const isProbablyPassword = (password: string) => {
-  const hasUpperCase = /[A-Z]/.test(password);
-  const hasLowerCase = /[a-z]/.test(password);
-  const hasDigit = /\d/.test(password);
-  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+export const isProbablyPassword = (text: string) => {
+  const hasUpperCase = /[A-Z]/.test(text);
+  const hasLowerCase = /[a-z]/.test(text);
+  const hasDigit = /\d/.test(text);
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(text);
 
   let score = 0;
   if (hasUpperCase) score++;
@@ -10,5 +10,5 @@ export const isProbablyPassword = (password: string) => {
   if (hasDigit) score++;
   if (hasSpecialChar) score++;
 
-  return score >= 3;
+  return score >= 3 && !text.startsWith("https://");
 };
