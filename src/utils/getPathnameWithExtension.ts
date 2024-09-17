@@ -1,2 +1,4 @@
-export const getPathnameWithExtension = (pathname: string) =>
-  pathname.endsWith(".js") ? pathname : `${pathname}.js`;
+export const getPathnameWithExtension = (
+  pathname: string,
+  extension = ".js"
+) => (pathname.endsWith(extension) ? pathname : `${pathname}${extension}`);

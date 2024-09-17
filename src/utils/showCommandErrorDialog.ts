@@ -1,5 +1,5 @@
 import cocoaDialog from "cocoa-dialog";
-import { editScript } from "./editScript.js";
+import { openInSystemEditor } from "./openInSystemEditor.js";
 import _ from "lodash";
 
 export const showCommandErrorDialog = async (
@@ -17,7 +17,7 @@ export const showCommandErrorDialog = async (
     });
 
     if (result === "1") {
-      await editScript(commandFilename);
+      await openInSystemEditor(commandFilename);
     }
   }
 };

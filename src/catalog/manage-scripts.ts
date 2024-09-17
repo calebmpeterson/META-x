@@ -1,11 +1,11 @@
 import cocoaDialog from "cocoa-dialog";
 import _ from "lodash";
-import { createEmptyScript } from "../utils/createEmptyScript.js";
-import { getConfigDir } from "../utils/getConfigDir.js";
-import { editScript } from "../utils/editScript.js";
-import { ensureEmptyFallbackHandler } from "../utils/ensureEmptyFallbackHandler.js";
-import { MANAGE_SCRIPTS_PREFIX } from "./_constants.js";
-import { getCommandFilename } from "../utils/getCommandFilename.js";
+import { createEmptyScript } from "../utils/createEmptyScript";
+import { getConfigDir } from "../utils/getConfigDir";
+import { openInSystemEditor } from "../utils/openInSystemEditor";
+import { ensureEmptyFallbackHandler } from "../utils/ensureEmptyFallbackHandler";
+import { MANAGE_SCRIPTS_PREFIX } from "./_constants";
+import { getCommandFilename } from "../utils/getCommandFilename";
 
 export const getManageScriptCommands = () => [
   {
@@ -18,7 +18,7 @@ export const getManageScriptCommands = () => [
 
       if (!_.isEmpty(result)) {
         createEmptyScript(result);
-        await editScript(result);
+        await openInSystemEditor(result);
       }
     },
   },
@@ -31,7 +31,7 @@ export const getManageScriptCommands = () => [
       });
 
       if (!_.isEmpty(result)) {
-        await editScript(result);
+        await openInSystemEditor(result);
       }
     },
   },
@@ -42,7 +42,7 @@ export const getManageScriptCommands = () => [
 
       ensureEmptyFallbackHandler();
 
-      await editScript(fallbackHandlerFilename);
+      await openInSystemEditor(fallbackHandlerFilename);
     },
   },
 ];

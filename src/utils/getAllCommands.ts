@@ -11,6 +11,8 @@ import { getShortcuts } from "../catalog/shortcuts";
 import { clock } from "./clock";
 import { getCommandFilename } from "./getCommandFilename";
 import { ApplicationLauncher, Command } from "../catalog/types";
+import { getManageSnippetCommands } from "../catalog/manage-snippets";
+import { getSnippetCommands } from "../catalog/snippets";
 
 const getCommandsFromFallbackHandler = () => {
   const commandFilename = getCommandFilename("fallback-handler.js");
@@ -44,9 +46,11 @@ export const getAllCommands = clock("getAllCommands", () => {
   const allCommands = [
     ..._.sortBy(
       [...getScriptCommands(), ...getBuiltInCommands()],
-      commandComparator,
+      commandComparator
     ),
     ...getManageScriptCommands(),
+    ...getSnippetCommands(),
+    ...getManageSnippetCommands(),
     ...getFolders(),
     ...getShortcuts(),
     ..._.chain([

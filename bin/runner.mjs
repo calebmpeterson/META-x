@@ -57,7 +57,7 @@ import _ from "lodash";
 var darwin_default3 = (commands) => new Promise((resolve, reject) => {
   const choices = commands.map(({ title }) => title).join("\n");
   const toShow = Math.min(40, _.size(commands));
-  const cmd = `echo "${choices}" | choose -b 000000 -c 222222 -w 30 -s 18 -m -n ${toShow} -p "Run a command or open an application"`;
+  const cmd = `echo "${choices}" | choose -f "Fira Code" -b 000000 -c 222222 -w 30 -s 18 -m -n ${toShow} -p "Run a command or open an application"`;
   exec(cmd, (error, stdout, stderr) => {
     if (stdout) {
       const query = _.trim(stdout);
@@ -110,7 +110,7 @@ import path2 from "node:path";
 // src/utils/getConfigDir.ts
 import os from "os";
 import path from "path";
-var getConfigDir = () => path.join(os.homedir(), ".meta-x");
+var getConfigDir = (...subdirs) => path.join(os.homedir(), ".meta-x", ...subdirs);
 
 // src/utils/getCommandFilename.ts
 var getCommandFilename = (commandFilename) => path2.join(getConfigDir(), commandFilename);
@@ -268,7 +268,7 @@ var listen = (onMessage) => {
 };
 
 // src/utils/getAllCommands.ts
-import _15 from "lodash";
+import _16 from "lodash";
 import { createRequire as createRequire3 } from "node:module";
 
 // src/catalog/built-ins.ts
@@ -276,7 +276,9 @@ import _7 from "lodash";
 
 // src/catalog/_constants.ts
 var SCRIPT_PREFIX = "\u0192\u0578";
+var SNIPPET_PREFIX = "->";
 var MANAGE_SCRIPTS_PREFIX = "\u2425";
+var MANAGE_SNIPPETS_PREFIX = "\u2425";
 var FOLDER_PREFIX = "\u2302";
 var APPLICATION_PREFIX = "\u232C";
 var SYSTEM_PREFIX = "\u2699\uFE0E";
@@ -457,7 +459,7 @@ import _9 from "lodash";
 import fs4 from "node:fs";
 
 // src/utils/getPathnameWithExtension.ts
-var getPathnameWithExtension = (pathname) => pathname.endsWith(".js") ? pathname : `${pathname}.js`;
+var getPathnameWithExtension = (pathname, extension = ".js") => pathname.endsWith(extension) ? pathname : `${pathname}${extension}`;
 
 // src/utils/createEmptyScript.ts
 var TEMPLATE = `
@@ -479,11 +481,13 @@ var createEmptyScript = (pathname) => {
   }
 };
 
-// src/utils/editScript.ts
+// src/utils/openInSystemEditor.ts
 import { execa as execa4 } from "execa";
-var editScript = async (pathname) => {
+var openInSystemEditor = async (pathname, extension = ".js") => {
   if (process.env.EDITOR) {
-    await execa4(process.env.EDITOR, [getPathnameWithExtension(pathname)]);
+    await execa4(process.env.EDITOR, [
+      getPathnameWithExtension(pathname, extension)
+    ]);
   }
 };
 
@@ -518,7 +522,7 @@ var getManageScriptCommands = () => [
       });
       if (!_9.isEmpty(result)) {
         createEmptyScript(result);
-        await editScript(result);
+        await openInSystemEditor(result);
       }
     }
   },
@@ -530,7 +534,7 @@ var getManageScriptCommands = () => [
         withDirectory: getConfigDir()
       });
       if (!_9.isEmpty(result)) {
-        await editScript(result);
+        await openInSystemEditor(result);
       }
     }
   },
@@ -539,7 +543,7 @@ var getManageScriptCommands = () => [
     invoke: async () => {
       const fallbackHandlerFilename = getCommandFilename("fallback-handler.js");
       ensureEmptyFallbackHandler();
-      await editScript(fallbackHandlerFilename);
+      await openInSystemEditor(fallbackHandlerFilename);
     }
   }
 ];
@@ -569,7 +573,7 @@ var choose = (items, options = {}) => new Promise((resolve) => {
     options.returnIndex ? "-i" : "",
     options.placeholder ? `-p "${options.placeholder}"` : ""
   ].join(" ");
-  const cmd = `echo "${choices}" | choose -b 000000 -c 222222 -w 30 -s 18 -m -n ${toShow} ${outputConfig}`;
+  const cmd = `echo "${choices}" | choose -f "Fira Code" -b 000000 -c 222222 -w 30 -s 18 -m -n ${toShow} ${outputConfig}`;
   exec2(cmd, (error, stdout, stderr) => {
     if (stdout) {
       const selection = _10.trim(stdout);
@@ -635,7 +639,7 @@ var showCommandErrorDialog = async (commandFilename, error) => {
       button2: "Dismiss"
     });
     if (result === "1") {
-      await editScript(commandFilename);
+      await openInSystemEditor(commandFilename);
     }
   }
 };
@@ -703,6 +707,76 @@ var getShortcuts = () => {
   }
 };
 
+// src/catalog/manage-snippets.ts
+import cocoaDialog3 from "cocoa-dialog";
+import _15 from "lodash";
+import fs9 from "node:fs";
+
+// src/utils/createEmptySnippet.ts
+import fs8 from "node:fs";
+var SNIPPET_EXTENSION = ".txt";
+var TEMPLATE3 = ``;
+var createEmptySnippet = (pathname) => {
+  const nameWithExtension = getPathnameWithExtension(
+    pathname,
+    SNIPPET_EXTENSION
+  );
+  if (!fs8.existsSync(nameWithExtension)) {
+    fs8.writeFileSync(nameWithExtension, TEMPLATE3, "utf8");
+  }
+};
+
+// src/catalog/manage-snippets.ts
+var SNIPPETS_DIR = getConfigDir("snippets");
+if (!fs9.existsSync(SNIPPETS_DIR)) {
+  fs9.mkdirSync(SNIPPETS_DIR, { recursive: true });
+}
+var getManageSnippetCommands = () => [
+  {
+    title: `${MANAGE_SNIPPETS_PREFIX} Create Snippet`,
+    invoke: async () => {
+      const result = await cocoaDialog3("filesave", {
+        title: "Save Snippet As...",
+        withDirectory: SNIPPETS_DIR
+      });
+      if (!_15.isEmpty(result)) {
+        createEmptySnippet(result);
+        await openInSystemEditor(result, SNIPPET_EXTENSION);
+      }
+    }
+  },
+  {
+    title: `${MANAGE_SNIPPETS_PREFIX} Edit Snippet`,
+    invoke: async () => {
+      const result = await cocoaDialog3("fileselect", {
+        title: "Choose Snippet To Edit...",
+        withDirectory: SNIPPETS_DIR
+      });
+      if (!_15.isEmpty(result)) {
+        await openInSystemEditor(result, SNIPPET_EXTENSION);
+      }
+    }
+  }
+];
+
+// src/catalog/snippets.ts
+import fs10 from "fs";
+import path10 from "path";
+
+// src/utils/getSnippetFilename.ts
+import path9 from "node:path";
+var getSnippetFilename = (snippetFilename) => path9.join(getConfigDir("snippets"), snippetFilename);
+
+// src/catalog/snippets.ts
+var getSnippetCommands = () => fs10.readdirSync(getConfigDir("snippets")).filter((file) => file.endsWith(SNIPPET_EXTENSION)).map((command) => ({
+  title: `${SNIPPET_PREFIX} ${path10.basename(command, SNIPPET_EXTENSION)}`,
+  invoke: async (_selection) => {
+    const snippetFilename = getSnippetFilename(command);
+    const snippet = fs10.readFileSync(snippetFilename, "utf-8");
+    return snippet;
+  }
+}));
+
 // src/utils/getAllCommands.ts
 var getCommandsFromFallbackHandler = () => {
   const commandFilename = getCommandFilename("fallback-handler.js");
@@ -717,7 +791,7 @@ var getCommandsFromFallbackHandler = () => {
       isFallback: true
     }));
   } catch (e) {
-    if (_15.isError(e)) {
+    if (_16.isError(e)) {
       console.error(`Failed to run fallback handler: ${e.message}`);
     }
     return [];
@@ -727,14 +801,16 @@ var commandComparator = ({ title }) => title;
 var applicationComparator = ({ score }) => -score;
 var getAllCommands = clock("getAllCommands", () => {
   const allCommands = [
-    ..._15.sortBy(
+    ..._16.sortBy(
       [...getScriptCommands(), ...getBuiltInCommands()],
       commandComparator
     ),
     ...getManageScriptCommands(),
+    ...getSnippetCommands(),
+    ...getManageSnippetCommands(),
     ...getFolders(),
     ...getShortcuts(),
-    ..._15.chain([
+    ..._16.chain([
       // Applications can live in multiple locations on macOS
       // Source: https://unix.stackexchange.com/a/583843
       ...getApplications("/Applications"),
@@ -756,13 +832,13 @@ var rebuildCatalog = () => {
 };
 
 // src/runner.ts
-import _18 from "lodash";
+import _19 from "lodash";
 
 // src/ui/clipboard-history/index.ts
-import _17 from "lodash";
+import _18 from "lodash";
 
 // src/state/clipboardHistory.ts
-import _16 from "lodash";
+import _17 from "lodash";
 
 // src/utils/isProbablyPassword.ts
 var isProbablyPassword = (text) => {
@@ -782,22 +858,22 @@ var isProbablyPassword = (text) => {
 var clipboardHistory = [];
 var updateClipboardHistory = (entry) => {
   if (!isProbablyPassword(entry)) {
-    clipboardHistory = _16.take(_16.uniq([entry, ...clipboardHistory]), 10);
+    clipboardHistory = _17.take(_17.uniq([entry, ...clipboardHistory]), 10);
   }
 };
 var getClipboardHistory = () => clipboardHistory;
 
 // src/ui/clipboard-history/index.ts
 var formatHistoryEntry = (entry) => {
-  const firstLine = entry.includes("\n") ? _17.truncate(
-    entry.split("\n").find((line) => !_17.isEmpty(line)),
+  const firstLine = entry.includes("\n") ? _18.truncate(
+    entry.split("\n").find((line) => !_18.isEmpty(line)),
     { length: 50 }
-  ) : _17.truncate(entry, { length: 50 });
-  return _17.trim(firstLine);
+  ) : _18.truncate(entry, { length: 50 });
+  return _18.trim(firstLine);
 };
 var runClipboardHistory = async () => {
   const history = getClipboardHistory();
-  const historyItems = _17.map(history, (entry) => formatHistoryEntry(entry));
+  const historyItems = _18.map(history, (entry) => formatHistoryEntry(entry));
   const index = await choose(historyItems, {
     returnIndex: true,
     placeholder: "Clipboard history"
@@ -829,7 +905,7 @@ var runCommand = async () => {
     }
   } catch (error) {
     console.error(error);
-    if (_18.isError(error)) {
+    if (_19.isError(error)) {
       notifier.notify({
         title: "META-x",
         message: "META-x encountered an error: " + error.message
