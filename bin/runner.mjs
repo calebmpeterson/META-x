@@ -54,10 +54,15 @@ var pressEnter_default = async () => {
 // src/ui/prompt/darwin.ts
 import { exec } from "child_process";
 import _ from "lodash";
+
+// src/utils/getFontName.ts
+var getFontName = () => "Fira Code";
+
+// src/ui/prompt/darwin.ts
 var darwin_default3 = (commands) => new Promise((resolve, reject) => {
   const choices = commands.map(({ title }) => title).join("\n");
   const toShow = Math.min(40, _.size(commands));
-  const cmd = `echo "${choices}" | choose -f "Fira Code" -b 000000 -c 222222 -w 30 -s 18 -m -n ${toShow} -p "Run a command or open an application"`;
+  const cmd = `echo "${choices}" | choose -f "${getFontName()}" -b 000000 -c 222222 -w 30 -s 18 -m -n ${toShow} -p "Run a command or open an application"`;
   exec(cmd, (error, stdout, stderr) => {
     if (stdout) {
       const query = _.trim(stdout);
@@ -573,7 +578,7 @@ var choose = (items, options = {}) => new Promise((resolve) => {
     options.returnIndex ? "-i" : "",
     options.placeholder ? `-p "${options.placeholder}"` : ""
   ].join(" ");
-  const cmd = `echo "${choices}" | choose -f "Fira Code" -b 000000 -c 222222 -w 30 -s 18 -m -n ${toShow} ${outputConfig}`;
+  const cmd = `echo "${choices}" | choose -f "${getFontName()}" -b 000000 -c 222222 -w 30 -s 18 -m -n ${toShow} ${outputConfig}`;
   exec2(cmd, (error, stdout, stderr) => {
     if (stdout) {
       const selection = _10.trim(stdout);

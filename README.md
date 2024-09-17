@@ -17,10 +17,17 @@ Emacs-esque `M-x` commands for your entire OS.
 1. `git clone https://github.com/calebmpeterson/META-x.git`
 2. `cd META-x`
 3. `yarn install`
+4. `brew install font-fira-code`
+5. `brew install choose-gui`
 
 ## Running
 
 **Meta-x** needs a hot-key launcher. [`skhd`](https://github.com/koekeishiya/skhd) is recommended for macOS.
+
+```
+brew install koekeishiya/formulae/skhd
+skhd --start-service
+```
 
 ### Sample `.shkdrc`
 

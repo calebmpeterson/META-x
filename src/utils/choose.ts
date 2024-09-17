@@ -1,5 +1,6 @@
 import { exec } from "child_process";
 import _ from "lodash";
+import { getFontName } from "./getFontName";
 
 // Uses choose: https://github.com/chipsenkbeil/choose
 // brew install choose-gui
@@ -19,7 +20,7 @@ export const choose = (items: string[], options: Options = {}) =>
       options.returnIndex ? "-i" : "",
       options.placeholder ? `-p "${options.placeholder}"` : "",
     ].join(" ");
-    const cmd = `echo "${choices}" | choose -b 000000 -c 222222 -w 30 -s 18 -m -n ${toShow} ${outputConfig}`;
+    const cmd = `echo "${choices}" | choose -f "${getFontName()}" -b 000000 -c 222222 -w 30 -s 18 -m -n ${toShow} ${outputConfig}`;
 
     exec(cmd, (error, stdout, stderr) => {
       if (stdout) {
