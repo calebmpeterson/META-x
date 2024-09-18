@@ -291,15 +291,16 @@ var SHORTCUT_PREFIX = "\u2318";
 
 // src/catalog/built-ins.ts
 var BUILT_IN_COMMANDS = {
-  "camel-case": _7.camelCase,
-  "kebab-case": _7.kebabCase,
-  "snake-case": _7.snakeCase,
-  "start-case": _7.startCase,
-  "to-lower": _7.toLower,
-  "to-upper": _7.toUpper,
-  capitalize: _7.capitalize,
-  deburr: _7.deburr,
-  sort: (selection) => _7.chain(selection).split("\n").sort().join("\n").value()
+  "Camel Case": _7.camelCase,
+  "Kebab Case": _7.kebabCase,
+  "Snake Case": _7.snakeCase,
+  "Start Case": _7.startCase,
+  "Title Case": _7.startCase,
+  "To Lower": _7.toLower,
+  "To Upper": _7.toUpper,
+  Capitalize: _7.capitalize,
+  Deburr: _7.deburr,
+  "Sort Lines": (selection) => _7.chain(selection).split("\n").sort().join("\n").value()
 };
 var getBuiltInCommands = () => _7.map(BUILT_IN_COMMANDS, (command, name) => ({
   label: name,
@@ -549,6 +550,12 @@ var getManageScriptCommands = () => [
       const fallbackHandlerFilename = getCommandFilename("fallback-handler.js");
       ensureEmptyFallbackHandler();
       await openInSystemEditor(fallbackHandlerFilename);
+    }
+  },
+  {
+    title: `${MANAGE_SCRIPTS_PREFIX} Reload Scripts`,
+    invoke: async () => {
+      rebuildCatalog();
     }
   }
 ];

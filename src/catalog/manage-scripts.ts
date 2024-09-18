@@ -6,8 +6,15 @@ import { openInSystemEditor } from "../utils/openInSystemEditor";
 import { ensureEmptyFallbackHandler } from "../utils/ensureEmptyFallbackHandler";
 import { MANAGE_SCRIPTS_PREFIX } from "./_constants";
 import { getCommandFilename } from "../utils/getCommandFilename";
+import { rebuildCatalog } from "../state/rebuildCatalog";
 
 export const getManageScriptCommands = () => [
+  {
+    title: `${MANAGE_SCRIPTS_PREFIX} Reload Scripts`,
+    invoke: async () => {
+      rebuildCatalog();
+    },
+  },
   {
     title: `${MANAGE_SCRIPTS_PREFIX} Create Script`,
     invoke: async () => {
