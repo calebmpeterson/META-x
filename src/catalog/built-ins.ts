@@ -14,6 +14,8 @@ const BUILT_IN_COMMANDS = {
   Deburr: _.deburr,
   "Sort Lines": (selection: string) =>
     _.chain(selection).split("\n").sort().join("\n").value(),
+  "Reverse Lines": (selection: string) =>
+    _.chain(selection).split("\n").reverse().join("\n").value()
 };
 
 export const getBuiltInCommands = (): BuiltInCommand[] =>

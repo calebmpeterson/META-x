@@ -300,7 +300,8 @@ var BUILT_IN_COMMANDS = {
   "To Upper": _7.toUpper,
   Capitalize: _7.capitalize,
   Deburr: _7.deburr,
-  "Sort Lines": (selection) => _7.chain(selection).split("\n").sort().join("\n").value()
+  "Sort Lines": (selection) => _7.chain(selection).split("\n").sort().join("\n").value(),
+  "Reverse Lines": (selection) => _7.chain(selection).split("\n").reverse().join("\n").value()
 };
 var getBuiltInCommands = () => _7.map(BUILT_IN_COMMANDS, (command, name) => ({
   label: name,
