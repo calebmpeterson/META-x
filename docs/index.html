@@ -25,93 +25,53 @@
   <body>
     <div class="container">
       <div class="row">
-        <div class="col-12 col-md-6 offset-md-3">
-          <h1 id="metax">Meta-X</h1>
-          <p>Emacs-esque <code>M-x</code> commands for your entire OS.</p>
-          <ul>
-            <li>Recommends <code>skhd</code> for hot-key bindings.</li>
-            <li>Uses <code>clipboardy</code> for clipboard interactions.</li>
-            <li>Uses <code>choose</code> for the command picker on macOS.</li>
-          </ul>
-          <h2 id="support">Support</h2>
-          <ul>
-            <li class="task-list-item" style="list-style-type: none">
-              <input
-                type="checkbox"
-                disabled
-                style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle"
-                checked
-              />
-              macOS
-            </li>
-            <li class="task-list-item" style="list-style-type: none">
-              <input
-                type="checkbox"
-                disabled
-                style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle"
-              />
-              Linux
-            </li>
-            <li class="task-list-item" style="list-style-type: none">
-              <input
-                type="checkbox"
-                disabled
-                style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle"
-              />
-              Windows
-            </li>
-          </ul>
-          <h2 id="installation">Installation</h2>
-          <ol>
-            <li>
-              <code
-                >git clone https://github.com/calebmpeterson/META-x.git</code
-              >
-            </li>
-            <li><code>cd META-x</code></li>
-            <li><code>yarn install</code></li>
-          </ol>
-          <h2 id="running">Running</h2>
-          <p>
-            <strong>Meta-x</strong> needs a hot-key launcher.
-            <a href="https://github.com/koekeishiya/skhd"><code>skhd</code></a>
-            is recommended for macOS.
-          </p>
-          <h3 id="sampleshkdrc">Sample <code>.shkdrc</code></h3>
-          <pre><code># ⌘SPACE to launch Meta-x on the current text selection in the active window
-cmd - space : node &lt;meta-x-root-dir&gt;/src/launcher.js
+        <div class="col-12 col-md-6 offset-md-3"><h1 id="metax">META-x</h1>
+<p>Emacs-esque <code>M-x</code> commands for your entire OS.</p>
+<ul>
+<li>Recommends <code>skhd</code> for hot-key bindings.</li>
+<li>Uses <code>clipboardy</code> for clipboard interactions.</li>
+<li>Uses <code>choose</code> for the command picker on macOS.</li>
+</ul>
+<h2 id="support">Support</h2>
+<ul>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> macOS</li>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;"> Linux</li>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;"> Windows</li>
+</ul>
+<h2 id="installation">Installation</h2>
+<ol>
+<li><code>git clone https://github.com/calebmpeterson/META-x.git</code></li>
+<li><code>cd META-x</code></li>
+<li><code>yarn install</code></li>
+<li><code>brew install font-fira-code</code></li>
+<li><code>brew install choose-gui</code></li>
+</ol>
+<h2 id="running">Running</h2>
+<p><strong>Meta-x</strong> needs a hot-key launcher. <a href="https://github.com/koekeishiya/skhd"><code>skhd</code></a> is recommended for macOS.</p>
+<pre><code>brew install koekeishiya/formulae/skhd
+skhd --start-service
 </code></pre>
-          <h2 id="configuration">Configuration</h2>
-          <p>
-            <strong>Meta-x</strong> config is kept in
-            <code>~/.meta-x/</code> directory. This makes it easy to keep your
-            config under source control.
-          </p>
-          <h3 id="settings">Settings</h3>
-          <p>
-            All configuration options are contained in
-            <code>~/.meta-x/config.json</code>
-          </p>
-          <h3 id="customcommands">Custom Commands</h3>
-          <p>
-            Custom commands are <code>commonjs</code> modules placed in
-            <code>~/.meta-x/</code>.
-          </p>
-          <h4 id="examplecommand">Example Command</h4>
-          <p>
-            To get a calculator capable of all operations/syntax available to
-            you in JavaScript, create <code>~/.meta-x/calc.js</code> with the
-            following content:
-          </p>
-          <pre><code class="js language-js">module.exports = (selection) =&gt; eval(selection);
+<h3 id="sampleshkdrc">Sample <code>.shkdrc</code></h3>
+<pre><code># ⌘SPACE to launch Meta-x on the current text selection in the active window
+alt - space: EDITOR=code ~/Tools/meta-x/bin/launch
+cmd - space: EDITOR=code ~/Tools/meta-x/bin/launch
+
+# CTRL+V to launch clipboard history
+ctrl - v: EDITOR=code ~/Tools/meta-x/bin/clipboard-history
 </code></pre>
-          <h4 id="nontransformingcommands">Non-transforming Commands</h4>
-          <p>
-            To create a command which does not transform the current selection
-            simply return <code>undefined</code> from the command module's
-            exported function:
-          </p>
-          <pre><code class="js language-js">module.exports = (selection) =&gt; {
+<h2 id="configuration">Configuration</h2>
+<p><strong>Meta-x</strong> config is kept in <code>~/.meta-x/</code> directory. This makes it easy to keep your config under source control.</p>
+<h3 id="settings">Settings</h3>
+<p>All configuration options are contained in <code>~/.meta-x/config.json</code></p>
+<h3 id="customcommands">Custom Commands</h3>
+<p>Custom commands are <code>commonjs</code> modules placed in <code>~/.meta-x/</code>.</p>
+<h4 id="examplecommand">Example Command</h4>
+<p>To get a calculator capable of all operations/syntax available to you in JavaScript, create <code>~/.meta-x/calc.js</code> with the following content:</p>
+<pre><code class="js language-js">module.exports = (selection) =&gt; eval(selection);
+</code></pre>
+<h4 id="nontransformingcommands">Non-transforming Commands</h4>
+<p>To create a command which does not transform the current selection simply return <code>undefined</code> from the command module's exported function:</p>
+<pre><code class="js language-js">module.exports = (selection) =&gt; {
   // Do something side-effect'ish here
   // ...
 
@@ -119,132 +79,70 @@ cmd - space : node &lt;meta-x-root-dir&gt;/src/launcher.js
   return undefined;
 };
 </code></pre>
-          <h4 id="commandnotfoundfallback">Command Not Found Fallback</h4>
-          <p>
-            If the event that your query does not match a known command, the raw
-            query string will be passed to
-            <code>~/.meta-x/fallback-handler.js</code> if it exists:
-          </p>
-          <pre><code class="js language-js">module.exports = function (selection, query) {
+<h4 id="macosshortcutcommands">macOS Shortcut Commands</h4>
+<p>To run a macOS Shortcut with the output of the command:</p>
+<pre><code class="js language-js">module.exports = (selection) =&gt; {
+  // The current selection will not be transformed.
+  //
+  // Instead, "Your Shortcut" will be run with the
+  // provided input.
+  return {
+    shortcut: "Your Shortcut",
+    input: selection.toUpperCase(),
+  };
+};
+</code></pre>
+<h4 id="commandnotfoundfallback">Command Not Found Fallback</h4>
+<p>In the event that your query does not match a known command, the raw query string will be passed to <code>~/.meta-x/fallback-handler.js</code> if it exists:</p>
+<pre><code class="js language-js">module.exports = function (selection, query) {
   // Do something with the currently selected
   // text and/or the raw query string
 };
 </code></pre>
-          <h4 id="commandnotfoundfallbacksuggestions">
-            Command Not Found Fallback Suggestions
-          </h4>
-          <p>The <code>fallback-handler</code> can provide suggestions:</p>
-          <pre><code class="js language-js">module.exports = function (selection, query) {
+<h4 id="commandnotfoundfallbacksuggestions">Command Not Found Fallback Suggestions</h4>
+<p>The <code>fallback-handler</code> can provide suggestions:</p>
+<pre><code class="js language-js">module.exports = (selection, query) =&gt; {
   // Do something with the currently selected
   // text and/or the raw query string
 };
 
-module.exports.suggestions = function () {
+module.exports.suggestions = () =&gt; {
   // The suggestions should be an array of strings
   return ["suggestion one", "suggestion two", "suggestion three"];
 };
 </code></pre>
-          <h4 id="commandcontext">Command Context</h4>
-          <p>
-            In addition to the <code>selection</code>, each command function is
-            invoked within the "command context".
-          </p>
-          <p>The "command context" API includes:</p>
-          <ul>
-            <li>
-              <a href="https://www.npmjs.com/package/open"
-                ><code>open</code> API</a
-              >
-              ↗
-            </li>
-            <li>
-              <code>get</code
-              >/<code>put</code>/<code>post</code>/<code>patch</code>/<code
-                >delete</code
-              >
-              methods from
-              <a
-                href="https://www.npmjs.com/package/axios#request-method-aliases"
-                ><code>axios</code></a
-              >
-              ↗
-            </li>
-            <li>
-              <code>ENV</code> which is loaded from the
-              <code>~/.meta-x/.env</code> file if it exists
-            </li>
-          </ul>
-          <h4 id="usingnpmpackages">Using NPM Packages</h4>
-          <p>
-            You can use <code>npm</code> packages by simply installing them in
-            your <code>~/.meta-x/</code> directory.
-          </p>
-          <p>For example:</p>
-          <pre><code class="js language-js">&gt; cd ~/.meta-x/
+<h4 id="commandcontext">Command Context</h4>
+<p>In addition to the <code>selection</code>, each command function is invoked within the "command context".</p>
+<p>The "command context" API includes:</p>
+<ul>
+<li><a href="https://lodash.com/docs/"><code>_</code> the Lodash library</a></li>
+<li><a href="https://www.npmjs.com/package/open"><code>open</code> API</a> ↗</li>
+<li><code>get</code>/<code>put</code>/<code>post</code>/<code>patch</code>/<code>delete</code> methods from <a href="https://www.npmjs.com/package/axios#request-method-aliases"><code>axios</code></a> ↗</li>
+<li><code>$</code>/<code>execa</code> methods from <a href="https://www.npmjs.com/package/execa"><code>execa</code></a></li>
+<li><code>osascript</code> method from <a href="https://www.npmjs.com/package/run-applescript">'run-applescript`</a></li>
+<li><code>ENV</code> which is loaded from the <code>~/.meta-x/.env</code> file if it exists</li>
+<li><code>choose(['option A', 'option B', 'option C'])</code> which returns a <code>Promise</code> that resolves to the selected option or <code>undefined</code> if nothing was selected.</li>
+</ul>
+<h4 id="usingnpmpackages">Using NPM Packages</h4>
+<p>You can use <code>npm</code> packages by simply installing them in your <code>~/.meta-x/</code> directory.</p>
+<p>For example:</p>
+<pre><code class="js language-js">&gt; cd ~/.meta-x/
 &gt; yarn add lodash
 </code></pre>
-          <h2 id="license">License</h2>
-          <p><strong>Meta-x</strong> is released under the MIT license.</p>
-          <h2 id="contributing">Contributing</h2>
-          <p>Issues and Pull Requests are welcome!</p>
-          <h3 id="roadmap">Roadmap</h3>
-          <ul>
-            <li class="task-list-item" style="list-style-type: none">
-              <input
-                type="checkbox"
-                disabled
-                style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle"
-                checked
-              />
-              Configurable hot-key
-            </li>
-            <li class="task-list-item" style="list-style-type: none">
-              <input
-                type="checkbox"
-                disabled
-                style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle"
-                checked
-              />
-              Document usage instructions
-            </li>
-            <li class="task-list-item" style="list-style-type: none">
-              <input
-                type="checkbox"
-                disabled
-                style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle"
-                checked
-              />
-              Add built-in commands
-            </li>
-            <li class="task-list-item" style="list-style-type: none">
-              <input
-                type="checkbox"
-                disabled
-                style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle"
-                checked
-              />
-              Document installation instructions
-            </li>
-            <li class="task-list-item" style="list-style-type: none">
-              <input
-                type="checkbox"
-                disabled
-                style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle"
-                checked
-              />
-              Improve UI performance (with <code>choose</code> on macOS and
-              <code>dmenu</code> on Linux)
-            </li>
-            <li class="task-list-item" style="list-style-type: none">
-              <input
-                type="checkbox"
-                disabled
-                style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle"
-              />
-              Publish to NPM
-            </li>
-          </ul>
-        </div>
+<h2 id="license">License</h2>
+<p><strong>Meta-x</strong> is released under the MIT license.</p>
+<h2 id="contributing">Contributing</h2>
+<p>Issues and Pull Requests are welcome!</p>
+<h3 id="roadmap">Roadmap</h3>
+<ul>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> Configurable hot-key</li>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> Document usage instructions</li>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> Add built-in commands</li>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> Document installation instructions</li>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> Periodically re-build command catalog in the background rather than re-building when launched</li>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> Add shutdown/restart commands</li>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> Add support for static text snippets</li>
+</ul></div>
       </div>
     </div>
 
