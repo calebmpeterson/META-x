@@ -157,7 +157,7 @@ var showCalculationResultDialog = async (query, result) => {
   const cwd = path3.join(os2.homedir(), "Tools", "quickulator", "app");
   const target = path3.join(cwd, "dist", "quickulator");
   try {
-    await execa(target, [...query], { cwd, preferLocal: true });
+    await execa(target, [query], { cwd, preferLocal: true });
   } catch (error) {
     console.error(`Failed to show calculation result`, error);
   }
@@ -520,6 +520,12 @@ var ensureEmptyFallbackHandler = () => {
 // src/catalog/manage-scripts.ts
 var getManageScriptCommands = () => [
   {
+    title: `${MANAGE_SCRIPTS_PREFIX} Reload Scripts`,
+    invoke: async () => {
+      rebuildCatalog();
+    }
+  },
+  {
     title: `${MANAGE_SCRIPTS_PREFIX} Create Script`,
     invoke: async () => {
       const result = await cocoaDialog("filesave", {
@@ -550,12 +556,6 @@ var getManageScriptCommands = () => [
       const fallbackHandlerFilename = getCommandFilename("fallback-handler.js");
       ensureEmptyFallbackHandler();
       await openInSystemEditor(fallbackHandlerFilename);
-    }
-  },
-  {
-    title: `${MANAGE_SCRIPTS_PREFIX} Reload Scripts`,
-    invoke: async () => {
-      rebuildCatalog();
     }
   }
 ];
@@ -869,7 +869,7 @@ var isProbablyPassword = (text) => {
 // src/state/clipboardHistory.ts
 var clipboardHistory = [];
 var updateClipboardHistory = (entry) => {
-  if (!isProbablyPassword(entry)) {
+  if (!isProbablyPassword(entry) && entry.length > 1) {
     clipboardHistory = _17.take(_17.uniq([entry, ...clipboardHistory]), 10);
   }
 };
