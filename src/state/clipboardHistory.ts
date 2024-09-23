@@ -4,7 +4,7 @@ import { isProbablyPassword } from "../utils/isProbablyPassword";
 let clipboardHistory: string[] = [];
 
 export const updateClipboardHistory = (entry: string) => {
-  if (!isProbablyPassword(entry)) {
+  if (!isProbablyPassword(entry) && entry.length > 1) {
     clipboardHistory = _.take(_.uniq([entry, ...clipboardHistory]), 10);
   }
 };
