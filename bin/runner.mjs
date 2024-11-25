@@ -61,7 +61,7 @@ var getFontName = () => "Fira Code";
 // src/ui/prompt/darwin.ts
 var darwin_default3 = (commands) => new Promise((resolve, reject) => {
   const choices = commands.map(({ title }) => title).join("\n");
-  const toShow = Math.min(40, _.size(commands));
+  const toShow = Math.min(30, _.size(commands));
   const cmd = `echo "${choices}" | choose -f "${getFontName()}" -b 000000 -c 222222 -w 30 -s 16 -m -n ${toShow} -p "Run a command or open an application"`;
   exec(cmd, (error, stdout, stderr) => {
     if (stdout) {
@@ -870,7 +870,7 @@ var isProbablyPassword = (text) => {
 // src/state/clipboardHistory.ts
 var clipboardHistory = [];
 var updateClipboardHistory = (entry) => {
-  if (!isProbablyPassword(entry) && entry.length > 1) {
+  if (!isProbablyPassword(entry)) {
     clipboardHistory = _17.take(_17.uniq([entry, ...clipboardHistory]), 10);
   }
 };

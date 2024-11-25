@@ -9,7 +9,7 @@ import { getFontName } from "../../utils/getFontName";
 export default (commands: Command[]) =>
   new Promise<PromptResult>((resolve, reject) => {
     const choices = commands.map(({ title }) => title).join("\n");
-    const toShow = Math.min(40, _.size(commands));
+    const toShow = Math.min(30, _.size(commands));
     const cmd = `echo "${choices}" | choose -f "${getFontName()}" -b 000000 -c 222222 -w 30 -s 16 -m -n ${toShow} -p "Run a command or open an application"`;
 
     exec(cmd, (error, stdout, stderr) => {
