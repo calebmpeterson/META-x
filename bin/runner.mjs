@@ -299,6 +299,7 @@ var BUILT_IN_COMMANDS = {
   "To Lower": _7.toLower,
   "To Upper": _7.toUpper,
   Capitalize: _7.capitalize,
+  "Sentence Case": _7.capitalize,
   Deburr: _7.deburr,
   "Sort Lines": (selection) => _7.chain(selection).split("\n").sort().join("\n").value(),
   "Reverse Lines": (selection) => _7.chain(selection).split("\n").reverse().join("\n").value()
@@ -475,10 +476,18 @@ module.exports = (selection) => {
   // found at https://github.com/calebmpeterson/META-x#command-context.
 
   // Modify the currently selected text and return the replacement text.
-  //
+  // return selection.toUpperCase();
+
   // Or perform some other side-effect and return undefined, in which
   // case the currently selected text will not be transformed.
-  return selection.toUpperCase();
+  // return undefined;
+
+  // Or return a shortcut to run a macOS Shortcut with the output of the command:
+  //
+  // return {
+  //   shortcut: "Your Shortcut",
+  //   input: selection.toUpperCase(),
+  // };
 };
 `.trim();
 var createEmptyScript = (pathname) => {

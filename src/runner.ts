@@ -16,7 +16,7 @@ const spinner = ora({
   spinner: "dots",
 });
 
-const runCommand = async () => {
+const promptForAndRunCommand = async () => {
   spinner.stop();
 
   try {
@@ -43,19 +43,22 @@ const runCommand = async () => {
 
 rebuildCatalog();
 
+// Rebuild the catalog every minute
 setInterval(async () => {
   spinner.stop();
   rebuildCatalog();
   spinner.start();
 }, 1000 * 60);
 
+// Update the clipboard history every 250ms
 setInterval(async () => {
   updateClipboardHistory(await getClipboardContent());
 }, 250);
 
+// Listen for IPC messages
 listen((message) => {
   if (message.trim() === "run") {
-    runCommand();
+    promptForAndRunCommand();
   } else if (message.trim() === "clipboard-history") {
     runClipboardHistory();
   } else {

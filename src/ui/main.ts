@@ -5,16 +5,15 @@ import prompt from "./prompt";
 import { ENTER } from "../keystrokes/constants";
 import { calculate, didCalculate } from "../utils/calculate";
 import { createRequire } from "module";
-import { execa } from "execa";
 import { getCommandFilename } from "../utils/getCommandFilename";
 import { getCommandsCatalog } from "../state/commands";
 import { getCurrentSelection, setClipboardContent } from "../clipboard/utils";
-import { invokeScript } from "../utils/invokeScript";
 import { processInvokeScriptResult } from "../utils/processInvokeScriptResult";
 import { showCalculationResultDialog } from "../utils/showCalculationResultDialog";
 import { stripKeystrokes } from "../utils/stripKeystrokes";
 import { isShortcutResult } from "../utils/isShortcutResult";
 import { invokeShortcut } from "../utils/invokeShortcut";
+import { createScriptContext } from "../utils/createScriptContext";
 
 export default async () => {
   const selection = await getCurrentSelection();
@@ -27,11 +26,6 @@ export default async () => {
 
   const require = createRequire(import.meta.url);
   Object.assign(global, { open, require });
-
-  const commandContext = {
-    open,
-    ENTER,
-  };
 
   // Execute built-in command
   if ("isUnknown" in item) {
@@ -63,11 +57,12 @@ export default async () => {
 
       try {
         const fallbackHandler = require(commandFilename);
+        const commandContext = createScriptContext(commandFilename, selection);
 
         const resultFromFallback = fallbackHandler.call(
           commandContext,
           selection,
-          item.query,
+          item.query
         );
 
         if (!_.isUndefined(resultFromFallback)) {

@@ -11,11 +11,12 @@ const BUILT_IN_COMMANDS = {
   "To Lower": _.toLower,
   "To Upper": _.toUpper,
   Capitalize: _.capitalize,
+  "Sentence Case": _.capitalize,
   Deburr: _.deburr,
   "Sort Lines": (selection: string) =>
     _.chain(selection).split("\n").sort().join("\n").value(),
   "Reverse Lines": (selection: string) =>
-    _.chain(selection).split("\n").reverse().join("\n").value()
+    _.chain(selection).split("\n").reverse().join("\n").value(),
 };
 
 export const getBuiltInCommands = (): BuiltInCommand[] =>

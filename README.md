@@ -160,3 +160,4 @@ Issues and Pull Requests are welcome!
 - [x] Periodically re-build command catalog in the background rather than re-building when launched
 - [x] Add shutdown/restart commands
 - [x] Add support for static text snippets
+- [ ] Add support for directly invoking a custom command from the launch CLI (e.g. `~/Tools/meta-x/bin/launch "My Custom Command"`)

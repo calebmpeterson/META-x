@@ -7,10 +7,18 @@ module.exports = (selection) => {
   // found at https://github.com/calebmpeterson/META-x#command-context.
 
   // Modify the currently selected text and return the replacement text.
-  //
+  // return selection.toUpperCase();
+
   // Or perform some other side-effect and return undefined, in which
   // case the currently selected text will not be transformed.
-  return selection.toUpperCase();
+  // return undefined;
+
+  // Or return a shortcut to run a macOS Shortcut with the output of the command:
+  //
+  // return {
+  //   shortcut: "Your Shortcut",
+  //   input: selection.toUpperCase(),
+  // };
 };
 `.trim();
 
