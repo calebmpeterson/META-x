@@ -697,7 +697,7 @@ if (!isMainThread) {
       width: 400,
       indeterminate: true
     });
-  }, 500);
+  }, 5e3);
 }
 
 // src/utils/getCommandTitle.ts

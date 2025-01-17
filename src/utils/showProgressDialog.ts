@@ -38,5 +38,5 @@ if (!isMainThread) {
       width: 400,
       indeterminate: true,
     });
-  }, 500);
+  }, 5000);
 }
