@@ -1,9 +1,11 @@
 import _ from "lodash";
 import fs from "node:fs";
 import vm from "node:vm";
-import { createScriptContext } from "./createScriptContext.js";
-import { processInvokeScriptResult } from "./processInvokeScriptResult.js";
+import { createScriptContext } from "./createScriptContext";
+import { processInvokeScriptResult } from "./processInvokeScriptResult";
 import { showCommandErrorDialog } from "./showCommandErrorDialog";
+import { showProgressDialog } from "./showProgressDialog";
+import { getCommandTitle } from "./getCommandTitle";
 
 const wrapCommandSource = (commandSource: string) => `
 const module = {};
@@ -15,9 +17,10 @@ module.exports(selection);
 
 export const invokeScript = async (
   commandFilename: string,
-  selection: string,
+  selection: string
 ) => {
   const commandContext = createScriptContext(commandFilename, selection);
+  const progress = showProgressDialog(getCommandTitle(commandFilename));
 
   try {
     const commandSource = fs.readFileSync(commandFilename, "utf8");
@@ -34,5 +37,9 @@ export const invokeScript = async (
   } catch (error: unknown) {
     console.error(`Failed to execute ${commandFilename}`, error);
     await showCommandErrorDialog(commandFilename, error);
+  } finally {
+    if (progress) {
+      progress.terminate();
+    }
   }
 };

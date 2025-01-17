@@ -9,6 +9,7 @@ import _ from "lodash";
 import { runClipboardHistory } from "./ui/clipboard-history";
 import { updateClipboardHistory } from "./state/clipboardHistory";
 import { getClipboardContent } from "./clipboard/utils";
+import { TITLE } from "./constants";
 
 const spinner = ora({
   text: "Ready",
@@ -67,8 +68,8 @@ listen((message) => {
 });
 
 notifier.notify({
-  title: "META-x",
-  message: "META-x is ready",
+  title: TITLE,
+  message: `${TITLE} is ready`,
 });
 
 spinner.start();
