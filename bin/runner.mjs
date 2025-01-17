@@ -879,7 +879,7 @@ var isProbablyPassword = (text) => {
 // src/state/clipboardHistory.ts
 var clipboardHistory = [];
 var updateClipboardHistory = (entry) => {
-  if (!isProbablyPassword(entry)) {
+  if (!isProbablyPassword(entry) && entry.length > 1) {
     clipboardHistory = _17.take(_17.uniq([entry, ...clipboardHistory]), 10);
   }
 };
