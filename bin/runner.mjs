@@ -1,6 +1,6 @@
 // src/runner.ts
 import ora from "ora";
-import notifier from "node-notifier";
+import notifier2 from "node-notifier";
 
 // src/clipboard/prepare/darwin.ts
 import { keyboard, Key } from "@nut-tree/nut-js";
@@ -642,6 +642,7 @@ import fs7 from "fs";
 import _13 from "lodash";
 import fs6 from "node:fs";
 import vm2 from "node:vm";
+import notifier from "node-notifier";
 
 // src/utils/showCommandErrorDialog.ts
 import cocoaDialog2 from "cocoa-dialog";
@@ -662,47 +663,12 @@ var showCommandErrorDialog = async (commandFilename, error) => {
   }
 };
 
-// src/utils/showProgressDialog.ts
-import cocoaDialog3 from "cocoa-dialog";
-import { isMainThread, Worker, workerData } from "node:worker_threads";
-import { fileURLToPath } from "node:url";
-
-// src/constants.ts
-var TITLE = "META-x";
-
-// src/utils/showProgressDialog.ts
-var runInWorker = (title) => {
-  const worker = new Worker(fileURLToPath(import.meta.url), {
-    workerData: { title }
-  });
-  worker.on("message", () => {
-    worker.terminate();
-  });
-  worker.on("error", () => {
-    worker.terminate();
-  });
-  return worker;
-};
-var showProgressDialog = (title) => {
-  if (isMainThread) {
-    return runInWorker(title);
-  }
-};
-if (!isMainThread) {
-  const { title } = workerData;
-  setTimeout(async () => {
-    await cocoaDialog3("progressbar", {
-      title: TITLE,
-      text: `Invoking ${title}`,
-      width: 400,
-      indeterminate: true
-    });
-  }, 5e3);
-}
-
 // src/utils/getCommandTitle.ts
 import { basename } from "node:path";
 var getCommandTitle = (commandFilename) => basename(commandFilename, ".js");
+
+// src/constants.ts
+var TITLE = "META-x";
 
 // src/utils/invokeScript.ts
 var wrapCommandSource = (commandSource) => `
@@ -714,7 +680,12 @@ module.exports(selection);
 `;
 var invokeScript = async (commandFilename, selection) => {
   const commandContext = createScriptContext(commandFilename, selection);
-  const progress = showProgressDialog(getCommandTitle(commandFilename));
+  const timeoutId = setTimeout(() => {
+    notifier.notify({
+      title: TITLE,
+      message: `Meta-x is still invoking ${getCommandTitle(commandFilename)}`
+    });
+  }, 5e3);
   try {
     const commandSource = fs6.readFileSync(commandFilename, "utf8");
     const wrappedCommandSource = wrapCommandSource(commandSource);
@@ -727,9 +698,7 @@ var invokeScript = async (commandFilename, selection) => {
     console.error(`Failed to execute ${commandFilename}`, error);
     await showCommandErrorDialog(commandFilename, error);
   } finally {
-    if (progress) {
-      progress.terminate();
-    }
+    clearTimeout(timeoutId);
   }
 };
 
@@ -773,7 +742,7 @@ var getShortcuts = () => {
 };
 
 // src/catalog/manage-snippets.ts
-import cocoaDialog4 from "cocoa-dialog";
+import cocoaDialog3 from "cocoa-dialog";
 import _15 from "lodash";
 import fs9 from "node:fs";
 
@@ -800,7 +769,7 @@ var getManageSnippetCommands = () => [
   {
     title: `${MANAGE_SNIPPETS_PREFIX} Create Snippet`,
     invoke: async () => {
-      const result = await cocoaDialog4("filesave", {
+      const result = await cocoaDialog3("filesave", {
         title: "Save Snippet As...",
         withDirectory: SNIPPETS_DIR
       });
@@ -813,7 +782,7 @@ var getManageSnippetCommands = () => [
   {
     title: `${MANAGE_SNIPPETS_PREFIX} Edit Snippet`,
     invoke: async () => {
-      const result = await cocoaDialog4("fileselect", {
+      const result = await cocoaDialog3("fileselect", {
         title: "Choose Snippet To Edit...",
         withDirectory: SNIPPETS_DIR
       });
@@ -971,7 +940,7 @@ var promptForAndRunCommand = async () => {
   } catch (error) {
     console.error(error);
     if (_19.isError(error)) {
-      notifier.notify({
+      notifier2.notify({
         title: "META-x",
         message: "META-x encountered an error: " + error.message
       });
@@ -998,7 +967,7 @@ listen((message) => {
     console.log(`Unknown message: "${message}"`);
   }
 });
-notifier.notify({
+notifier2.notify({
   title: TITLE,
   message: `${TITLE} is ready`
 });

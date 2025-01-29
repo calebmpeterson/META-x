@@ -1,11 +1,12 @@
 import _ from "lodash";
 import fs from "node:fs";
 import vm from "node:vm";
+import notifier from "node-notifier";
 import { createScriptContext } from "./createScriptContext";
 import { processInvokeScriptResult } from "./processInvokeScriptResult";
 import { showCommandErrorDialog } from "./showCommandErrorDialog";
-import { showProgressDialog } from "./showProgressDialog";
 import { getCommandTitle } from "./getCommandTitle";
+import { TITLE } from "../constants";
 
 const wrapCommandSource = (commandSource: string) => `
 const module = {};
@@ -20,7 +21,13 @@ export const invokeScript = async (
   selection: string
 ) => {
   const commandContext = createScriptContext(commandFilename, selection);
-  const progress = showProgressDialog(getCommandTitle(commandFilename));
+
+  const timeoutId = setTimeout(() => {
+    notifier.notify({
+      title: TITLE,
+      message: `Meta-x is still invoking ${getCommandTitle(commandFilename)}`,
+    });
+  }, 5000);
 
   try {
     const commandSource = fs.readFileSync(commandFilename, "utf8");
@@ -38,8 +45,6 @@ export const invokeScript = async (
     console.error(`Failed to execute ${commandFilename}`, error);
     await showCommandErrorDialog(commandFilename, error);
   } finally {
-    if (progress) {
-      progress.terminate();
-    }
+    clearTimeout(timeoutId);
   }
 };
