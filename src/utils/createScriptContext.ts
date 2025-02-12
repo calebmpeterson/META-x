@@ -8,10 +8,11 @@ import { createRequire } from "module";
 import { execa, $ } from "execa";
 import { getConfigPath } from "./getConfigPath.js";
 import { runAppleScript } from "run-applescript";
+import { showNotification } from "./showNotification";
 
 export const createScriptContext = (
   commandFilename: string,
-  selection: string,
+  selection: string
 ) => {
   const require = createRequire(commandFilename);
 
@@ -35,6 +36,7 @@ export const createScriptContext = (
     $,
     osascript: runAppleScript,
     choose,
+    notify: showNotification,
   };
 
   return commandContext;

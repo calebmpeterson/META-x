@@ -1,5 +1,4 @@
 import ora from "ora";
-import notifier from "node-notifier";
 import prepareClipboard from "./clipboard/prepare";
 import finishClipboard from "./clipboard/finish";
 import showPrompt from "./ui/main";
@@ -10,6 +9,7 @@ import { runClipboardHistory } from "./ui/clipboard-history";
 import { updateClipboardHistory } from "./state/clipboardHistory";
 import { getClipboardContent } from "./clipboard/utils";
 import { TITLE } from "./constants";
+import { showNotification } from "./utils/showNotification";
 
 const spinner = ora({
   text: "Ready",
@@ -32,8 +32,7 @@ const promptForAndRunCommand = async () => {
     console.error(error);
 
     if (_.isError(error)) {
-      notifier.notify({
-        title: "META-x",
+      showNotification({
         message: "META-x encountered an error: " + error.message,
       });
     }
@@ -67,8 +66,7 @@ listen((message) => {
   }
 });
 
-notifier.notify({
-  title: TITLE,
+showNotification({
   message: `${TITLE} is ready`,
 });
 

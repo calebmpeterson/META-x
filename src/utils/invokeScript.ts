@@ -1,12 +1,11 @@
 import _ from "lodash";
 import fs from "node:fs";
 import vm from "node:vm";
-import notifier from "node-notifier";
 import { createScriptContext } from "./createScriptContext";
 import { processInvokeScriptResult } from "./processInvokeScriptResult";
 import { showCommandErrorDialog } from "./showCommandErrorDialog";
 import { getCommandTitle } from "./getCommandTitle";
-import { TITLE } from "../constants";
+import { showNotification } from "./showNotification";
 
 const wrapCommandSource = (commandSource: string) => `
 const module = {};
@@ -23,8 +22,7 @@ export const invokeScript = async (
   const commandContext = createScriptContext(commandFilename, selection);
 
   const timeoutId = setTimeout(() => {
-    notifier.notify({
-      title: TITLE,
+    showNotification({
       message: `Meta-x is still invoking ${getCommandTitle(commandFilename)}`,
     });
   }, 5000);

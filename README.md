@@ -131,6 +131,7 @@ The "command context" API includes:
 - `osascript` method from ['run-applescript`](https://www.npmjs.com/package/run-applescript)
 - `ENV` which is loaded from the `~/.meta-x/.env` file if it exists
 - `choose(['option A', 'option B', 'option C'])` which returns a `Promise` that resolves to the selected option or `undefined` if nothing was selected.
+- `notify({ message: "Your message here" })` which displays an OS-level toast/notification with the given message.
 
 #### Using NPM Packages
 

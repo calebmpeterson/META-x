@@ -1,12 +1,35 @@
 // src/runner.ts
 import ora from "ora";
-import notifier2 from "node-notifier";
 
-// src/clipboard/prepare/darwin.ts
-import { keyboard, Key } from "@nut-tree/nut-js";
+// src/state/clipboardHistory.ts
+import _ from "lodash";
 
-// src/utils/delay.ts
-var delay = (timeout) => new Promise((resolve) => setTimeout(resolve, timeout));
+// src/utils/isProbablyPassword.ts
+var isProbablyPassword = (text) => {
+  const hasUpperCase = /[A-Z]/.test(text);
+  const hasLowerCase = /[a-z]/.test(text);
+  const hasDigit = /\d/.test(text);
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(text);
+  let score = 0;
+  if (hasUpperCase) score++;
+  if (hasLowerCase) score++;
+  if (hasDigit) score++;
+  if (hasSpecialChar) score++;
+  return score >= 3 && !text.startsWith("https://");
+};
+
+// src/state/clipboardHistory.ts
+var clipboardHistory = [];
+var updateClipboardHistory = (entry) => {
+  if (!isProbablyPassword(entry) && entry.length > 1) {
+    clipboardHistory = _.take(_.uniq([entry, ...clipboardHistory]), 10);
+  }
+};
+var getClipboardHistory = () => clipboardHistory;
+
+// src/clipboard/utils.ts
+import _2 from "lodash";
+import clipboard from "clipboardy";
 
 // src/utils/clock.ts
 var clock = (label, work) => (...args) => {
@@ -19,6 +42,28 @@ var clock = (label, work) => (...args) => {
   }
 };
 
+// src/clipboard/utils.ts
+var getCurrentSelection = clock("getCurrentSelection", async () => {
+  return clipboard.read();
+});
+var setClipboardContent = clock(
+  "setClipboardContent",
+  async (contentAsText) => {
+    if (_2.isString(contentAsText)) {
+      await clipboard.write(contentAsText);
+    }
+  }
+);
+var getClipboardContent = async () => {
+  return clipboard.read();
+};
+
+// src/clipboard/prepare/darwin.ts
+import { keyboard, Key } from "@nut-tree/nut-js";
+
+// src/utils/delay.ts
+var delay = (timeout) => new Promise((resolve) => setTimeout(resolve, timeout));
+
 // src/clipboard/prepare/darwin.ts
 var darwin_default = clock("prepare", async () => {
   await keyboard.type(Key.LeftSuper, Key.C);
@@ -26,7 +71,10 @@ var darwin_default = clock("prepare", async () => {
 });
 
 // src/clipboard/prepare/index.ts
-var prepare_default = () => process.platform === "darwin" ? darwin_default() : Promise.resolve();
+var prepare_default = async () => {
+  updateClipboardHistory(await getClipboardContent());
+  return process.platform === "darwin" ? darwin_default() : Promise.resolve();
+};
 
 // src/clipboard/finish/darwin.ts
 import { keyboard as keyboard2, Key as Key2 } from "@nut-tree/nut-js";
@@ -39,7 +87,7 @@ var darwin_default2 = async () => {
 var finish_default = () => process.platform === "darwin" ? darwin_default2() : Promise.resolve();
 
 // src/ui/main.ts
-import _8 from "lodash";
+import _9 from "lodash";
 import open2 from "open";
 
 // src/keystrokes/pressEnter.ts
@@ -53,7 +101,7 @@ var pressEnter_default = async () => {
 
 // src/ui/prompt/darwin.ts
 import { exec } from "child_process";
-import _ from "lodash";
+import _3 from "lodash";
 
 // src/utils/getFontName.ts
 var getFontName = () => "Fira Code";
@@ -61,11 +109,11 @@ var getFontName = () => "Fira Code";
 // src/ui/prompt/darwin.ts
 var darwin_default3 = (commands) => new Promise((resolve, reject) => {
   const choices = commands.map(({ title }) => title).join("\n");
-  const toShow = Math.min(30, _.size(commands));
+  const toShow = Math.min(30, _3.size(commands));
   const cmd = `echo "${choices}" | choose -f "${getFontName()}" -b 000000 -c 222222 -w 30 -s 16 -m -n ${toShow} -p "Run a command or open an application"`;
   exec(cmd, (error, stdout, stderr) => {
     if (stdout) {
-      const query = _.trim(stdout);
+      const query = _3.trim(stdout);
       const rawQueryCommand = {
         isUnhandled: true,
         query
@@ -127,27 +175,9 @@ var setCommandsCatalog = (newCommandsState) => {
   commandsState = newCommandsState;
 };
 
-// src/clipboard/utils.ts
-import _2 from "lodash";
-import clipboard from "clipboardy";
-var getCurrentSelection = clock("getCurrentSelection", async () => {
-  return clipboard.read();
-});
-var setClipboardContent = clock(
-  "setClipboardContent",
-  async (contentAsText) => {
-    if (_2.isString(contentAsText)) {
-      await clipboard.write(contentAsText);
-    }
-  }
-);
-var getClipboardContent = async () => {
-  return clipboard.read();
-};
-
 // src/utils/processInvokeScriptResult.ts
-import _3 from "lodash";
-var processInvokeScriptResult = (result) => _3.isArray(result) || _3.isObject(result) ? result : _3.toString(result);
+import _4 from "lodash";
+var processInvokeScriptResult = (result) => _4.isArray(result) || _4.isObject(result) ? result : _4.toString(result);
 
 // src/utils/showCalculationResultDialog.ts
 import { execa } from "execa";
@@ -167,17 +197,17 @@ var showCalculationResultDialog = async (query, result) => {
 var stripKeystrokes = (text) => text.endsWith(ENTER) ? text.slice(0, -ENTER.length) : text;
 
 // src/utils/isShortcutResult.ts
-import _4 from "lodash";
-var isShortcutResult = (result) => Boolean(result) && _4.isObject(result) && "shortcut" in result && _4.isString(result.shortcut);
+import _5 from "lodash";
+var isShortcutResult = (result) => Boolean(result) && _5.isObject(result) && "shortcut" in result && _5.isString(result.shortcut);
 
 // src/utils/invokeShortcut.ts
 import { execa as execa2 } from "execa";
-import _5 from "lodash";
+import _6 from "lodash";
 var invokeShortcut = async ({ shortcut, input }) => {
   try {
     await execa2("shortcuts", ["run", shortcut, "-i", input ?? ""]);
   } catch (error) {
-    if (_5.isError(error)) {
+    if (_6.isError(error)) {
       console.error(`Failed to run shortcut: ${error.message}`);
     } else {
       console.error(`Failed to run shortcut: ${shortcut}`);
@@ -186,17 +216,17 @@ var invokeShortcut = async ({ shortcut, input }) => {
 };
 
 // src/utils/createScriptContext.ts
-import _7 from "lodash";
+import _8 from "lodash";
 import axios from "axios";
 import dotenv from "dotenv";
 import open from "open";
 
 // src/utils/choose.ts
 import { exec as exec2 } from "child_process";
-import _6 from "lodash";
+import _7 from "lodash";
 var choose = (items, options = {}) => new Promise((resolve) => {
   const choices = items.join("\n");
-  const toShow = Math.max(5, Math.min(40, _6.size(items)));
+  const toShow = Math.max(5, Math.min(40, _7.size(items)));
   const outputConfig = [
     options.returnIndex ? "-i" : "",
     options.placeholder ? `-p "${options.placeholder}"` : ""
@@ -204,7 +234,7 @@ var choose = (items, options = {}) => new Promise((resolve) => {
   const cmd = `echo "${choices}" | choose -f "${getFontName()}" -b 000000 -c 222222 -w 30 -s 16 -m -n ${toShow} ${outputConfig}`;
   exec2(cmd, (error, stdout, stderr) => {
     if (stdout) {
-      const selection = _6.trim(stdout);
+      const selection = _7.trim(stdout);
       if (options.returnIndex && selection === "-1") {
         resolve(void 0);
       }
@@ -228,12 +258,28 @@ var getConfigPath = (filename) => path4.join(getConfigDir(), filename);
 
 // src/utils/createScriptContext.ts
 import { runAppleScript } from "run-applescript";
+
+// src/utils/showNotification.ts
+import notifier from "node-notifier";
+
+// src/constants.ts
+var TITLE = "META-x";
+
+// src/utils/showNotification.ts
+var showNotification = ({ message }) => {
+  notifier.notify({
+    title: TITLE,
+    message
+  });
+};
+
+// src/utils/createScriptContext.ts
 var createScriptContext = (commandFilename, selection) => {
   const require2 = createRequire(commandFilename);
   const ENV = {};
   dotenv.config({ path: getConfigPath(".env"), processEnv: ENV });
   const commandContext = {
-    _: _7,
+    _: _8,
     selection,
     require: require2,
     console,
@@ -248,7 +294,8 @@ var createScriptContext = (commandFilename, selection) => {
     execa: execa3,
     $,
     osascript: runAppleScript,
-    choose
+    choose,
+    notify: showNotification
   };
   return commandContext;
 };
@@ -263,9 +310,9 @@ var main_default = async () => {
   Object.assign(global, { open: open2, require: require2 });
   if ("isUnknown" in item) {
     console.warn(`Unknown command`);
-  } else if ("value" in item && _8.isFunction(item.value)) {
+  } else if ("value" in item && _9.isFunction(item.value)) {
     result = item.value(selection);
-  } else if ("invoke" in item && _8.isFunction(item.invoke)) {
+  } else if ("invoke" in item && _9.isFunction(item.invoke)) {
     result = await item.invoke(selection);
   } else if ("isUnhandled" in item && item.isUnhandled) {
     console.warn(`Unhandled command: ${item.query}`);
@@ -283,7 +330,7 @@ var main_default = async () => {
           selection,
           item.query
         );
-        if (!_8.isUndefined(resultFromFallback)) {
+        if (!_9.isUndefined(resultFromFallback)) {
           result = processInvokeScriptResult(resultFromFallback);
         }
       } catch (e) {
@@ -291,7 +338,7 @@ var main_default = async () => {
       }
     }
   }
-  if (result && _8.isString(result)) {
+  if (result && _9.isString(result)) {
     console.log(`Result: ${result}`);
     await setClipboardContent(stripKeystrokes(result));
     if (result.endsWith(ENTER)) {
@@ -338,11 +385,11 @@ var listen = (onMessage) => {
 };
 
 // src/utils/getAllCommands.ts
-import _16 from "lodash";
+import _17 from "lodash";
 import { createRequire as createRequire3 } from "node:module";
 
 // src/catalog/built-ins.ts
-import _9 from "lodash";
+import _10 from "lodash";
 
 // src/catalog/_constants.ts
 var SCRIPT_PREFIX = "\u0192\u0578";
@@ -356,20 +403,20 @@ var SHORTCUT_PREFIX = "\u2318";
 
 // src/catalog/built-ins.ts
 var BUILT_IN_COMMANDS = {
-  "Camel Case": _9.camelCase,
-  "Kebab Case": _9.kebabCase,
-  "Snake Case": _9.snakeCase,
-  "Start Case": _9.startCase,
-  "Title Case": _9.startCase,
-  "To Lower": _9.toLower,
-  "To Upper": _9.toUpper,
-  Capitalize: _9.capitalize,
-  "Sentence Case": _9.capitalize,
-  Deburr: _9.deburr,
-  "Sort Lines": (selection) => _9.chain(selection).split("\n").sort().join("\n").value(),
-  "Reverse Lines": (selection) => _9.chain(selection).split("\n").reverse().join("\n").value()
+  "Camel Case": _10.camelCase,
+  "Kebab Case": _10.kebabCase,
+  "Snake Case": _10.snakeCase,
+  "Start Case": _10.startCase,
+  "Title Case": _10.startCase,
+  "To Lower": _10.toLower,
+  "To Upper": _10.toUpper,
+  Capitalize: _10.capitalize,
+  "Sentence Case": _10.capitalize,
+  Deburr: _10.deburr,
+  "Sort Lines": (selection) => _10.chain(selection).split("\n").sort().join("\n").value(),
+  "Reverse Lines": (selection) => _10.chain(selection).split("\n").reverse().join("\n").value()
 };
-var getBuiltInCommands = () => _9.map(BUILT_IN_COMMANDS, (command, name) => ({
+var getBuiltInCommands = () => _10.map(BUILT_IN_COMMANDS, (command, name) => ({
   label: name,
   title: `${SCRIPT_PREFIX} ${name}`,
   value: command
@@ -408,13 +455,13 @@ var getFolders = () => FOLDERS.map((folder) => ({
 // src/catalog/applications.ts
 import fs2 from "fs";
 import path6 from "path";
-import _10 from "lodash";
+import _11 from "lodash";
 import { openApp as openApp2 } from "open";
 var getApplicationUsageHistory = () => path6.join(getConfigDir(), ".application-usage");
 var persistApplicationUsage = (values) => {
   fs2.writeFileSync(
     getApplicationUsageHistory(),
-    _10.takeRight(values, 100).join("\n"),
+    _11.takeRight(values, 100).join("\n"),
     "utf8"
   );
 };
@@ -431,7 +478,7 @@ var trackApplicationUsage = (value) => {
 };
 var getApplications = (rootDir = "/Applications") => {
   const history = restoreApplicationUsage();
-  const scores = _10.countBy(history, _10.identity);
+  const scores = _11.countBy(history, _11.identity);
   const applications = fs2.readdirSync(rootDir).filter((filename) => {
     const pathname = path6.join(rootDir, filename);
     const stats = fs2.statSync(pathname);
@@ -448,7 +495,7 @@ var getApplications = (rootDir = "/Applications") => {
   const items = applications.map((application) => {
     const value = path6.join(rootDir, application);
     return {
-      title: `${APPLICATION_PREFIX} ${_10.get(
+      title: `${APPLICATION_PREFIX} ${_11.get(
         path6.parse(application),
         "name",
         application
@@ -526,7 +573,7 @@ var getSystemCommands = () => [
 
 // src/catalog/manage-scripts.ts
 import cocoaDialog from "cocoa-dialog";
-import _11 from "lodash";
+import _12 from "lodash";
 
 // src/utils/createEmptyScript.ts
 import fs4 from "node:fs";
@@ -607,7 +654,7 @@ var getManageScriptCommands = () => [
         title: "Save Script As...",
         withDirectory: getConfigDir()
       });
-      if (!_11.isEmpty(result)) {
+      if (!_12.isEmpty(result)) {
         createEmptyScript(result);
         await openInSystemEditor(result);
       }
@@ -620,7 +667,7 @@ var getManageScriptCommands = () => [
         title: "Choose Script To Edit...",
         withDirectory: getConfigDir()
       });
-      if (!_11.isEmpty(result)) {
+      if (!_12.isEmpty(result)) {
         await openInSystemEditor(result);
       }
     }
@@ -639,16 +686,15 @@ var getManageScriptCommands = () => [
 import fs7 from "fs";
 
 // src/utils/invokeScript.ts
-import _13 from "lodash";
+import _14 from "lodash";
 import fs6 from "node:fs";
 import vm2 from "node:vm";
-import notifier from "node-notifier";
 
 // src/utils/showCommandErrorDialog.ts
 import cocoaDialog2 from "cocoa-dialog";
-import _12 from "lodash";
+import _13 from "lodash";
 var showCommandErrorDialog = async (commandFilename, error) => {
-  if (_12.isError(error)) {
+  if (_13.isError(error)) {
     const result = await cocoaDialog2("textbox", {
       title: `Error in ${commandFilename}`,
       text: error.stack,
@@ -667,9 +713,6 @@ var showCommandErrorDialog = async (commandFilename, error) => {
 import { basename } from "node:path";
 var getCommandTitle = (commandFilename) => basename(commandFilename, ".js");
 
-// src/constants.ts
-var TITLE = "META-x";
-
 // src/utils/invokeScript.ts
 var wrapCommandSource = (commandSource) => `
 const module = {};
@@ -681,8 +724,7 @@ module.exports(selection);
 var invokeScript = async (commandFilename, selection) => {
   const commandContext = createScriptContext(commandFilename, selection);
   const timeoutId = setTimeout(() => {
-    notifier.notify({
-      title: TITLE,
+    showNotification({
       message: `Meta-x is still invoking ${getCommandTitle(commandFilename)}`
     });
   }, 5e3);
@@ -691,7 +733,7 @@ var invokeScript = async (commandFilename, selection) => {
     const wrappedCommandSource = wrapCommandSource(commandSource);
     const commandScript = new vm2.Script(wrappedCommandSource);
     const result = await commandScript.runInNewContext(commandContext);
-    if (!_13.isUndefined(result)) {
+    if (!_14.isUndefined(result)) {
       return processInvokeScriptResult(result);
     }
   } catch (error) {
@@ -715,7 +757,7 @@ var getScriptCommands = () => fs7.readdirSync(getConfigDir()).filter(
 
 // src/catalog/shortcuts.ts
 import { execaSync } from "execa";
-import _14 from "lodash";
+import _15 from "lodash";
 var getShortcuts = () => {
   try {
     const shortcuts = execaSync("shortcuts", ["list"]).stdout.split("\n").filter(Boolean).map((shortcut) => {
@@ -725,7 +767,7 @@ var getShortcuts = () => {
           try {
             execaSync("shortcuts", ["run", shortcut]);
           } catch (error) {
-            if (_14.isError(error)) {
+            if (_15.isError(error)) {
               console.error(`Failed to run shortcut: ${error.message}`);
             }
           }
@@ -734,7 +776,7 @@ var getShortcuts = () => {
     });
     return shortcuts;
   } catch (error) {
-    if (_14.isError(error)) {
+    if (_15.isError(error)) {
       console.error(`Failed to get shortcuts: ${error.message}`);
     }
     return [];
@@ -743,7 +785,7 @@ var getShortcuts = () => {
 
 // src/catalog/manage-snippets.ts
 import cocoaDialog3 from "cocoa-dialog";
-import _15 from "lodash";
+import _16 from "lodash";
 import fs9 from "node:fs";
 
 // src/utils/createEmptySnippet.ts
@@ -773,7 +815,7 @@ var getManageSnippetCommands = () => [
         title: "Save Snippet As...",
         withDirectory: SNIPPETS_DIR
       });
-      if (!_15.isEmpty(result)) {
+      if (!_16.isEmpty(result)) {
         createEmptySnippet(result);
         await openInSystemEditor(result, SNIPPET_EXTENSION);
       }
@@ -786,7 +828,7 @@ var getManageSnippetCommands = () => [
         title: "Choose Snippet To Edit...",
         withDirectory: SNIPPETS_DIR
       });
-      if (!_15.isEmpty(result)) {
+      if (!_16.isEmpty(result)) {
         await openInSystemEditor(result, SNIPPET_EXTENSION);
       }
     }
@@ -825,7 +867,7 @@ var getCommandsFromFallbackHandler = () => {
       isFallback: true
     }));
   } catch (e) {
-    if (_16.isError(e)) {
+    if (_17.isError(e)) {
       console.error(`Failed to run fallback handler: ${e.message}`);
     }
     return [];
@@ -835,7 +877,7 @@ var commandComparator = ({ title }) => title;
 var applicationComparator = ({ score }) => -score;
 var getAllCommands = clock("getAllCommands", () => {
   const allCommands = [
-    ..._16.sortBy(
+    ..._17.sortBy(
       [...getScriptCommands(), ...getBuiltInCommands()],
       commandComparator
     ),
@@ -844,7 +886,7 @@ var getAllCommands = clock("getAllCommands", () => {
     ...getManageSnippetCommands(),
     ...getFolders(),
     ...getShortcuts(),
-    ..._16.chain([
+    ..._17.chain([
       // Applications can live in multiple locations on macOS
       // Source: https://unix.stackexchange.com/a/583843
       ...getApplications("/Applications"),
@@ -870,34 +912,6 @@ import _19 from "lodash";
 
 // src/ui/clipboard-history/index.ts
 import _18 from "lodash";
-
-// src/state/clipboardHistory.ts
-import _17 from "lodash";
-
-// src/utils/isProbablyPassword.ts
-var isProbablyPassword = (text) => {
-  const hasUpperCase = /[A-Z]/.test(text);
-  const hasLowerCase = /[a-z]/.test(text);
-  const hasDigit = /\d/.test(text);
-  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(text);
-  let score = 0;
-  if (hasUpperCase) score++;
-  if (hasLowerCase) score++;
-  if (hasDigit) score++;
-  if (hasSpecialChar) score++;
-  return score >= 3 && !text.startsWith("https://");
-};
-
-// src/state/clipboardHistory.ts
-var clipboardHistory = [];
-var updateClipboardHistory = (entry) => {
-  if (!isProbablyPassword(entry) && entry.length > 1) {
-    clipboardHistory = _17.take(_17.uniq([entry, ...clipboardHistory]), 10);
-  }
-};
-var getClipboardHistory = () => clipboardHistory;
-
-// src/ui/clipboard-history/index.ts
 var formatHistoryEntry = (entry) => {
   const firstLine = entry.includes("\n") ? _18.truncate(
     entry.split("\n").find((line) => !_18.isEmpty(line)),
@@ -940,8 +954,7 @@ var promptForAndRunCommand = async () => {
   } catch (error) {
     console.error(error);
     if (_19.isError(error)) {
-      notifier2.notify({
-        title: "META-x",
+      showNotification({
         message: "META-x encountered an error: " + error.message
       });
     }
@@ -967,8 +980,7 @@ listen((message) => {
     console.log(`Unknown message: "${message}"`);
   }
 });
-notifier2.notify({
-  title: TITLE,
+showNotification({
   message: `${TITLE} is ready`
 });
 spinner.start();
