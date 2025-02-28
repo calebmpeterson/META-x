@@ -7,6 +7,8 @@ import { ensureEmptyFallbackHandler } from "../utils/ensureEmptyFallbackHandler"
 import { MANAGE_SCRIPTS_PREFIX } from "./_constants";
 import { getCommandFilename } from "../utils/getCommandFilename";
 import { rebuildCatalog } from "../state/rebuildCatalog";
+import { TITLE } from "../constants";
+import open from "open";
 
 export const getManageScriptCommands = () => [
   {
@@ -50,6 +52,12 @@ export const getManageScriptCommands = () => [
       ensureEmptyFallbackHandler();
 
       await openInSystemEditor(fallbackHandlerFilename);
+    },
+  },
+  {
+    title: `${MANAGE_SCRIPTS_PREFIX} Open ${TITLE} Documentation`,
+    invoke: async () => {
+      await open(`https://github.com/calebmpeterson/META-x#command-context`);
     },
   },
 ];

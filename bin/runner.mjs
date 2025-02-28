@@ -640,6 +640,7 @@ var ensureEmptyFallbackHandler = () => {
 };
 
 // src/catalog/manage-scripts.ts
+import open5 from "open";
 var getManageScriptCommands = () => [
   {
     title: `${MANAGE_SCRIPTS_PREFIX} Reload Scripts`,
@@ -678,6 +679,12 @@ var getManageScriptCommands = () => [
       const fallbackHandlerFilename = getCommandFilename("fallback-handler.js");
       ensureEmptyFallbackHandler();
       await openInSystemEditor(fallbackHandlerFilename);
+    }
+  },
+  {
+    title: `${MANAGE_SCRIPTS_PREFIX} Open ${TITLE} Documentation`,
+    invoke: async () => {
+      await open5(`https://github.com/calebmpeterson/META-x#command-context`);
     }
   }
 ];
