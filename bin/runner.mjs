@@ -59,7 +59,7 @@ var getClipboardContent = async () => {
 };
 
 // src/clipboard/prepare/darwin.ts
-import { keyboard, Key } from "@nut-tree/nut-js";
+import { keyboard, Key } from "@nut-tree-fork/nut-js";
 
 // src/utils/delay.ts
 var delay = (timeout) => new Promise((resolve) => setTimeout(resolve, timeout));
@@ -77,7 +77,7 @@ var prepare_default = async () => {
 };
 
 // src/clipboard/finish/darwin.ts
-import { keyboard as keyboard2, Key as Key2 } from "@nut-tree/nut-js";
+import { keyboard as keyboard2, Key as Key2 } from "@nut-tree-fork/nut-js";
 var darwin_default2 = async () => {
   await delay(20);
   await keyboard2.type(Key2.LeftSuper, Key2.V);
@@ -91,7 +91,7 @@ import _9 from "lodash";
 import open2 from "open";
 
 // src/keystrokes/pressEnter.ts
-import { keyboard as keyboard3, Key as Key3 } from "@nut-tree/nut-js";
+import { keyboard as keyboard3, Key as Key3 } from "@nut-tree-fork/nut-js";
 var pressEnter_default = async () => {
   await delay(1e3);
   await keyboard3.pressKey(Key3.Enter);
