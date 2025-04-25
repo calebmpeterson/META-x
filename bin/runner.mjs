@@ -295,7 +295,8 @@ var createScriptContext = (commandFilename, selection) => {
     $,
     osascript: runAppleScript,
     choose,
-    notify: showNotification
+    notify: showNotification,
+    setTimeout
   };
   return commandContext;
 };
@@ -649,6 +650,12 @@ var getManageScriptCommands = () => [
     }
   },
   {
+    title: `${MANAGE_SCRIPTS_PREFIX} View Scripts`,
+    invoke: async () => {
+      await open5(getConfigDir());
+    }
+  },
+  {
     title: `${MANAGE_SCRIPTS_PREFIX} Create Script`,
     invoke: async () => {
       const result = await cocoaDialog("filesave", {
@@ -794,6 +801,7 @@ var getShortcuts = () => {
 import cocoaDialog3 from "cocoa-dialog";
 import _16 from "lodash";
 import fs9 from "node:fs";
+import open6 from "open";
 
 // src/utils/createEmptySnippet.ts
 import fs8 from "node:fs";
@@ -838,6 +846,12 @@ var getManageSnippetCommands = () => [
       if (!_16.isEmpty(result)) {
         await openInSystemEditor(result, SNIPPET_EXTENSION);
       }
+    }
+  },
+  {
+    title: `${MANAGE_SNIPPETS_PREFIX} View Snippets`,
+    invoke: async () => {
+      await open6(SNIPPETS_DIR);
     }
   }
 ];

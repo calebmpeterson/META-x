@@ -1,6 +1,7 @@
 import cocoaDialog from "cocoa-dialog";
 import _ from "lodash";
 import fs from "node:fs";
+import open from "open";
 import {
   createEmptySnippet,
   SNIPPET_EXTENSION,
@@ -42,6 +43,12 @@ export const getManageSnippetCommands = () => [
       if (!_.isEmpty(result)) {
         await openInSystemEditor(result, SNIPPET_EXTENSION);
       }
+    },
+  },
+  {
+    title: `${MANAGE_SNIPPETS_PREFIX} View Snippets`,
+    invoke: async () => {
+      await open(SNIPPETS_DIR);
     },
   },
 ];

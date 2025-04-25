@@ -37,6 +37,7 @@ export const createScriptContext = (
     osascript: runAppleScript,
     choose,
     notify: showNotification,
+    setTimeout,
   };
 
   return commandContext;

@@ -18,6 +18,12 @@ export const getManageScriptCommands = () => [
     },
   },
   {
+    title: `${MANAGE_SCRIPTS_PREFIX} View Scripts`,
+    invoke: async () => {
+      await open(getConfigDir());
+    },
+  },
+  {
     title: `${MANAGE_SCRIPTS_PREFIX} Create Script`,
     invoke: async () => {
       const result = await cocoaDialog("filesave", {
