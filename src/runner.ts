@@ -1,19 +1,20 @@
-import ora from "ora";
-import prepareClipboard from "./clipboard/prepare";
-import finishClipboard from "./clipboard/finish";
-import showPrompt from "./ui/main";
-import { listen } from "./ipc";
-import { rebuildCatalog } from "./state/rebuildCatalog";
 import _ from "lodash";
-import { runClipboardHistory } from "./ui/clipboard-history";
-import { updateClipboardHistory } from "./state/clipboardHistory";
+import ora from "ora";
+import finishClipboard from "./clipboard/finish";
+import prepareClipboard from "./clipboard/prepare";
 import { getClipboardContent } from "./clipboard/utils";
 import { TITLE } from "./constants";
+import { listen } from "./ipc";
+import { updateClipboardHistory } from "./state/clipboardHistory";
+import { rebuildCatalog } from "./state/rebuildCatalog";
+import { runClipboardHistory } from "./ui/clipboard-history";
+import showPrompt from "./ui/main";
 import { showNotification } from "./utils/showNotification";
+
+console.clear();
 
 const spinner = ora({
   text: "Ready",
-  interval: 500,
   spinner: "dots",
 });
 
