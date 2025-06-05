@@ -1,6 +1,7 @@
 import { execaSync } from "execa";
 import { SHORTCUT_PREFIX } from "./_constants";
 import _ from "lodash";
+import { logger } from "../utils/logger";
 
 export const getShortcuts = () => {
   try {
@@ -15,7 +16,7 @@ export const getShortcuts = () => {
               execaSync("shortcuts", ["run", shortcut]);
             } catch (error: unknown) {
               if (_.isError(error)) {
-                console.error(`Failed to run shortcut: ${error.message}`);
+                logger.error(`Failed to run shortcut: ${error.message}`);
               }
             }
           },
@@ -24,7 +25,7 @@ export const getShortcuts = () => {
     return shortcuts;
   } catch (error: unknown) {
     if (_.isError(error)) {
-      console.error(`Failed to get shortcuts: ${error.message}`);
+      logger.error(`Failed to get shortcuts: ${error.message}`);
     }
     return [];
   }

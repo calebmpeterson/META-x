@@ -1,6 +1,7 @@
 import { exec } from "child_process";
 import _ from "lodash";
 import { getFontName } from "./getFontName";
+import { logger } from "./logger";
 
 // Uses choose: https://github.com/chipsenkbeil/choose
 // brew install choose-gui
@@ -33,7 +34,7 @@ export const choose = (items: string[], options: Options = {}) =>
         resolve(selection);
       } else {
         if (error && process.env.NODE_ENV === "development") {
-          console.error(error.stack);
+          logger.error(error.stack);
         }
 
         resolve(undefined);

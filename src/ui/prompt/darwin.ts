@@ -3,6 +3,7 @@ import _ from "lodash";
 import { Command } from "../../catalog/types";
 import { PromptResult } from "./types";
 import { getFontName } from "../../utils/getFontName";
+import { logger } from "../../utils/logger";
 
 // Uses choose: https://github.com/chipsenkbeil/choose
 // brew install choose-gui
@@ -28,7 +29,7 @@ export default (commands: Command[]) =>
         resolve(command);
       } else {
         if (error && process.env.NODE_ENV === "development") {
-          console.error(error.stack);
+          logger.error(error.stack);
         }
 
         resolve({

@@ -13,6 +13,7 @@ import { getCommandFilename } from "./getCommandFilename";
 import { ApplicationLauncher, Command } from "../catalog/types";
 import { getManageSnippetCommands } from "../catalog/manage-snippets";
 import { getSnippetCommands } from "../catalog/snippets";
+import { logger } from "./logger";
 
 const getCommandsFromFallbackHandler = () => {
   const commandFilename = getCommandFilename("fallback-handler.js");
@@ -31,7 +32,7 @@ const getCommandsFromFallbackHandler = () => {
     }));
   } catch (e: unknown) {
     if (_.isError(e)) {
-      console.error(`Failed to run fallback handler: ${e.message}`);
+      logger.error(`Failed to run fallback handler: ${e.message}`);
     }
 
     return [];

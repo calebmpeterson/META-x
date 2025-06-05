@@ -14,6 +14,7 @@ import { stripKeystrokes } from "../utils/stripKeystrokes";
 import { isShortcutResult } from "../utils/isShortcutResult";
 import { invokeShortcut } from "../utils/invokeShortcut";
 import { createScriptContext } from "../utils/createScriptContext";
+import { logger } from "../utils/logger";
 
 export default async () => {
   const selection = await getCurrentSelection();
@@ -29,7 +30,7 @@ export default async () => {
 
   // Execute built-in command
   if ("isUnknown" in item) {
-    console.warn(`Unknown command`);
+    logger.warn(`Unknown command`);
   }
   // Handle built-in functions
   else if ("value" in item && _.isFunction(item.value)) {
@@ -43,7 +44,7 @@ export default async () => {
   // 1. attempt to treat as a calculation
   // 2. defer to the fallback handler, if it exists
   else if ("isUnhandled" in item && item.isUnhandled) {
-    console.warn(`Unhandled command: ${item.query}`);
+    logger.warn(`Unhandled command: ${item.query}`);
 
     // Attempt to calculate
     const calculated = calculate(item.query);
@@ -69,13 +70,13 @@ export default async () => {
           result = processInvokeScriptResult(resultFromFallback);
         }
       } catch (e) {
-        console.error(`Failed to execute ${commandFilename}`, e);
+        logger.error(`Failed to execute ${commandFilename}`, e);
       }
     }
   }
 
   if (result && _.isString(result)) {
-    console.log(`Result: ${result}`);
+    logger.log(`Result: ${result}`);
 
     // Update clipboard to reflect the command execution result
     await setClipboardContent(stripKeystrokes(result));

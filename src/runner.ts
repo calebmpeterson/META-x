@@ -10,8 +10,9 @@ import { rebuildCatalog } from "./state/rebuildCatalog";
 import { runClipboardHistory } from "./ui/clipboard-history";
 import showPrompt from "./ui/main";
 import { showNotification } from "./utils/showNotification";
+import { logger } from "./utils/logger";
 
-console.clear();
+logger.clear();
 
 const spinner = ora({
   text: "Ready",
@@ -22,7 +23,7 @@ const promptForAndRunCommand = async () => {
   spinner.stop();
 
   try {
-    console.log("Meta-x triggered");
+    logger.log("Meta-x triggered");
 
     await prepareClipboard();
     const result = await showPrompt();
@@ -30,7 +31,7 @@ const promptForAndRunCommand = async () => {
       await finishClipboard();
     }
   } catch (error: unknown) {
-    console.error(error);
+    logger.error(error);
 
     if (_.isError(error)) {
       showNotification({
@@ -63,7 +64,7 @@ listen((message) => {
   } else if (message.trim() === "clipboard-history") {
     runClipboardHistory();
   } else {
-    console.log(`Unknown message: "${message}"`);
+    logger.log(`Unknown message: "${message}"`);
   }
 });
 

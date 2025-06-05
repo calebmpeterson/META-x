@@ -6,6 +6,7 @@ import { processInvokeScriptResult } from "./processInvokeScriptResult";
 import { showCommandErrorDialog } from "./showCommandErrorDialog";
 import { getCommandTitle } from "./getCommandTitle";
 import { showNotification } from "./showNotification";
+import { logger } from "./logger";
 
 const wrapCommandSource = (commandSource: string) => `
 const module = {};
@@ -40,7 +41,7 @@ export const invokeScript = async (
       return processInvokeScriptResult(result);
     }
   } catch (error: unknown) {
-    console.error(`Failed to execute ${commandFilename}`, error);
+    logger.error(`Failed to execute ${commandFilename}`, error);
     await showCommandErrorDialog(commandFilename, error);
   } finally {
     clearTimeout(timeoutId);

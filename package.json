@@ -4,7 +4,6 @@
   "main": "src/launcher.mjs",
   "author": "caleb.peterson@cubicle6.com",
   "license": "MIT",
-  "private": false,
   "type": "module",
   "scripts": {
     "start": "cross-env NODE_ENV=production node bin/runner.mjs",
@@ -42,5 +41,6 @@
     "prompts": "^2.3.2",
     "run-applescript": "^7.0.0",
     "user-startup": "^0.2.2"
-  }
+  },
+  "packageManager": "yarn@4.9.1"
 }

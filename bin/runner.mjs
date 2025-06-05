@@ -47,14 +47,32 @@ var getClipboardHistory = () => clipboardHistory;
 import _2 from "lodash";
 import clipboard from "clipboardy";
 
+// src/utils/logger.ts
+import chalk from "chalk";
+var logger = {
+  ...console,
+  log: (...args) => {
+    const [first, ...rest] = args;
+    console.log(`\u2699\uFE0E`, chalk.grey(first), ...rest.map((arg) => arg.toString()));
+  },
+  warn: (...args) => {
+    const [first, ...rest] = args;
+    console.warn(chalk.yellow(first), ...rest.map((arg) => arg.toString()));
+  },
+  error: (...args) => {
+    const [first, ...rest] = args;
+    console.error(chalk.red(first), ...rest.map((arg) => arg.toString()));
+  }
+};
+
 // src/utils/clock.ts
 var clock = (label, work) => (...args) => {
   try {
-    console.time(label);
+    logger.time(label);
     const result = work(...args);
     return result;
   } finally {
-    console.timeEnd(label);
+    logger.timeEnd(label);
   }
 };
 
@@ -101,7 +119,7 @@ var createServer = (socket, onMessage) => {
       try {
         onMessage(message);
       } catch (error) {
-        console.error(
+        logger.error(
           `Error encountered while handling message "${message}"`,
           error
         );
@@ -249,7 +267,7 @@ var getApplications = (rootDir = "/Applications") => {
       value,
       score: scores[value] ?? 0,
       invoke: async () => {
-        console.log(`Opening ${application}`);
+        logger.log(`Opening ${application}`);
         trackApplicationUsage(value);
         await openApp2(value);
       }
@@ -489,7 +507,7 @@ var choose = (items, options = {}) => new Promise((resolve) => {
       resolve(selection);
     } else {
       if (error && process.env.NODE_ENV === "development") {
-        console.error(error.stack);
+        logger.error(error.stack);
       }
       resolve(void 0);
     }
@@ -595,7 +613,7 @@ var invokeScript = async (commandFilename, selection) => {
       return processInvokeScriptResult(result);
     }
   } catch (error) {
-    console.error(`Failed to execute ${commandFilename}`, error);
+    logger.error(`Failed to execute ${commandFilename}`, error);
     await showCommandErrorDialog(commandFilename, error);
   } finally {
     clearTimeout(timeoutId);
@@ -626,7 +644,7 @@ var getShortcuts = () => {
             execaSync("shortcuts", ["run", shortcut]);
           } catch (error) {
             if (_11.isError(error)) {
-              console.error(`Failed to run shortcut: ${error.message}`);
+              logger.error(`Failed to run shortcut: ${error.message}`);
             }
           }
         }
@@ -635,7 +653,7 @@ var getShortcuts = () => {
     return shortcuts;
   } catch (error) {
     if (_11.isError(error)) {
-      console.error(`Failed to get shortcuts: ${error.message}`);
+      logger.error(`Failed to get shortcuts: ${error.message}`);
     }
     return [];
   }
@@ -733,7 +751,7 @@ var getCommandsFromFallbackHandler = () => {
     }));
   } catch (e) {
     if (_13.isError(e)) {
-      console.error(`Failed to run fallback handler: ${e.message}`);
+      logger.error(`Failed to run fallback handler: ${e.message}`);
     }
     return [];
   }
@@ -775,7 +793,7 @@ var setCommandsCatalog = (newCommandsState) => {
 
 // src/state/rebuildCatalog.ts
 var rebuildCatalog = () => {
-  console.log("Rebuilding commands catalog...");
+  logger.log("Rebuilding commands catalog...");
   setCommandsCatalog(getAllCommands());
 };
 
@@ -838,7 +856,7 @@ var darwin_default3 = (commands) => new Promise((resolve, reject) => {
       resolve(command);
     } else {
       if (error && process.env.NODE_ENV === "development") {
-        console.error(error.stack);
+        logger.error(error.stack);
       }
       resolve({
         isUnknown: true
@@ -857,7 +875,7 @@ var calculate = (input) => {
   try {
     const script = new vm2.Script(input);
     const result = script.runInNewContext();
-    console.log(`Calculated ${input} as ${result}`);
+    logger.log(`Calculated ${input} as ${result}`);
     return result;
   } catch {
     return INCALCULABLE;
@@ -878,7 +896,7 @@ var showCalculationResultDialog = async (query, result) => {
   try {
     await execa4(target, [query], { cwd, preferLocal: true });
   } catch (error) {
-    console.error(`Failed to show calculation result`, error);
+    logger.error(`Failed to show calculation result`, error);
   }
 };
 
@@ -897,9 +915,9 @@ var invokeShortcut = async ({ shortcut, input }) => {
     await execa5("shortcuts", ["run", shortcut, "-i", input ?? ""]);
   } catch (error) {
     if (_17.isError(error)) {
-      console.error(`Failed to run shortcut: ${error.message}`);
+      logger.error(`Failed to run shortcut: ${error.message}`);
     } else {
-      console.error(`Failed to run shortcut: ${shortcut}`);
+      logger.error(`Failed to run shortcut: ${shortcut}`);
     }
   }
 };
@@ -913,13 +931,13 @@ var main_default = async () => {
   const require2 = createRequire3(import.meta.url);
   Object.assign(global, { open: open6, require: require2 });
   if ("isUnknown" in item) {
-    console.warn(`Unknown command`);
+    logger.warn(`Unknown command`);
   } else if ("value" in item && _18.isFunction(item.value)) {
     result = item.value(selection);
   } else if ("invoke" in item && _18.isFunction(item.invoke)) {
     result = await item.invoke(selection);
   } else if ("isUnhandled" in item && item.isUnhandled) {
-    console.warn(`Unhandled command: ${item.query}`);
+    logger.warn(`Unhandled command: ${item.query}`);
     const calculated = calculate(item.query);
     if (didCalculate(calculated)) {
       result = String(calculated);
@@ -938,12 +956,12 @@ var main_default = async () => {
           result = processInvokeScriptResult(resultFromFallback);
         }
       } catch (e) {
-        console.error(`Failed to execute ${commandFilename}`, e);
+        logger.error(`Failed to execute ${commandFilename}`, e);
       }
     }
   }
   if (result && _18.isString(result)) {
-    console.log(`Result: ${result}`);
+    logger.log(`Result: ${result}`);
     await setClipboardContent(stripKeystrokes(result));
     if (result.endsWith(ENTER)) {
       await pressEnter_default();
@@ -956,7 +974,7 @@ var main_default = async () => {
 };
 
 // src/runner.ts
-console.clear();
+logger.clear();
 var spinner = ora({
   text: "Ready",
   spinner: "dots"
@@ -964,14 +982,14 @@ var spinner = ora({
 var promptForAndRunCommand = async () => {
   spinner.stop();
   try {
-    console.log("Meta-x triggered");
+    logger.log("Meta-x triggered");
     await prepare_default();
     const result = await main_default();
     if (result) {
       await finish_default();
     }
   } catch (error) {
-    console.error(error);
+    logger.error(error);
     if (_19.isError(error)) {
       showNotification({
         message: "META-x encountered an error: " + error.message
@@ -996,7 +1014,7 @@ listen((message) => {
   } else if (message.trim() === "clipboard-history") {
     runClipboardHistory();
   } else {
-    console.log(`Unknown message: "${message}"`);
+    logger.log(`Unknown message: "${message}"`);
   }
 });
 showNotification({

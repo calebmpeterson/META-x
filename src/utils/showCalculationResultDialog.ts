@@ -1,6 +1,7 @@
 import { execa } from "execa";
 import os from "node:os";
 import path from "node:path";
+import { logger } from "./logger";
 
 export const showCalculationResultDialog = async (
   query: string,
@@ -12,6 +13,6 @@ export const showCalculationResultDialog = async (
   try {
     await execa(target, [query], { cwd, preferLocal: true });
   } catch (error) {
-    console.error(`Failed to show calculation result`, error);
+    logger.error(`Failed to show calculation result`, error);
   }
 };

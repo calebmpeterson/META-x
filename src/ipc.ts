@@ -1,5 +1,6 @@
 import net from "node:net";
 import fs from "node:fs";
+import { logger } from "./utils/logger";
 
 const SOCKET_FILE = "/tmp/meta-x.socket";
 
@@ -13,9 +14,9 @@ const createServer = (socket: string, onMessage: OnMessage) => {
         try {
           onMessage(message);
         } catch (error) {
-          console.error(
+          logger.error(
             `Error encountered while handling message "${message}"`,
-            error,
+            error
           );
         }
       });

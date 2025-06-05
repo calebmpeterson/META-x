@@ -5,6 +5,7 @@ import { openApp } from "open";
 import { getConfigDir } from "../utils/getConfigDir";
 import { APPLICATION_PREFIX } from "./_constants";
 import { ApplicationLauncher } from "./types";
+import { logger } from "../utils/logger";
 const getApplicationUsageHistory = () =>
   path.join(getConfigDir(), ".application-usage");
 
@@ -12,7 +13,7 @@ const persistApplicationUsage = (values: string[]) => {
   fs.writeFileSync(
     getApplicationUsageHistory(),
     _.takeRight(values, 100).join("\n"),
-    "utf8",
+    "utf8"
   );
 };
 
@@ -31,7 +32,7 @@ const trackApplicationUsage = (value: string) => {
 };
 
 export const getApplications = (
-  rootDir = "/Applications",
+  rootDir = "/Applications"
 ): ApplicationLauncher[] => {
   const history = restoreApplicationUsage();
   const scores = _.countBy(history, _.identity);
@@ -61,12 +62,12 @@ export const getApplications = (
       title: `${APPLICATION_PREFIX} ${_.get(
         path.parse(application),
         "name",
-        application,
+        application
       )}`,
       value,
       score: scores[value] ?? 0,
       invoke: async () => {
-        console.log(`Opening ${application}`);
+        logger.log(`Opening ${application}`);
         trackApplicationUsage(value);
         await openApp(value);
       },
