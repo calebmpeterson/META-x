@@ -46,7 +46,7 @@ export const getManageSnippetCommands = () => [
     },
   },
   {
-    title: `${MANAGE_SNIPPETS_PREFIX} View Snippets`,
+    title: `${MANAGE_SNIPPETS_PREFIX} Manage Snippets`,
     invoke: async () => {
       await open(SNIPPETS_DIR);
     },

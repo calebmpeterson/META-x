@@ -18,7 +18,7 @@ export const getManageScriptCommands = () => [
     },
   },
   {
-    title: `${MANAGE_SCRIPTS_PREFIX} View Scripts`,
+    title: `${MANAGE_SCRIPTS_PREFIX} Manage Scripts`,
     invoke: async () => {
       await open(getConfigDir());
     },

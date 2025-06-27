@@ -57,11 +57,15 @@ var logger = {
   },
   warn: (...args) => {
     const [first, ...rest] = args;
-    console.warn(chalk.yellow(first), ...rest.map((arg) => arg.toString()));
+    console.warn(
+      `\u26A0\uFE0E`,
+      chalk.yellow(first),
+      ...rest.map((arg) => arg.toString())
+    );
   },
   error: (...args) => {
     const [first, ...rest] = args;
-    console.error(chalk.red(first), ...rest.map((arg) => arg.toString()));
+    console.error(`\u2297`, chalk.red(first), ...rest.map((arg) => arg.toString()));
   }
 };
 
@@ -419,7 +423,7 @@ var getManageScriptCommands = () => [
     }
   },
   {
-    title: `${MANAGE_SCRIPTS_PREFIX} View Scripts`,
+    title: `${MANAGE_SCRIPTS_PREFIX} Manage Scripts`,
     invoke: async () => {
       await open3(getConfigDir());
     }
@@ -711,7 +715,7 @@ var getManageSnippetCommands = () => [
     }
   },
   {
-    title: `${MANAGE_SNIPPETS_PREFIX} View Snippets`,
+    title: `${MANAGE_SNIPPETS_PREFIX} Manage Snippets`,
     invoke: async () => {
       await open5(SNIPPETS_DIR);
     }
