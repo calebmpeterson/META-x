@@ -1,5 +1,5 @@
 import path from "node:path";
-import { getConfigDir } from "./getConfigDir";
+import { SCRIPTS_DIR } from "./getConfigDir";
 
 export const getCommandFilename = (commandFilename: string) =>
-  path.join(getConfigDir(), commandFilename);
+  path.join(SCRIPTS_DIR, commandFilename);

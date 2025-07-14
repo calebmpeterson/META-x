@@ -223,6 +223,7 @@ import { openApp as openApp2 } from "open";
 import os2 from "os";
 import path2 from "path";
 var getConfigDir = (...subdirs) => path2.join(os2.homedir(), ".meta-x", ...subdirs);
+var SCRIPTS_DIR = getConfigDir("scripts");
 
 // src/catalog/applications.ts
 var getApplicationUsageHistory = () => path3.join(getConfigDir(), ".application-usage");
@@ -342,6 +343,8 @@ var getSystemCommands = () => [
 // src/catalog/manage-scripts.ts
 import cocoaDialog from "cocoa-dialog";
 import _5 from "lodash";
+import fs6 from "node:fs";
+import open3 from "open";
 
 // src/utils/createEmptyScript.ts
 import fs4 from "node:fs";
@@ -377,22 +380,12 @@ var createEmptyScript = (pathname) => {
   }
 };
 
-// src/utils/openInSystemEditor.ts
-import { execa as execa2 } from "execa";
-var openInSystemEditor = async (pathname, extension = ".js") => {
-  if (process.env.EDITOR) {
-    await execa2(process.env.EDITOR, [
-      getPathnameWithExtension(pathname, extension)
-    ]);
-  }
-};
-
 // src/utils/ensureEmptyFallbackHandler.ts
 import fs5 from "node:fs";
 
 // src/utils/getCommandFilename.ts
 import path5 from "node:path";
-var getCommandFilename = (commandFilename) => path5.join(getConfigDir(), commandFilename);
+var getCommandFilename = (commandFilename) => path5.join(SCRIPTS_DIR, commandFilename);
 
 // src/utils/ensureEmptyFallbackHandler.ts
 var TEMPLATE2 = `
@@ -413,8 +406,20 @@ var ensureEmptyFallbackHandler = () => {
   }
 };
 
+// src/utils/openInSystemEditor.ts
+import { execa as execa2 } from "execa";
+var openInSystemEditor = async (pathname, extension = ".js") => {
+  if (process.env.EDITOR) {
+    await execa2(process.env.EDITOR, [
+      getPathnameWithExtension(pathname, extension)
+    ]);
+  }
+};
+
 // src/catalog/manage-scripts.ts
-import open3 from "open";
+if (!fs6.existsSync(SCRIPTS_DIR)) {
+  fs6.mkdirSync(SCRIPTS_DIR, { recursive: true });
+}
 var getManageScriptCommands = () => [
   {
     title: `${MANAGE_SCRIPTS_PREFIX} Reload Scripts`,
@@ -425,7 +430,7 @@ var getManageScriptCommands = () => [
   {
     title: `${MANAGE_SCRIPTS_PREFIX} Manage Scripts`,
     invoke: async () => {
-      await open3(getConfigDir());
+      await open3(SCRIPTS_DIR);
     }
   },
   {
@@ -433,7 +438,7 @@ var getManageScriptCommands = () => [
     invoke: async () => {
       const result = await cocoaDialog("filesave", {
         title: "Save Script As...",
-        withDirectory: getConfigDir()
+        withDirectory: SCRIPTS_DIR
       });
       if (!_5.isEmpty(result)) {
         createEmptyScript(result);
@@ -446,7 +451,7 @@ var getManageScriptCommands = () => [
     invoke: async () => {
       const result = await cocoaDialog("fileselect", {
         title: "Choose Script To Edit...",
-        withDirectory: getConfigDir()
+        withDirectory: SCRIPTS_DIR
       });
       if (!_5.isEmpty(result)) {
         await openInSystemEditor(result);
@@ -470,11 +475,15 @@ var getManageScriptCommands = () => [
 ];
 
 // src/catalog/scripts.ts
-import fs7 from "fs";
+import fs8 from "fs";
+
+// src/utils/getCommandTitle.ts
+import { basename } from "node:path";
+var getCommandTitle = (commandFilename) => basename(commandFilename, ".js");
 
 // src/utils/invokeScript.ts
 import _10 from "lodash";
-import fs6 from "node:fs";
+import fs7 from "node:fs";
 import vm from "node:vm";
 
 // src/utils/createScriptContext.ts
@@ -589,10 +598,6 @@ var showCommandErrorDialog = async (commandFilename, error) => {
   }
 };
 
-// src/utils/getCommandTitle.ts
-import { basename } from "node:path";
-var getCommandTitle = (commandFilename) => basename(commandFilename, ".js");
-
 // src/utils/invokeScript.ts
 var wrapCommandSource = (commandSource) => `
 const module = {};
@@ -602,6 +607,7 @@ ${commandSource};
 module.exports(selection);
 `;
 var invokeScript = async (commandFilename, selection) => {
+  console.log(`Invoking ${commandFilename}`);
   const commandContext = createScriptContext(commandFilename, selection);
   const timeoutId = setTimeout(() => {
     showNotification({
@@ -609,7 +615,7 @@ var invokeScript = async (commandFilename, selection) => {
     });
   }, 5e3);
   try {
-    const commandSource = fs6.readFileSync(commandFilename, "utf8");
+    const commandSource = fs7.readFileSync(commandFilename, "utf8");
     const wrappedCommandSource = wrapCommandSource(commandSource);
     const commandScript = new vm.Script(wrappedCommandSource);
     const result = await commandScript.runInNewContext(commandContext);
@@ -625,7 +631,7 @@ var invokeScript = async (commandFilename, selection) => {
 };
 
 // src/catalog/scripts.ts
-var getScriptCommands = () => fs7.readdirSync(getConfigDir()).filter(
+var getScriptCommands = () => fs8.readdirSync(SCRIPTS_DIR).filter(
   (file) => file.endsWith(".js") && !file.includes("fallback-handler")
 ).map((command) => ({
   title: `${SCRIPT_PREFIX} ${getCommandTitle(command)}`,
@@ -666,11 +672,11 @@ var getShortcuts = () => {
 // src/catalog/manage-snippets.ts
 import cocoaDialog3 from "cocoa-dialog";
 import _12 from "lodash";
-import fs9 from "node:fs";
+import fs10 from "node:fs";
 import open5 from "open";
 
 // src/utils/createEmptySnippet.ts
-import fs8 from "node:fs";
+import fs9 from "node:fs";
 var SNIPPET_EXTENSION = ".txt";
 var TEMPLATE3 = ``;
 var createEmptySnippet = (pathname) => {
@@ -678,15 +684,15 @@ var createEmptySnippet = (pathname) => {
     pathname,
     SNIPPET_EXTENSION
   );
-  if (!fs8.existsSync(nameWithExtension)) {
-    fs8.writeFileSync(nameWithExtension, TEMPLATE3, "utf8");
+  if (!fs9.existsSync(nameWithExtension)) {
+    fs9.writeFileSync(nameWithExtension, TEMPLATE3, "utf8");
   }
 };
 
 // src/catalog/manage-snippets.ts
 var SNIPPETS_DIR = getConfigDir("snippets");
-if (!fs9.existsSync(SNIPPETS_DIR)) {
-  fs9.mkdirSync(SNIPPETS_DIR, { recursive: true });
+if (!fs10.existsSync(SNIPPETS_DIR)) {
+  fs10.mkdirSync(SNIPPETS_DIR, { recursive: true });
 }
 var getManageSnippetCommands = () => [
   {
@@ -723,7 +729,7 @@ var getManageSnippetCommands = () => [
 ];
 
 // src/catalog/snippets.ts
-import fs10 from "fs";
+import fs11 from "fs";
 import path8 from "path";
 
 // src/utils/getSnippetFilename.ts
@@ -731,11 +737,11 @@ import path7 from "node:path";
 var getSnippetFilename = (snippetFilename) => path7.join(getConfigDir("snippets"), snippetFilename);
 
 // src/catalog/snippets.ts
-var getSnippetCommands = () => fs10.readdirSync(getConfigDir("snippets")).filter((file) => file.endsWith(SNIPPET_EXTENSION)).map((command) => ({
+var getSnippetCommands = () => fs11.readdirSync(getConfigDir("snippets")).filter((file) => file.endsWith(SNIPPET_EXTENSION)).map((command) => ({
   title: `${SNIPPET_PREFIX} ${path8.basename(command, SNIPPET_EXTENSION)}`,
   invoke: async (_selection) => {
     const snippetFilename = getSnippetFilename(command);
-    const snippet = fs10.readFileSync(snippetFilename, "utf-8");
+    const snippet = fs11.readFileSync(snippetFilename, "utf-8");
     return snippet;
   }
 }));

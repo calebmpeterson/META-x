@@ -1,14 +1,14 @@
 import fs from "fs";
-import { getConfigDir } from "../utils/getConfigDir";
+import { getCommandFilename } from "../utils/getCommandFilename";
+import { getCommandTitle } from "../utils/getCommandTitle";
+import { SCRIPTS_DIR } from "../utils/getConfigDir";
+import { invokeScript } from "../utils/invokeScript";
 import { SCRIPT_PREFIX } from "./_constants";
 import { ScriptCommand } from "./types";
-import { getCommandFilename } from "../utils/getCommandFilename";
-import { invokeScript } from "../utils/invokeScript";
-import { getCommandTitle } from "../utils/getCommandTitle";
 
 export const getScriptCommands = (): ScriptCommand[] =>
   fs
-    .readdirSync(getConfigDir())
+    .readdirSync(SCRIPTS_DIR)
     .filter(
       (file) => file.endsWith(".js") && !file.includes("fallback-handler")
     )

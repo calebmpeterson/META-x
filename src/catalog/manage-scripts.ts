@@ -1,14 +1,20 @@
 import cocoaDialog from "cocoa-dialog";
 import _ from "lodash";
-import { createEmptyScript } from "../utils/createEmptyScript";
-import { getConfigDir } from "../utils/getConfigDir";
-import { openInSystemEditor } from "../utils/openInSystemEditor";
-import { ensureEmptyFallbackHandler } from "../utils/ensureEmptyFallbackHandler";
-import { MANAGE_SCRIPTS_PREFIX } from "./_constants";
-import { getCommandFilename } from "../utils/getCommandFilename";
-import { rebuildCatalog } from "../state/rebuildCatalog";
-import { TITLE } from "../constants";
+import fs from "node:fs";
 import open from "open";
+import { TITLE } from "../constants";
+import { rebuildCatalog } from "../state/rebuildCatalog";
+import { createEmptyScript } from "../utils/createEmptyScript";
+import { ensureEmptyFallbackHandler } from "../utils/ensureEmptyFallbackHandler";
+import { getCommandFilename } from "../utils/getCommandFilename";
+import { SCRIPTS_DIR } from "../utils/getConfigDir";
+import { openInSystemEditor } from "../utils/openInSystemEditor";
+import { MANAGE_SCRIPTS_PREFIX } from "./_constants";
+
+// Ensure the scripts directory exists
+if (!fs.existsSync(SCRIPTS_DIR)) {
+  fs.mkdirSync(SCRIPTS_DIR, { recursive: true });
+}
 
 export const getManageScriptCommands = () => [
   {
@@ -20,7 +26,7 @@ export const getManageScriptCommands = () => [
   {
     title: `${MANAGE_SCRIPTS_PREFIX} Manage Scripts`,
     invoke: async () => {
-      await open(getConfigDir());
+      await open(SCRIPTS_DIR);
     },
   },
   {
@@ -28,7 +34,7 @@ export const getManageScriptCommands = () => [
     invoke: async () => {
       const result = await cocoaDialog("filesave", {
         title: "Save Script As...",
-        withDirectory: getConfigDir(),
+        withDirectory: SCRIPTS_DIR,
       });
 
       if (!_.isEmpty(result)) {
@@ -42,7 +48,7 @@ export const getManageScriptCommands = () => [
     invoke: async () => {
       const result = await cocoaDialog("fileselect", {
         title: "Choose Script To Edit...",
-        withDirectory: getConfigDir(),
+        withDirectory: SCRIPTS_DIR,
       });
 
       if (!_.isEmpty(result)) {

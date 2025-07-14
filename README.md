@@ -50,11 +50,11 @@ All configuration options are contained in `~/.meta-x/config.json`
 
 ### Custom Commands
 
-Custom commands are `commonjs` modules placed in `~/.meta-x/`.
+Custom commands are `commonjs` modules placed in `~/.meta-x/scripts/`.
 
 #### Example Command
 
-To get a calculator capable of all operations/syntax available to you in JavaScript, create `~/.meta-x/calc.js` with the following content:
+To get a calculator capable of all operations/syntax available to you in JavaScript, create `~/.meta-x/scripts/calc.js` with the following content:
 
 ```js
 module.exports = (selection) => eval(selection);
@@ -93,7 +93,7 @@ module.exports = (selection) => {
 
 #### Command Not Found Fallback
 
-In the event that your query does not match a known command, the raw query string will be passed to `~/.meta-x/fallback-handler.js` if it exists:
+In the event that your query does not match a known command, the raw query string will be passed to `~/.meta-x/scripts/fallback-handler.js` if it exists:
 
 ```js
 module.exports = function (selection, query) {
@@ -161,7 +161,7 @@ Issues and Pull Requests are welcome!
 - [x] Periodically re-build command catalog in the background rather than re-building when launched
 - [x] Add shutdown/restart commands
 - [x] Add support for static text snippets
-- [ ] Improve standard for organization of ~/.meta-x/\*
+- [x] Improve standard for organization of ~/.meta-x/\*
 - [ ] Add support for omitting applications and system preferences
 - [ ] Add a progress indicator for async commands
 - [ ] Add support for directly invoking a custom command from the launch CLI (e.g. `~/Tools/meta-x/bin/launch "My Custom Command"`)

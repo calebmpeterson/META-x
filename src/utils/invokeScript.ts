@@ -2,11 +2,11 @@ import _ from "lodash";
 import fs from "node:fs";
 import vm from "node:vm";
 import { createScriptContext } from "./createScriptContext";
+import { getCommandTitle } from "./getCommandTitle";
+import { logger } from "./logger";
 import { processInvokeScriptResult } from "./processInvokeScriptResult";
 import { showCommandErrorDialog } from "./showCommandErrorDialog";
-import { getCommandTitle } from "./getCommandTitle";
 import { showNotification } from "./showNotification";
-import { logger } from "./logger";
 
 const wrapCommandSource = (commandSource: string) => `
 const module = {};
@@ -20,6 +20,7 @@ export const invokeScript = async (
   commandFilename: string,
   selection: string
 ) => {
+  console.log(`Invoking ${commandFilename}`);
   const commandContext = createScriptContext(commandFilename, selection);
 
   const timeoutId = setTimeout(() => {
