@@ -2012,6 +2012,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"json5@npm:^2.2.3":
+  version: 2.2.3
+  resolution: "json5@npm:2.2.3"
+  bin:
+    json5: lib/cli.js
+  checksum: 10c0/5a04eed94810fa55c5ea138b2f7a5c12b97c3750bc63d11e511dcecbfef758003861522a070c2272764ee0f4e3e323862f386945aeb5b85b87ee43f084ba586c
+  languageName: node
+  linkType: hard
+
 "kleur@npm:^3.0.3":
   version: 3.0.3
   resolution: "kleur@npm:3.0.3"
@@ -2110,6 +2119,7 @@ __metadata:
     dotenv: "npm:^16.4.5"
     esbuild: "npm:^0.23.0"
     execa: "npm:^9.3.0"
+    json5: "npm:^2.2.3"
     lodash: "npm:^4.17.21"
     node-fetch: "npm:^3.3.2"
     node-notifier: "npm:^10.0.1"
@@ -2119,6 +2129,7 @@ __metadata:
     prompts: "npm:^2.3.2"
     run-applescript: "npm:^7.0.0"
     showdown: "npm:^1.9.1"
+    type-fest: "npm:^4.41.0"
     typescript: "npm:^5.5.4"
     user-startup: "npm:^0.2.2"
   languageName: unknown
@@ -3176,6 +3187,13 @@ __metadata:
   version: 0.0.3
   resolution: "tr46@npm:0.0.3"
   checksum: 10c0/047cb209a6b60c742f05c9d3ace8fa510bff609995c129a37ace03476a9b12db4dbf975e74600830ef0796e18882b2381fb5fb1f6b4f96b832c374de3ab91a11
+  languageName: node
+  linkType: hard
+
+"type-fest@npm:^4.41.0":
+  version: 4.41.0
+  resolution: "type-fest@npm:4.41.0"
+  checksum: 10c0/f5ca697797ed5e88d33ac8f1fec21921839871f808dc59345c9cf67345bfb958ce41bd821165dbf3ae591cedec2bf6fe8882098dfdd8dc54320b859711a2c1e4
   languageName: node
   linkType: hard
 

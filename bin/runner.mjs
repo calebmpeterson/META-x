@@ -1,5 +1,5 @@
 // src/runner.ts
-import _19 from "lodash";
+import _20 from "lodash";
 import ora from "ora";
 
 // src/clipboard/finish/darwin.ts
@@ -146,7 +146,7 @@ var listen = (onMessage) => {
 };
 
 // src/utils/getAllCommands.ts
-import _13 from "lodash";
+import _14 from "lodash";
 import { createRequire as createRequire2 } from "node:module";
 
 // src/catalog/built-ins.ts
@@ -214,10 +214,10 @@ var getFolders = () => FOLDERS.map((folder) => ({
 }));
 
 // src/catalog/applications.ts
-import fs2 from "fs";
-import path3 from "path";
-import _4 from "lodash";
+import fs3 from "fs";
+import _5 from "lodash";
 import { openApp as openApp2 } from "open";
+import path4 from "path";
 
 // src/utils/getConfigDir.ts
 import os2 from "os";
@@ -225,18 +225,39 @@ import path2 from "path";
 var getConfigDir = (...subdirs) => path2.join(os2.homedir(), ".meta-x", ...subdirs);
 var SCRIPTS_DIR = getConfigDir("scripts");
 
+// src/utils/getConfigOption.ts
+import JSON5 from "json5";
+import _4 from "lodash";
+import fs2 from "node:fs";
+
+// src/utils/getConfigPath.ts
+import * as path3 from "node:path";
+var getConfigPath = (filename) => path3.join(getConfigDir(), filename);
+
+// src/utils/getConfigOption.ts
+var CONFIG_FILENAME = getConfigPath("config.json");
+var getConfigOption = (key, defaultValue) => {
+  try {
+    const contents = fs2.readFileSync(CONFIG_FILENAME, "utf8");
+    const json = JSON5.parse(contents);
+    return _4.get(json, key, defaultValue);
+  } catch {
+    return defaultValue;
+  }
+};
+
 // src/catalog/applications.ts
-var getApplicationUsageHistory = () => path3.join(getConfigDir(), ".application-usage");
+var getApplicationUsageHistory = () => path4.join(getConfigDir(), ".application-usage");
 var persistApplicationUsage = (values) => {
-  fs2.writeFileSync(
+  fs3.writeFileSync(
     getApplicationUsageHistory(),
-    _4.takeRight(values, 100).join("\n"),
+    _5.takeRight(values, 100).join("\n"),
     "utf8"
   );
 };
 var restoreApplicationUsage = () => {
   try {
-    return fs2.readFileSync(getApplicationUsageHistory(), "utf8").split("\n");
+    return fs3.readFileSync(getApplicationUsageHistory(), "utf8").split("\n");
   } catch {
     return [];
   }
@@ -245,30 +266,29 @@ var trackApplicationUsage = (value) => {
   const history = restoreApplicationUsage();
   persistApplicationUsage([...history, value]);
 };
+var DEFAULT_IGNORED = [];
 var getApplications = (rootDir = "/Applications") => {
   const history = restoreApplicationUsage();
-  const scores = _4.countBy(history, _4.identity);
-  const applications = fs2.readdirSync(rootDir).filter((filename) => {
-    const pathname = path3.join(rootDir, filename);
-    const stats = fs2.statSync(pathname);
+  const scores = _5.countBy(history, _5.identity);
+  const ignored = getConfigOption("ignored", DEFAULT_IGNORED);
+  const applications = fs3.readdirSync(rootDir).filter((filename) => {
+    const pathname = path4.join(rootDir, filename);
+    const stats = fs3.statSync(pathname);
     if (stats.isDirectory() && !filename.endsWith(".app")) {
       return false;
     }
     try {
-      fs2.accessSync(pathname, fs2.constants.X_OK);
+      fs3.accessSync(pathname, fs3.constants.X_OK);
       return true;
     } catch {
       return false;
     }
-  }).filter((filename) => !filename.startsWith("."));
+  }).filter((filename) => !filename.startsWith(".")).filter((filename) => !ignored.some((ignore) => filename.includes(ignore)));
   const items = applications.map((application) => {
-    const value = path3.join(rootDir, application);
+    const value = path4.join(rootDir, application);
+    const name = _5.get(path4.parse(application), "name", application);
     return {
-      title: `${APPLICATION_PREFIX} ${_4.get(
-        path3.parse(application),
-        "name",
-        application
-      )}`,
+      title: `${APPLICATION_PREFIX} ${name}`,
       value,
       score: scores[value] ?? 0,
       invoke: async () => {
@@ -282,11 +302,15 @@ var getApplications = (rootDir = "/Applications") => {
 };
 
 // src/catalog/system-preferences.ts
-import fs3 from "node:fs";
-import path4 from "node:path";
+import fs4 from "node:fs";
+import path5 from "node:path";
 import open2 from "open";
 var PREFERENCE_PANE_ROOT_DIR = "/System/Library/PreferencePanes";
-var getPreferencePanes = () => fs3.readdirSync(PREFERENCE_PANE_ROOT_DIR).map((filename) => path4.parse(filename).name);
+var DEFAULT_IGNORED2 = [];
+var getPreferencePanes = () => {
+  const ignored = getConfigOption("ignored", DEFAULT_IGNORED2);
+  return fs4.readdirSync(PREFERENCE_PANE_ROOT_DIR).map((filename) => path5.parse(filename).name).filter((filename) => !ignored.some((ignore) => filename.includes(ignore)));
+};
 var getPane = (pane) => `${PREFERENCE_PANE_ROOT_DIR}/${pane}.prefPane`;
 var getSystemPreferences = () => getPreferencePanes().map((pane) => ({
   title: `${SYSTEM_PREFIX} ${pane}`,
@@ -342,12 +366,12 @@ var getSystemCommands = () => [
 
 // src/catalog/manage-scripts.ts
 import cocoaDialog from "cocoa-dialog";
-import _5 from "lodash";
-import fs6 from "node:fs";
+import _6 from "lodash";
+import fs7 from "node:fs";
 import open3 from "open";
 
 // src/utils/createEmptyScript.ts
-import fs4 from "node:fs";
+import fs5 from "node:fs";
 
 // src/utils/getPathnameWithExtension.ts
 var getPathnameWithExtension = (pathname, extension = ".js") => pathname.endsWith(extension) ? pathname : `${pathname}${extension}`;
@@ -375,17 +399,17 @@ module.exports = (selection) => {
 `.trim();
 var createEmptyScript = (pathname) => {
   const nameWithExtension = getPathnameWithExtension(pathname);
-  if (!fs4.existsSync(nameWithExtension)) {
-    fs4.writeFileSync(nameWithExtension, TEMPLATE, "utf8");
+  if (!fs5.existsSync(nameWithExtension)) {
+    fs5.writeFileSync(nameWithExtension, TEMPLATE, "utf8");
   }
 };
 
 // src/utils/ensureEmptyFallbackHandler.ts
-import fs5 from "node:fs";
+import fs6 from "node:fs";
 
 // src/utils/getCommandFilename.ts
-import path5 from "node:path";
-var getCommandFilename = (commandFilename) => path5.join(SCRIPTS_DIR, commandFilename);
+import path6 from "node:path";
+var getCommandFilename = (commandFilename) => path6.join(SCRIPTS_DIR, commandFilename);
 
 // src/utils/ensureEmptyFallbackHandler.ts
 var TEMPLATE2 = `
@@ -401,8 +425,8 @@ module.exports.suggestions = function () {
 `.trim();
 var ensureEmptyFallbackHandler = () => {
   const fallbackHandlerFilename = getCommandFilename("fallback-handler.js");
-  if (!fs5.existsSync(fallbackHandlerFilename)) {
-    fs5.writeFileSync(fallbackHandlerFilename, TEMPLATE2, "utf8");
+  if (!fs6.existsSync(fallbackHandlerFilename)) {
+    fs6.writeFileSync(fallbackHandlerFilename, TEMPLATE2, "utf8");
   }
 };
 
@@ -417,8 +441,8 @@ var openInSystemEditor = async (pathname, extension = ".js") => {
 };
 
 // src/catalog/manage-scripts.ts
-if (!fs6.existsSync(SCRIPTS_DIR)) {
-  fs6.mkdirSync(SCRIPTS_DIR, { recursive: true });
+if (!fs7.existsSync(SCRIPTS_DIR)) {
+  fs7.mkdirSync(SCRIPTS_DIR, { recursive: true });
 }
 var getManageScriptCommands = () => [
   {
@@ -440,7 +464,7 @@ var getManageScriptCommands = () => [
         title: "Save Script As...",
         withDirectory: SCRIPTS_DIR
       });
-      if (!_5.isEmpty(result)) {
+      if (!_6.isEmpty(result)) {
         createEmptyScript(result);
         await openInSystemEditor(result);
       }
@@ -453,7 +477,7 @@ var getManageScriptCommands = () => [
         title: "Choose Script To Edit...",
         withDirectory: SCRIPTS_DIR
       });
-      if (!_5.isEmpty(result)) {
+      if (!_6.isEmpty(result)) {
         await openInSystemEditor(result);
       }
     }
@@ -475,19 +499,19 @@ var getManageScriptCommands = () => [
 ];
 
 // src/catalog/scripts.ts
-import fs8 from "fs";
+import fs9 from "fs";
 
 // src/utils/getCommandTitle.ts
 import { basename } from "node:path";
 var getCommandTitle = (commandFilename) => basename(commandFilename, ".js");
 
 // src/utils/invokeScript.ts
-import _10 from "lodash";
-import fs7 from "node:fs";
+import _11 from "lodash";
+import fs8 from "node:fs";
 import vm from "node:vm";
 
 // src/utils/createScriptContext.ts
-import _7 from "lodash";
+import _8 from "lodash";
 import axios from "axios";
 import dotenv from "dotenv";
 import open4 from "open";
@@ -497,7 +521,7 @@ var ENTER = "{ENTER}";
 
 // src/utils/choose.ts
 import { exec } from "child_process";
-import _6 from "lodash";
+import _7 from "lodash";
 
 // src/utils/getFontName.ts
 var getFontName = () => "Fira Code";
@@ -505,7 +529,7 @@ var getFontName = () => "Fira Code";
 // src/utils/choose.ts
 var choose = (items, options = {}) => new Promise((resolve) => {
   const choices = items.join("\n");
-  const toShow = Math.max(5, Math.min(40, _6.size(items)));
+  const toShow = Math.max(5, Math.min(40, _7.size(items)));
   const outputConfig = [
     options.returnIndex ? "-i" : "",
     options.placeholder ? `-p "${options.placeholder}"` : ""
@@ -513,7 +537,7 @@ var choose = (items, options = {}) => new Promise((resolve) => {
   const cmd = `echo "${choices}" | choose -f "${getFontName()}" -b 000000 -c 222222 -w 30 -s 16 -m -n ${toShow} ${outputConfig}`;
   exec(cmd, (error, stdout, stderr) => {
     if (stdout) {
-      const selection = _6.trim(stdout);
+      const selection = _7.trim(stdout);
       if (options.returnIndex && selection === "-1") {
         resolve(void 0);
       }
@@ -530,12 +554,6 @@ var choose = (items, options = {}) => new Promise((resolve) => {
 // src/utils/createScriptContext.ts
 import { createRequire } from "module";
 import { execa as execa3, $ } from "execa";
-
-// src/utils/getConfigPath.ts
-import * as path6 from "node:path";
-var getConfigPath = (filename) => path6.join(getConfigDir(), filename);
-
-// src/utils/createScriptContext.ts
 import { runAppleScript } from "run-applescript";
 
 // src/utils/showNotification.ts
@@ -553,7 +571,7 @@ var createScriptContext = (commandFilename, selection) => {
   const ENV = {};
   dotenv.config({ path: getConfigPath(".env"), processEnv: ENV });
   const commandContext = {
-    _: _7,
+    _: _8,
     selection,
     require: require2,
     console,
@@ -576,14 +594,14 @@ var createScriptContext = (commandFilename, selection) => {
 };
 
 // src/utils/processInvokeScriptResult.ts
-import _8 from "lodash";
-var processInvokeScriptResult = (result) => _8.isArray(result) || _8.isObject(result) ? result : _8.toString(result);
+import _9 from "lodash";
+var processInvokeScriptResult = (result) => _9.isArray(result) || _9.isObject(result) ? result : _9.toString(result);
 
 // src/utils/showCommandErrorDialog.ts
 import cocoaDialog2 from "cocoa-dialog";
-import _9 from "lodash";
+import _10 from "lodash";
 var showCommandErrorDialog = async (commandFilename, error) => {
-  if (_9.isError(error)) {
+  if (_10.isError(error)) {
     const result = await cocoaDialog2("textbox", {
       title: `Error in ${commandFilename}`,
       text: error.stack,
@@ -615,11 +633,11 @@ var invokeScript = async (commandFilename, selection) => {
     });
   }, 5e3);
   try {
-    const commandSource = fs7.readFileSync(commandFilename, "utf8");
+    const commandSource = fs8.readFileSync(commandFilename, "utf8");
     const wrappedCommandSource = wrapCommandSource(commandSource);
     const commandScript = new vm.Script(wrappedCommandSource);
     const result = await commandScript.runInNewContext(commandContext);
-    if (!_10.isUndefined(result)) {
+    if (!_11.isUndefined(result)) {
       return processInvokeScriptResult(result);
     }
   } catch (error) {
@@ -631,7 +649,7 @@ var invokeScript = async (commandFilename, selection) => {
 };
 
 // src/catalog/scripts.ts
-var getScriptCommands = () => fs8.readdirSync(SCRIPTS_DIR).filter(
+var getScriptCommands = () => fs9.readdirSync(SCRIPTS_DIR).filter(
   (file) => file.endsWith(".js") && !file.includes("fallback-handler")
 ).map((command) => ({
   title: `${SCRIPT_PREFIX} ${getCommandTitle(command)}`,
@@ -643,7 +661,7 @@ var getScriptCommands = () => fs8.readdirSync(SCRIPTS_DIR).filter(
 
 // src/catalog/shortcuts.ts
 import { execaSync } from "execa";
-import _11 from "lodash";
+import _12 from "lodash";
 var getShortcuts = () => {
   try {
     const shortcuts = execaSync("shortcuts", ["list"]).stdout.split("\n").filter(Boolean).map((shortcut) => {
@@ -653,7 +671,7 @@ var getShortcuts = () => {
           try {
             execaSync("shortcuts", ["run", shortcut]);
           } catch (error) {
-            if (_11.isError(error)) {
+            if (_12.isError(error)) {
               logger.error(`Failed to run shortcut: ${error.message}`);
             }
           }
@@ -662,7 +680,7 @@ var getShortcuts = () => {
     });
     return shortcuts;
   } catch (error) {
-    if (_11.isError(error)) {
+    if (_12.isError(error)) {
       logger.error(`Failed to get shortcuts: ${error.message}`);
     }
     return [];
@@ -671,12 +689,12 @@ var getShortcuts = () => {
 
 // src/catalog/manage-snippets.ts
 import cocoaDialog3 from "cocoa-dialog";
-import _12 from "lodash";
-import fs10 from "node:fs";
+import _13 from "lodash";
+import fs11 from "node:fs";
 import open5 from "open";
 
 // src/utils/createEmptySnippet.ts
-import fs9 from "node:fs";
+import fs10 from "node:fs";
 var SNIPPET_EXTENSION = ".txt";
 var TEMPLATE3 = ``;
 var createEmptySnippet = (pathname) => {
@@ -684,15 +702,15 @@ var createEmptySnippet = (pathname) => {
     pathname,
     SNIPPET_EXTENSION
   );
-  if (!fs9.existsSync(nameWithExtension)) {
-    fs9.writeFileSync(nameWithExtension, TEMPLATE3, "utf8");
+  if (!fs10.existsSync(nameWithExtension)) {
+    fs10.writeFileSync(nameWithExtension, TEMPLATE3, "utf8");
   }
 };
 
 // src/catalog/manage-snippets.ts
 var SNIPPETS_DIR = getConfigDir("snippets");
-if (!fs10.existsSync(SNIPPETS_DIR)) {
-  fs10.mkdirSync(SNIPPETS_DIR, { recursive: true });
+if (!fs11.existsSync(SNIPPETS_DIR)) {
+  fs11.mkdirSync(SNIPPETS_DIR, { recursive: true });
 }
 var getManageSnippetCommands = () => [
   {
@@ -702,7 +720,7 @@ var getManageSnippetCommands = () => [
         title: "Save Snippet As...",
         withDirectory: SNIPPETS_DIR
       });
-      if (!_12.isEmpty(result)) {
+      if (!_13.isEmpty(result)) {
         createEmptySnippet(result);
         await openInSystemEditor(result, SNIPPET_EXTENSION);
       }
@@ -715,7 +733,7 @@ var getManageSnippetCommands = () => [
         title: "Choose Snippet To Edit...",
         withDirectory: SNIPPETS_DIR
       });
-      if (!_12.isEmpty(result)) {
+      if (!_13.isEmpty(result)) {
         await openInSystemEditor(result, SNIPPET_EXTENSION);
       }
     }
@@ -729,7 +747,7 @@ var getManageSnippetCommands = () => [
 ];
 
 // src/catalog/snippets.ts
-import fs11 from "fs";
+import fs12 from "fs";
 import path8 from "path";
 
 // src/utils/getSnippetFilename.ts
@@ -737,11 +755,11 @@ import path7 from "node:path";
 var getSnippetFilename = (snippetFilename) => path7.join(getConfigDir("snippets"), snippetFilename);
 
 // src/catalog/snippets.ts
-var getSnippetCommands = () => fs11.readdirSync(getConfigDir("snippets")).filter((file) => file.endsWith(SNIPPET_EXTENSION)).map((command) => ({
+var getSnippetCommands = () => fs12.readdirSync(getConfigDir("snippets")).filter((file) => file.endsWith(SNIPPET_EXTENSION)).map((command) => ({
   title: `${SNIPPET_PREFIX} ${path8.basename(command, SNIPPET_EXTENSION)}`,
   invoke: async (_selection) => {
     const snippetFilename = getSnippetFilename(command);
-    const snippet = fs11.readFileSync(snippetFilename, "utf-8");
+    const snippet = fs12.readFileSync(snippetFilename, "utf-8");
     return snippet;
   }
 }));
@@ -760,7 +778,7 @@ var getCommandsFromFallbackHandler = () => {
       isFallback: true
     }));
   } catch (e) {
-    if (_13.isError(e)) {
+    if (_14.isError(e)) {
       logger.error(`Failed to run fallback handler: ${e.message}`);
     }
     return [];
@@ -770,7 +788,7 @@ var commandComparator = ({ title }) => title;
 var applicationComparator = ({ score }) => -score;
 var getAllCommands = clock("getAllCommands", () => {
   const allCommands = [
-    ..._13.sortBy(
+    ..._14.sortBy(
       [...getScriptCommands(), ...getBuiltInCommands()],
       commandComparator
     ),
@@ -779,7 +797,7 @@ var getAllCommands = clock("getAllCommands", () => {
     ...getManageSnippetCommands(),
     ...getFolders(),
     ...getShortcuts(),
-    ..._13.chain([
+    ..._14.chain([
       // Applications can live in multiple locations on macOS
       // Source: https://unix.stackexchange.com/a/583843
       ...getApplications("/Applications"),
@@ -808,17 +826,17 @@ var rebuildCatalog = () => {
 };
 
 // src/ui/clipboard-history/index.ts
-import _14 from "lodash";
+import _15 from "lodash";
 var formatHistoryEntry = (entry) => {
-  const firstLine = entry.includes("\n") ? _14.truncate(
-    entry.split("\n").find((line) => !_14.isEmpty(line)),
+  const firstLine = entry.includes("\n") ? _15.truncate(
+    entry.split("\n").find((line) => !_15.isEmpty(line)),
     { length: 50 }
-  ) : _14.truncate(entry, { length: 50 });
-  return _14.trim(firstLine);
+  ) : _15.truncate(entry, { length: 50 });
+  return _15.trim(firstLine);
 };
 var runClipboardHistory = async () => {
   const history = getClipboardHistory();
-  const historyItems = _14.map(history, (entry) => formatHistoryEntry(entry));
+  const historyItems = _15.map(history, (entry) => formatHistoryEntry(entry));
   const index = await choose(historyItems, {
     returnIndex: true,
     placeholder: "Clipboard history"
@@ -834,7 +852,7 @@ var runClipboardHistory = async () => {
 };
 
 // src/ui/main.ts
-import _18 from "lodash";
+import _19 from "lodash";
 import open6 from "open";
 
 // src/keystrokes/pressEnter.ts
@@ -848,14 +866,14 @@ var pressEnter_default = async () => {
 
 // src/ui/prompt/darwin.ts
 import { exec as exec2 } from "child_process";
-import _15 from "lodash";
+import _16 from "lodash";
 var darwin_default3 = (commands) => new Promise((resolve, reject) => {
   const choices = commands.map(({ title }) => title).join("\n");
-  const toShow = Math.min(30, _15.size(commands));
+  const toShow = Math.min(30, _16.size(commands));
   const cmd = `echo "${choices}" | choose -f "${getFontName()}" -b 000000 -c 222222 -w 30 -s 16 -m -n ${toShow} -p "Run a command or open an application"`;
   exec2(cmd, (error, stdout, stderr) => {
     if (stdout) {
-      const query = _15.trim(stdout);
+      const query = _16.trim(stdout);
       const rawQueryCommand = {
         isUnhandled: true,
         query
@@ -914,17 +932,17 @@ var showCalculationResultDialog = async (query, result) => {
 var stripKeystrokes = (text) => text.endsWith(ENTER) ? text.slice(0, -ENTER.length) : text;
 
 // src/utils/isShortcutResult.ts
-import _16 from "lodash";
-var isShortcutResult = (result) => Boolean(result) && _16.isObject(result) && "shortcut" in result && _16.isString(result.shortcut);
+import _17 from "lodash";
+var isShortcutResult = (result) => Boolean(result) && _17.isObject(result) && "shortcut" in result && _17.isString(result.shortcut);
 
 // src/utils/invokeShortcut.ts
 import { execa as execa5 } from "execa";
-import _17 from "lodash";
+import _18 from "lodash";
 var invokeShortcut = async ({ shortcut, input }) => {
   try {
     await execa5("shortcuts", ["run", shortcut, "-i", input ?? ""]);
   } catch (error) {
-    if (_17.isError(error)) {
+    if (_18.isError(error)) {
       logger.error(`Failed to run shortcut: ${error.message}`);
     } else {
       logger.error(`Failed to run shortcut: ${shortcut}`);
@@ -942,9 +960,9 @@ var main_default = async () => {
   Object.assign(global, { open: open6, require: require2 });
   if ("isUnknown" in item) {
     logger.warn(`Unknown command`);
-  } else if ("value" in item && _18.isFunction(item.value)) {
+  } else if ("value" in item && _19.isFunction(item.value)) {
     result = item.value(selection);
-  } else if ("invoke" in item && _18.isFunction(item.invoke)) {
+  } else if ("invoke" in item && _19.isFunction(item.invoke)) {
     result = await item.invoke(selection);
   } else if ("isUnhandled" in item && item.isUnhandled) {
     logger.warn(`Unhandled command: ${item.query}`);
@@ -962,7 +980,7 @@ var main_default = async () => {
           selection,
           item.query
         );
-        if (!_18.isUndefined(resultFromFallback)) {
+        if (!_19.isUndefined(resultFromFallback)) {
           result = processInvokeScriptResult(resultFromFallback);
         }
       } catch (e) {
@@ -970,7 +988,7 @@ var main_default = async () => {
       }
     }
   }
-  if (result && _18.isString(result)) {
+  if (result && _19.isString(result)) {
     logger.log(`Result: ${result}`);
     await setClipboardContent(stripKeystrokes(result));
     if (result.endsWith(ENTER)) {
@@ -1000,7 +1018,7 @@ var promptForAndRunCommand = async () => {
     }
   } catch (error) {
     logger.error(error);
-    if (_19.isError(error)) {
+    if (_20.isError(error)) {
       showNotification({
         message: "META-x encountered an error: " + error.message
       });

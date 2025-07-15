@@ -1,11 +1,13 @@
 import fs from "fs";
-import path from "path";
 import _ from "lodash";
 import { openApp } from "open";
+import path from "path";
 import { getConfigDir } from "../utils/getConfigDir";
+import { getConfigOption } from "../utils/getConfigOption";
+import { logger } from "../utils/logger";
 import { APPLICATION_PREFIX } from "./_constants";
 import { ApplicationLauncher } from "./types";
-import { logger } from "../utils/logger";
+
 const getApplicationUsageHistory = () =>
   path.join(getConfigDir(), ".application-usage");
 
@@ -31,11 +33,14 @@ const trackApplicationUsage = (value: string) => {
   persistApplicationUsage([...history, value]);
 };
 
+const DEFAULT_IGNORED: string[] = [];
+
 export const getApplications = (
   rootDir = "/Applications"
 ): ApplicationLauncher[] => {
   const history = restoreApplicationUsage();
   const scores = _.countBy(history, _.identity);
+  const ignored = getConfigOption("ignored", DEFAULT_IGNORED);
 
   const applications = fs
     .readdirSync(rootDir)
@@ -54,16 +59,14 @@ export const getApplications = (
         return false;
       }
     })
-    .filter((filename) => !filename.startsWith("."));
+    .filter((filename) => !filename.startsWith("."))
+    .filter((filename) => !ignored.some((ignore) => filename.includes(ignore)));
 
   const items = applications.map((application) => {
     const value = path.join(rootDir, application);
+    const name = _.get(path.parse(application), "name", application);
     return {
-      title: `${APPLICATION_PREFIX} ${_.get(
-        path.parse(application),
-        "name",
-        application
-      )}`,
+      title: `${APPLICATION_PREFIX} ${name}`,
       value,
       score: scores[value] ?? 0,
       invoke: async () => {

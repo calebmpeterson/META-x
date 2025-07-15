@@ -46,7 +46,16 @@ ctrl - v: EDITOR=code ~/Tools/meta-x/bin/clipboard-history
 
 ### Settings
 
-All configuration options are contained in `~/.meta-x/config.json`
+All configuration options are contained in `~/.meta-x/config.json` (JSON/JSON5 supported):
+
+```json5
+{
+  // Apps that will be omitted from the catalog
+  ignored: [
+    "Pref", // Will ignore any app including "Pref" (case sensitive)
+  ],
+}
+```
 
 ### Custom Commands
 
@@ -162,6 +171,6 @@ Issues and Pull Requests are welcome!
 - [x] Add shutdown/restart commands
 - [x] Add support for static text snippets
 - [x] Improve standard for organization of ~/.meta-x/\*
-- [ ] Add support for omitting applications and system preferences
+- [x] Add support for omitting applications and system preferences
 - [ ] Add a progress indicator for async commands
 - [ ] Add support for directly invoking a custom command from the launch CLI (e.g. `~/Tools/meta-x/bin/launch "My Custom Command"`)
