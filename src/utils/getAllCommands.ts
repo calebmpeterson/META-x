@@ -1,18 +1,19 @@
 import _ from "lodash";
+import { ApplicationLauncher, Command } from "../catalog/types";
+import { clock } from "./clock";
 import { createRequire } from "node:module";
-import { getBuiltInCommands } from "../catalog/built-ins";
-import { getFolders } from "../catalog/folders";
 import { getApplications } from "../catalog/applications";
-import { getSystemPreferences } from "../catalog/system-preferences";
-import { getSystemCommands } from "../catalog/system";
+import { getBuiltInCommands } from "../catalog/built-ins";
+import { getCommandFilename } from "./getCommandFilename";
+import { getFolders } from "../catalog/folders";
+import { getManageCommands } from "../catalog/manage";
 import { getManageScriptCommands } from "../catalog/manage-scripts";
+import { getManageSnippetCommands } from "../catalog/manage-snippets";
 import { getScriptCommands } from "../catalog/scripts";
 import { getShortcuts } from "../catalog/shortcuts";
-import { clock } from "./clock";
-import { getCommandFilename } from "./getCommandFilename";
-import { ApplicationLauncher, Command } from "../catalog/types";
-import { getManageSnippetCommands } from "../catalog/manage-snippets";
 import { getSnippetCommands } from "../catalog/snippets";
+import { getSystemCommands } from "../catalog/system";
+import { getSystemPreferences } from "../catalog/system-preferences";
 import { logger } from "./logger";
 
 const getCommandsFromFallbackHandler = () => {
@@ -52,6 +53,7 @@ export const getAllCommands = clock("getAllCommands", () => {
     ...getManageScriptCommands(),
     ...getSnippetCommands(),
     ...getManageSnippetCommands(),
+    ...getManageCommands(),
     ...getFolders(),
     ...getShortcuts(),
     ..._.chain([

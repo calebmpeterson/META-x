@@ -53,12 +53,16 @@ var logger = {
   ...console,
   log: (...args) => {
     const [first, ...rest] = args;
-    console.log(`\u2699\uFE0E`, chalk.grey(first), ...rest.map((arg) => arg.toString()));
+    console.log(
+      chalk.grey(`\u2699\uFE0E`),
+      chalk.grey(first),
+      ...rest.map((arg) => arg.toString())
+    );
   },
   warn: (...args) => {
     const [first, ...rest] = args;
     console.warn(
-      `\u26A0\uFE0E`,
+      chalk.yellow(`\u26A0\uFE0E`),
       chalk.yellow(first),
       ...rest.map((arg) => arg.toString())
     );
@@ -149,8 +153,38 @@ var listen = (onMessage) => {
 import _14 from "lodash";
 import { createRequire as createRequire2 } from "node:module";
 
-// src/catalog/built-ins.ts
+// src/catalog/applications.ts
+import fs3 from "fs";
+import _4 from "lodash";
+import { openApp } from "open";
+import path3 from "path";
+
+// src/utils/getConfigDir.ts
+import os from "os";
+import path from "path";
+var getConfigDir = (...subdirs) => path.join(os.homedir(), ".meta-x", ...subdirs);
+var SCRIPTS_DIR = getConfigDir("scripts");
+
+// src/utils/getConfigOption.ts
+import JSON5 from "json5";
 import _3 from "lodash";
+import fs2 from "node:fs";
+
+// src/utils/getConfigPath.ts
+import * as path2 from "node:path";
+var getConfigPath = (filename) => path2.join(getConfigDir(), filename);
+
+// src/utils/getConfigOption.ts
+var CONFIG_FILENAME = getConfigPath("config.json");
+var getConfigOption = (key, defaultValue) => {
+  try {
+    const contents = fs2.readFileSync(CONFIG_FILENAME, "utf8");
+    const json = JSON5.parse(contents);
+    return _3.get(json, key, defaultValue);
+  } catch {
+    return defaultValue;
+  }
+};
 
 // src/catalog/_constants.ts
 var SCRIPT_PREFIX = "\u0192\u0578";
@@ -162,96 +196,12 @@ var APPLICATION_PREFIX = "\u232C";
 var SYSTEM_PREFIX = "\u2699\uFE0E";
 var SHORTCUT_PREFIX = "\u2318";
 
-// src/catalog/built-ins.ts
-var BUILT_IN_COMMANDS = {
-  "Camel Case": _3.camelCase,
-  "Kebab Case": _3.kebabCase,
-  "Snake Case": _3.snakeCase,
-  "Start Case": _3.startCase,
-  "Title Case": _3.startCase,
-  "To Lower": _3.toLower,
-  "To Upper": _3.toUpper,
-  Capitalize: _3.capitalize,
-  "Sentence Case": _3.capitalize,
-  Deburr: _3.deburr,
-  "Sort Lines": (selection) => _3.chain(selection).split("\n").sort().join("\n").value(),
-  "Reverse Lines": (selection) => _3.chain(selection).split("\n").reverse().join("\n").value()
-};
-var getBuiltInCommands = () => _3.map(BUILT_IN_COMMANDS, (command, name) => ({
-  label: name,
-  title: `${SCRIPT_PREFIX} ${name}`,
-  value: command
-}));
-
-// src/catalog/folders.ts
-import os from "os";
-import path from "path";
-import open, { openApp } from "open";
-var FOLDERS = [
-  "Finder",
-  "Applications",
-  "Documents",
-  "Downloads",
-  "Home",
-  "Pictures",
-  "Workspace"
-];
-var getFolders = () => FOLDERS.map((folder) => ({
-  title: `${FOLDER_PREFIX} ${folder}`,
-  value: folder,
-  invoke: async () => {
-    if (folder === "Finder") {
-      await openApp("Finder");
-    } else if (folder === "Applications") {
-      await open("/Applications");
-    } else if (folder === "Home") {
-      await open(os.homedir());
-    } else {
-      const dirname = path.join(os.homedir(), folder);
-      await open(dirname);
-    }
-  }
-}));
-
 // src/catalog/applications.ts
-import fs3 from "fs";
-import _5 from "lodash";
-import { openApp as openApp2 } from "open";
-import path4 from "path";
-
-// src/utils/getConfigDir.ts
-import os2 from "os";
-import path2 from "path";
-var getConfigDir = (...subdirs) => path2.join(os2.homedir(), ".meta-x", ...subdirs);
-var SCRIPTS_DIR = getConfigDir("scripts");
-
-// src/utils/getConfigOption.ts
-import JSON5 from "json5";
-import _4 from "lodash";
-import fs2 from "node:fs";
-
-// src/utils/getConfigPath.ts
-import * as path3 from "node:path";
-var getConfigPath = (filename) => path3.join(getConfigDir(), filename);
-
-// src/utils/getConfigOption.ts
-var CONFIG_FILENAME = getConfigPath("config.json");
-var getConfigOption = (key, defaultValue) => {
-  try {
-    const contents = fs2.readFileSync(CONFIG_FILENAME, "utf8");
-    const json = JSON5.parse(contents);
-    return _4.get(json, key, defaultValue);
-  } catch {
-    return defaultValue;
-  }
-};
-
-// src/catalog/applications.ts
-var getApplicationUsageHistory = () => path4.join(getConfigDir(), ".application-usage");
+var getApplicationUsageHistory = () => path3.join(getConfigDir(), ".application-usage");
 var persistApplicationUsage = (values) => {
   fs3.writeFileSync(
     getApplicationUsageHistory(),
-    _5.takeRight(values, 100).join("\n"),
+    _4.takeRight(values, 100).join("\n"),
     "utf8"
   );
 };
@@ -269,10 +219,10 @@ var trackApplicationUsage = (value) => {
 var DEFAULT_IGNORED = [];
 var getApplications = (rootDir = "/Applications") => {
   const history = restoreApplicationUsage();
-  const scores = _5.countBy(history, _5.identity);
+  const scores = _4.countBy(history, _4.identity);
   const ignored = getConfigOption("ignored", DEFAULT_IGNORED);
   const applications = fs3.readdirSync(rootDir).filter((filename) => {
-    const pathname = path4.join(rootDir, filename);
+    const pathname = path3.join(rootDir, filename);
     const stats = fs3.statSync(pathname);
     if (stats.isDirectory() && !filename.endsWith(".app")) {
       return false;
@@ -285,8 +235,8 @@ var getApplications = (rootDir = "/Applications") => {
     }
   }).filter((filename) => !filename.startsWith(".")).filter((filename) => !ignored.some((ignore) => filename.includes(ignore)));
   const items = applications.map((application) => {
-    const value = path4.join(rootDir, application);
-    const name = _5.get(path4.parse(application), "name", application);
+    const value = path3.join(rootDir, application);
+    const name = _4.get(path3.parse(application), "name", application);
     return {
       title: `${APPLICATION_PREFIX} ${name}`,
       value,
@@ -294,72 +244,79 @@ var getApplications = (rootDir = "/Applications") => {
       invoke: async () => {
         logger.log(`Opening ${application}`);
         trackApplicationUsage(value);
-        await openApp2(value);
+        await openApp(value);
       }
     };
   });
   return items;
 };
 
-// src/catalog/system-preferences.ts
-import fs4 from "node:fs";
-import path5 from "node:path";
-import open2 from "open";
-var PREFERENCE_PANE_ROOT_DIR = "/System/Library/PreferencePanes";
-var DEFAULT_IGNORED2 = [];
-var getPreferencePanes = () => {
-  const ignored = getConfigOption("ignored", DEFAULT_IGNORED2);
-  return fs4.readdirSync(PREFERENCE_PANE_ROOT_DIR).map((filename) => path5.parse(filename).name).filter((filename) => !ignored.some((ignore) => filename.includes(ignore)));
+// src/catalog/built-ins.ts
+import _5 from "lodash";
+var BUILT_IN_COMMANDS = {
+  "Camel Case": _5.camelCase,
+  "Kebab Case": _5.kebabCase,
+  "Snake Case": _5.snakeCase,
+  "Start Case": _5.startCase,
+  "Title Case": _5.startCase,
+  "To Lower": _5.toLower,
+  "To Upper": _5.toUpper,
+  Capitalize: _5.capitalize,
+  "Sentence Case": _5.capitalize,
+  Deburr: _5.deburr,
+  "Sort Lines": (selection) => _5.chain(selection).split("\n").sort().join("\n").value(),
+  "Reverse Lines": (selection) => _5.chain(selection).split("\n").reverse().join("\n").value()
 };
-var getPane = (pane) => `${PREFERENCE_PANE_ROOT_DIR}/${pane}.prefPane`;
-var getSystemPreferences = () => getPreferencePanes().map((pane) => ({
-  title: `${SYSTEM_PREFIX} ${pane}`,
-  value: pane,
+var getBuiltInCommands = () => _5.map(BUILT_IN_COMMANDS, (command, name) => ({
+  label: name,
+  title: `${SCRIPT_PREFIX} ${name}`,
+  value: command
+}));
+
+// src/utils/getCommandFilename.ts
+import path4 from "node:path";
+var getCommandFilename = (commandFilename) => path4.join(SCRIPTS_DIR, commandFilename);
+
+// src/catalog/folders.ts
+import os2 from "os";
+import path5 from "path";
+import open, { openApp as openApp2 } from "open";
+var FOLDERS = [
+  "Finder",
+  "Applications",
+  "Documents",
+  "Downloads",
+  "Home",
+  "Pictures",
+  "Workspace"
+];
+var getFolders = () => FOLDERS.map((folder) => ({
+  title: `${FOLDER_PREFIX} ${folder}`,
+  value: folder,
   invoke: async () => {
-    await open2(getPane(pane));
+    if (folder === "Finder") {
+      await openApp2("Finder");
+    } else if (folder === "Applications") {
+      await open("/Applications");
+    } else if (folder === "Home") {
+      await open(os2.homedir());
+    } else {
+      const dirname = path5.join(os2.homedir(), folder);
+      await open(dirname);
+    }
   }
 }));
 
-// src/catalog/system.ts
-import { execa } from "execa";
-var getSystemCommands = () => [
+// src/catalog/manage.ts
+import fs4 from "node:fs";
+if (!fs4.existsSync(SCRIPTS_DIR)) {
+  fs4.mkdirSync(SCRIPTS_DIR, { recursive: true });
+}
+var getManageCommands = () => [
   {
-    title: `${SYSTEM_PREFIX} Shutdown`,
+    title: `${MANAGE_SCRIPTS_PREFIX} Reload`,
     invoke: async () => {
-      await execa("pmset", ["halt"]);
-    }
-  },
-  {
-    title: `${SYSTEM_PREFIX} Restart`,
-    invoke: async () => {
-      await execa("pmset", ["restart"]);
-    }
-  },
-  {
-    title: `${SYSTEM_PREFIX} Sleep`,
-    invoke: async () => {
-      await execa("pmset", ["sleepnow"]);
-    }
-  },
-  {
-    title: `${SYSTEM_PREFIX} Sleep Displays`,
-    invoke: async () => {
-      await execa("pmset", ["displaysleepnow"]);
-    }
-  },
-  {
-    title: `${SYSTEM_PREFIX} About This Mac`,
-    invoke: async () => {
-      await execa("open", ["-a", "About This Mac"]);
-    }
-  },
-  {
-    title: `${SYSTEM_PREFIX} Lock Displays`,
-    invoke: async () => {
-      await execa("open", [
-        "-a",
-        "/System/Library/CoreServices/ScreenSaverEngine.app"
-      ]);
+      rebuildCatalog();
     }
   }
 ];
@@ -368,7 +325,7 @@ var getSystemCommands = () => [
 import cocoaDialog from "cocoa-dialog";
 import _6 from "lodash";
 import fs7 from "node:fs";
-import open3 from "open";
+import open2 from "open";
 
 // src/utils/createEmptyScript.ts
 import fs5 from "node:fs";
@@ -406,12 +363,6 @@ var createEmptyScript = (pathname) => {
 
 // src/utils/ensureEmptyFallbackHandler.ts
 import fs6 from "node:fs";
-
-// src/utils/getCommandFilename.ts
-import path6 from "node:path";
-var getCommandFilename = (commandFilename) => path6.join(SCRIPTS_DIR, commandFilename);
-
-// src/utils/ensureEmptyFallbackHandler.ts
 var TEMPLATE2 = `
 module.exports = function (selection, query) {
   // Do something with the currently selected
@@ -431,10 +382,10 @@ var ensureEmptyFallbackHandler = () => {
 };
 
 // src/utils/openInSystemEditor.ts
-import { execa as execa2 } from "execa";
+import { execa } from "execa";
 var openInSystemEditor = async (pathname, extension = ".js") => {
   if (process.env.EDITOR) {
-    await execa2(process.env.EDITOR, [
+    await execa(process.env.EDITOR, [
       getPathnameWithExtension(pathname, extension)
     ]);
   }
@@ -446,15 +397,9 @@ if (!fs7.existsSync(SCRIPTS_DIR)) {
 }
 var getManageScriptCommands = () => [
   {
-    title: `${MANAGE_SCRIPTS_PREFIX} Reload Scripts`,
-    invoke: async () => {
-      rebuildCatalog();
-    }
-  },
-  {
     title: `${MANAGE_SCRIPTS_PREFIX} Manage Scripts`,
     invoke: async () => {
-      await open3(SCRIPTS_DIR);
+      await open2(SCRIPTS_DIR);
     }
   },
   {
@@ -493,25 +438,84 @@ var getManageScriptCommands = () => [
   {
     title: `${MANAGE_SCRIPTS_PREFIX} Open ${TITLE} Documentation`,
     invoke: async () => {
-      await open3(`https://github.com/calebmpeterson/META-x#command-context`);
+      await open2(`https://github.com/calebmpeterson/META-x#command-context`);
+    }
+  }
+];
+
+// src/catalog/manage-snippets.ts
+import cocoaDialog2 from "cocoa-dialog";
+import _7 from "lodash";
+import fs9 from "node:fs";
+import open3 from "open";
+
+// src/utils/createEmptySnippet.ts
+import fs8 from "node:fs";
+var SNIPPET_EXTENSION = ".txt";
+var TEMPLATE3 = ``;
+var createEmptySnippet = (pathname) => {
+  const nameWithExtension = getPathnameWithExtension(
+    pathname,
+    SNIPPET_EXTENSION
+  );
+  if (!fs8.existsSync(nameWithExtension)) {
+    fs8.writeFileSync(nameWithExtension, TEMPLATE3, "utf8");
+  }
+};
+
+// src/catalog/manage-snippets.ts
+var SNIPPETS_DIR = getConfigDir("snippets");
+if (!fs9.existsSync(SNIPPETS_DIR)) {
+  fs9.mkdirSync(SNIPPETS_DIR, { recursive: true });
+}
+var getManageSnippetCommands = () => [
+  {
+    title: `${MANAGE_SNIPPETS_PREFIX} Create Snippet`,
+    invoke: async () => {
+      const result = await cocoaDialog2("filesave", {
+        title: "Save Snippet As...",
+        withDirectory: SNIPPETS_DIR
+      });
+      if (!_7.isEmpty(result)) {
+        createEmptySnippet(result);
+        await openInSystemEditor(result, SNIPPET_EXTENSION);
+      }
+    }
+  },
+  {
+    title: `${MANAGE_SNIPPETS_PREFIX} Edit Snippet`,
+    invoke: async () => {
+      const result = await cocoaDialog2("fileselect", {
+        title: "Choose Snippet To Edit...",
+        withDirectory: SNIPPETS_DIR
+      });
+      if (!_7.isEmpty(result)) {
+        await openInSystemEditor(result, SNIPPET_EXTENSION);
+      }
+    }
+  },
+  {
+    title: `${MANAGE_SNIPPETS_PREFIX} Manage Snippets`,
+    invoke: async () => {
+      await open3(SNIPPETS_DIR);
     }
   }
 ];
 
 // src/catalog/scripts.ts
-import fs9 from "fs";
+import fs11 from "fs";
 
 // src/utils/getCommandTitle.ts
 import { basename } from "node:path";
 var getCommandTitle = (commandFilename) => basename(commandFilename, ".js");
 
 // src/utils/invokeScript.ts
-import _11 from "lodash";
-import fs8 from "node:fs";
+import _12 from "lodash";
+import fs10 from "node:fs";
 import vm from "node:vm";
 
 // src/utils/createScriptContext.ts
-import _8 from "lodash";
+import _9 from "lodash";
 import axios from "axios";
 import dotenv from "dotenv";
 import open4 from "open";
@@ -521,7 +525,7 @@ var ENTER = "{ENTER}";
 
 // src/utils/choose.ts
 import { exec } from "child_process";
-import _7 from "lodash";
+import _8 from "lodash";
 
 // src/utils/getFontName.ts
 var getFontName = () => "Fira Code";
@@ -529,7 +533,7 @@ var getFontName = () => "Fira Code";
 // src/utils/choose.ts
 var choose = (items, options = {}) => new Promise((resolve) => {
   const choices = items.join("\n");
-  const toShow = Math.max(5, Math.min(40, _7.size(items)));
+  const toShow = Math.max(5, Math.min(40, _8.size(items)));
   const outputConfig = [
     options.returnIndex ? "-i" : "",
     options.placeholder ? `-p "${options.placeholder}"` : ""
@@ -537,7 +541,7 @@ var choose = (items, options = {}) => new Promise((resolve) => {
   const cmd = `echo "${choices}" | choose -f "${getFontName()}" -b 000000 -c 222222 -w 30 -s 16 -m -n ${toShow} ${outputConfig}`;
   exec(cmd, (error, stdout, stderr) => {
     if (stdout) {
-      const selection = _7.trim(stdout);
+      const selection = _8.trim(stdout);
       if (options.returnIndex && selection === "-1") {
         resolve(void 0);
       }
@@ -553,7 +557,7 @@ var choose = (items, options = {}) => new Promise((resolve) => {
 
 // src/utils/createScriptContext.ts
 import { createRequire } from "module";
-import { execa as execa3, $ } from "execa";
+import { execa as execa2, $ } from "execa";
 import { runAppleScript } from "run-applescript";
 
 // src/utils/showNotification.ts
@@ -571,7 +575,7 @@ var createScriptContext = (commandFilename, selection) => {
   const ENV = {};
   dotenv.config({ path: getConfigPath(".env"), processEnv: ENV });
   const commandContext = {
-    _: _8,
+    _: _9,
     selection,
     require: require2,
     console,
@@ -583,7 +587,7 @@ var createScriptContext = (commandFilename, selection) => {
     delete: axios.delete,
     ENV,
     ENTER,
-    execa: execa3,
+    execa: execa2,
     $,
     osascript: runAppleScript,
     choose,
@@ -594,15 +598,15 @@ var createScriptContext = (commandFilename, selection) => {
 };
 
 // src/utils/processInvokeScriptResult.ts
-import _9 from "lodash";
-var processInvokeScriptResult = (result) => _9.isArray(result) || _9.isObject(result) ? result : _9.toString(result);
+import _10 from "lodash";
+var processInvokeScriptResult = (result) => _10.isArray(result) || _10.isObject(result) ? result : _10.toString(result);
 
 // src/utils/showCommandErrorDialog.ts
-import cocoaDialog2 from "cocoa-dialog";
-import _10 from "lodash";
+import cocoaDialog3 from "cocoa-dialog";
+import _11 from "lodash";
 var showCommandErrorDialog = async (commandFilename, error) => {
-  if (_10.isError(error)) {
-    const result = await cocoaDialog2("textbox", {
+  if (_11.isError(error)) {
+    const result = await cocoaDialog3("textbox", {
       title: `Error in ${commandFilename}`,
       text: error.stack,
       height: 200,
@@ -633,11 +637,11 @@ var invokeScript = async (commandFilename, selection) => {
     });
   }, 5e3);
   try {
-    const commandSource = fs8.readFileSync(commandFilename, "utf8");
+    const commandSource = fs10.readFileSync(commandFilename, "utf8");
     const wrappedCommandSource = wrapCommandSource(commandSource);
     const commandScript = new vm.Script(wrappedCommandSource);
     const result = await commandScript.runInNewContext(commandContext);
-    if (!_11.isUndefined(result)) {
+    if (!_12.isUndefined(result)) {
       return processInvokeScriptResult(result);
     }
   } catch (error) {
@@ -649,7 +653,7 @@ var invokeScript = async (commandFilename, selection) => {
 };
 
 // src/catalog/scripts.ts
-var getScriptCommands = () => fs9.readdirSync(SCRIPTS_DIR).filter(
+var getScriptCommands = () => fs11.readdirSync(SCRIPTS_DIR).filter(
   (file) => file.endsWith(".js") && !file.includes("fallback-handler")
 ).map((command) => ({
   title: `${SCRIPT_PREFIX} ${getCommandTitle(command)}`,
@@ -661,7 +665,7 @@ var getScriptCommands = () => fs9.readdirSync(SCRIPTS_DIR).filter(
 
 // src/catalog/shortcuts.ts
 import { execaSync } from "execa";
-import _12 from "lodash";
+import _13 from "lodash";
 var getShortcuts = () => {
   try {
     const shortcuts = execaSync("shortcuts", ["list"]).stdout.split("\n").filter(Boolean).map((shortcut) => {
@@ -671,7 +675,7 @@ var getShortcuts = () => {
           try {
             execaSync("shortcuts", ["run", shortcut]);
           } catch (error) {
-            if (_12.isError(error)) {
+            if (_13.isError(error)) {
               logger.error(`Failed to run shortcut: ${error.message}`);
             }
           }
@@ -680,87 +684,91 @@ var getShortcuts = () => {
     });
     return shortcuts;
   } catch (error) {
-    if (_12.isError(error)) {
+    if (_13.isError(error)) {
       logger.error(`Failed to get shortcuts: ${error.message}`);
     }
     return [];
   }
 };
 
-// src/catalog/manage-snippets.ts
-import cocoaDialog3 from "cocoa-dialog";
-import _13 from "lodash";
-import fs11 from "node:fs";
-import open5 from "open";
-
-// src/utils/createEmptySnippet.ts
-import fs10 from "node:fs";
-var SNIPPET_EXTENSION = ".txt";
-var TEMPLATE3 = ``;
-var createEmptySnippet = (pathname) => {
-  const nameWithExtension = getPathnameWithExtension(
-    pathname,
-    SNIPPET_EXTENSION
-  );
-  if (!fs10.existsSync(nameWithExtension)) {
-    fs10.writeFileSync(nameWithExtension, TEMPLATE3, "utf8");
-  }
-};
-
-// src/catalog/manage-snippets.ts
-var SNIPPETS_DIR = getConfigDir("snippets");
-if (!fs11.existsSync(SNIPPETS_DIR)) {
-  fs11.mkdirSync(SNIPPETS_DIR, { recursive: true });
-}
-var getManageSnippetCommands = () => [
-  {
-    title: `${MANAGE_SNIPPETS_PREFIX} Create Snippet`,
-    invoke: async () => {
-      const result = await cocoaDialog3("filesave", {
-        title: "Save Snippet As...",
-        withDirectory: SNIPPETS_DIR
-      });
-      if (!_13.isEmpty(result)) {
-        createEmptySnippet(result);
-        await openInSystemEditor(result, SNIPPET_EXTENSION);
-      }
-    }
-  },
-  {
-    title: `${MANAGE_SNIPPETS_PREFIX} Edit Snippet`,
-    invoke: async () => {
-      const result = await cocoaDialog3("fileselect", {
-        title: "Choose Snippet To Edit...",
-        withDirectory: SNIPPETS_DIR
-      });
-      if (!_13.isEmpty(result)) {
-        await openInSystemEditor(result, SNIPPET_EXTENSION);
-      }
-    }
-  },
-  {
-    title: `${MANAGE_SNIPPETS_PREFIX} Manage Snippets`,
-    invoke: async () => {
-      await open5(SNIPPETS_DIR);
-    }
-  }
-];
-
 // src/catalog/snippets.ts
 import fs12 from "fs";
-import path8 from "path";
+import path7 from "path";
 
 // src/utils/getSnippetFilename.ts
-import path7 from "node:path";
-var getSnippetFilename = (snippetFilename) => path7.join(getConfigDir("snippets"), snippetFilename);
+import path6 from "node:path";
+var getSnippetFilename = (snippetFilename) => path6.join(getConfigDir("snippets"), snippetFilename);
 
 // src/catalog/snippets.ts
 var getSnippetCommands = () => fs12.readdirSync(getConfigDir("snippets")).filter((file) => file.endsWith(SNIPPET_EXTENSION)).map((command) => ({
-  title: `${SNIPPET_PREFIX} ${path8.basename(command, SNIPPET_EXTENSION)}`,
+  title: `${SNIPPET_PREFIX} ${path7.basename(command, SNIPPET_EXTENSION)}`,
   invoke: async (_selection) => {
     const snippetFilename = getSnippetFilename(command);
     const snippet = fs12.readFileSync(snippetFilename, "utf-8");
     return snippet;
+  }
+}));
+
+// src/catalog/system.ts
+import { execa as execa3 } from "execa";
+var getSystemCommands = () => [
+  {
+    title: `${SYSTEM_PREFIX} Shutdown`,
+    invoke: async () => {
+      await execa3("pmset", ["halt"]);
+    }
+  },
+  {
+    title: `${SYSTEM_PREFIX} Restart`,
+    invoke: async () => {
+      await execa3("pmset", ["restart"]);
+    }
+  },
+  {
+    title: `${SYSTEM_PREFIX} Sleep`,
+    invoke: async () => {
+      await execa3("pmset", ["sleepnow"]);
+    }
+  },
+  {
+    title: `${SYSTEM_PREFIX} Sleep Displays`,
+    invoke: async () => {
+      await execa3("pmset", ["displaysleepnow"]);
+    }
+  },
+  {
+    title: `${SYSTEM_PREFIX} About This Mac`,
+    invoke: async () => {
+      await execa3("open", ["-a", "About This Mac"]);
+    }
+  },
+  {
+    title: `${SYSTEM_PREFIX} Lock Displays`,
+    invoke: async () => {
+      await execa3("open", [
+        "-a",
+        "/System/Library/CoreServices/ScreenSaverEngine.app"
+      ]);
+    }
+  }
+];
+
+// src/catalog/system-preferences.ts
+import fs13 from "node:fs";
+import path8 from "node:path";
+import open5 from "open";
+var PREFERENCE_PANE_ROOT_DIR = "/System/Library/PreferencePanes";
+var DEFAULT_IGNORED2 = [];
+var getPreferencePanes = () => {
+  const ignored = getConfigOption("ignored", DEFAULT_IGNORED2);
+  return fs13.readdirSync(PREFERENCE_PANE_ROOT_DIR).map((filename) => path8.parse(filename).name).filter((filename) => !ignored.some((ignore) => filename.includes(ignore)));
+};
+var getPane = (pane) => `${PREFERENCE_PANE_ROOT_DIR}/${pane}.prefPane`;
+var getSystemPreferences = () => getPreferencePanes().map((pane) => ({
+  title: `${SYSTEM_PREFIX} ${pane}`,
+  value: pane,
+  invoke: async () => {
+    await open5(getPane(pane));
   }
 }));
 
@@ -795,6 +803,7 @@ var getAllCommands = clock("getAllCommands", () => {
     ...getManageScriptCommands(),
     ...getSnippetCommands(),
     ...getManageSnippetCommands(),
+    ...getManageCommands(),
     ...getFolders(),
     ...getShortcuts(),
     ..._14.chain([
@@ -821,6 +830,7 @@ var setCommandsCatalog = (newCommandsState) => {
 
 // src/state/rebuildCatalog.ts
 var rebuildCatalog = () => {
+  logger.clear();
   logger.log("Rebuilding commands catalog...");
   setCommandsCatalog(getAllCommands());
 };
@@ -1010,6 +1020,7 @@ var spinner = ora({
 var promptForAndRunCommand = async () => {
   spinner.stop();
   try {
+    logger.clear();
     logger.log("Meta-x triggered");
     await prepare_default();
     const result = await main_default();

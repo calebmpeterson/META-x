@@ -3,7 +3,6 @@ import _ from "lodash";
 import fs from "node:fs";
 import open from "open";
 import { TITLE } from "../constants";
-import { rebuildCatalog } from "../state/rebuildCatalog";
 import { createEmptyScript } from "../utils/createEmptyScript";
 import { ensureEmptyFallbackHandler } from "../utils/ensureEmptyFallbackHandler";
 import { getCommandFilename } from "../utils/getCommandFilename";
@@ -17,12 +16,6 @@ if (!fs.existsSync(SCRIPTS_DIR)) {
 }
 
 export const getManageScriptCommands = () => [
-  {
-    title: `${MANAGE_SCRIPTS_PREFIX} Reload Scripts`,
-    invoke: async () => {
-      rebuildCatalog();
-    },
-  },
   {
     title: `${MANAGE_SCRIPTS_PREFIX} Manage Scripts`,
     invoke: async () => {

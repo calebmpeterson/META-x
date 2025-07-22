@@ -5,13 +5,17 @@ const logger = {
 
   log: (...args: Parameters<typeof console.log>) => {
     const [first, ...rest] = args;
-    console.log(`⚙︎`, chalk.grey(first), ...rest.map((arg) => arg.toString()));
+    console.log(
+      chalk.grey(`⚙︎`),
+      chalk.grey(first),
+      ...rest.map((arg) => arg.toString())
+    );
   },
 
   warn: (...args: Parameters<typeof console.warn>) => {
     const [first, ...rest] = args;
     console.warn(
-      `⚠︎`,
+      chalk.yellow(`⚠︎`),
       chalk.yellow(first),
       ...rest.map((arg) => arg.toString())
     );

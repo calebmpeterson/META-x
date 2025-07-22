@@ -23,6 +23,7 @@ const promptForAndRunCommand = async () => {
   spinner.stop();
 
   try {
+    logger.clear();
     logger.log("Meta-x triggered");
 
     await prepareClipboard();
