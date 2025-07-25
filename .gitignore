@@ -12,3 +12,6 @@ sandbox
 
 # OS
 .DS_Store
+
+# Native Tool Binaries
+bin/tools/*.tool

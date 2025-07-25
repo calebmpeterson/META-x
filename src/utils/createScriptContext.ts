@@ -9,6 +9,7 @@ import { execa, $ } from "execa";
 import { getConfigPath } from "./getConfigPath.js";
 import { runAppleScript } from "run-applescript";
 import { showNotification } from "./showNotification";
+import { invokeNativeTool } from "./invokeNativeTool";
 
 export const createScriptContext = (
   commandFilename: string,
@@ -38,6 +39,11 @@ export const createScriptContext = (
     choose,
     notify: showNotification,
     setTimeout,
+
+    // Display a message to the user with an optional timeout
+    display: async (message: string, timeout?: string | number) => {
+      await invokeNativeTool({ tool: "display.tool", message, timeout });
+    },
   };
 
   return commandContext;

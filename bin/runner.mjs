@@ -1,5 +1,5 @@
 // src/runner.ts
-import _20 from "lodash";
+import _21 from "lodash";
 import ora from "ora";
 
 // src/clipboard/finish/darwin.ts
@@ -150,7 +150,7 @@ var listen = (onMessage) => {
 };
 
 // src/utils/getAllCommands.ts
-import _14 from "lodash";
+import _15 from "lodash";
 import { createRequire as createRequire2 } from "node:module";
 
 // src/catalog/applications.ts
@@ -510,12 +510,12 @@ import { basename } from "node:path";
 var getCommandTitle = (commandFilename) => basename(commandFilename, ".js");
 
 // src/utils/invokeScript.ts
-import _12 from "lodash";
+import _13 from "lodash";
 import fs10 from "node:fs";
 import vm from "node:vm";
 
 // src/utils/createScriptContext.ts
-import _9 from "lodash";
+import _10 from "lodash";
 import axios from "axios";
 import dotenv from "dotenv";
 import open4 from "open";
@@ -557,7 +557,7 @@ var choose = (items, options = {}) => new Promise((resolve) => {
 
 // src/utils/createScriptContext.ts
 import { createRequire } from "module";
-import { execa as execa2, $ } from "execa";
+import { execa as execa3, $ } from "execa";
 import { runAppleScript } from "run-applescript";
 
 // src/utils/showNotification.ts
@@ -569,13 +569,41 @@ var showNotification = ({ message }) => {
   });
 };
 
+// src/utils/invokeNativeTool.ts
+import { execa as execa2 } from "execa";
+import _9 from "lodash";
+import path6 from "path";
+var isDisplayToolInvocation = (invocation) => {
+  return invocation.tool === "display.tool";
+};
+var invokeNativeTool = async (invocation) => {
+  const toolDirectory = path6.join(process.cwd(), "bin", "tools");
+  const toolExecutable = path6.join(toolDirectory, invocation.tool);
+  try {
+    if (isDisplayToolInvocation(invocation)) {
+      await execa2(toolExecutable, [
+        ...invocation.timeout ? ["--timeout", String(invocation.timeout)] : [],
+        invocation.message
+      ]);
+    } else {
+      await execa2("shortcuts", ["run", invocation.tool]);
+    }
+  } catch (error) {
+    if (_9.isError(error)) {
+      logger.error(`Failed to run tool: ${error.message}`);
+    } else {
+      logger.error(`Failed to run tool: ${invocation.tool}`);
+    }
+  }
+};
+
 // src/utils/createScriptContext.ts
 var createScriptContext = (commandFilename, selection) => {
   const require2 = createRequire(commandFilename);
   const ENV = {};
   dotenv.config({ path: getConfigPath(".env"), processEnv: ENV });
   const commandContext = {
-    _: _9,
+    _: _10,
     selection,
     require: require2,
     console,
@@ -587,25 +615,29 @@ var createScriptContext = (commandFilename, selection) => {
     delete: axios.delete,
     ENV,
     ENTER,
-    execa: execa2,
+    execa: execa3,
     $,
     osascript: runAppleScript,
     choose,
     notify: showNotification,
-    setTimeout
+    setTimeout,
+    // Display a message to the user with an optional timeout
+    display: async (message, timeout) => {
+      await invokeNativeTool({ tool: "display.tool", message, timeout });
+    }
   };
   return commandContext;
 };
 
 // src/utils/processInvokeScriptResult.ts
-import _10 from "lodash";
-var processInvokeScriptResult = (result) => _10.isArray(result) || _10.isObject(result) ? result : _10.toString(result);
+import _11 from "lodash";
+var processInvokeScriptResult = (result) => _11.isArray(result) || _11.isObject(result) ? result : _11.toString(result);
 
 // src/utils/showCommandErrorDialog.ts
 import cocoaDialog3 from "cocoa-dialog";
-import _11 from "lodash";
+import _12 from "lodash";
 var showCommandErrorDialog = async (commandFilename, error) => {
-  if (_11.isError(error)) {
+  if (_12.isError(error)) {
     const result = await cocoaDialog3("textbox", {
       title: `Error in ${commandFilename}`,
       text: error.stack,
@@ -641,7 +673,7 @@ var invokeScript = async (commandFilename, selection) => {
     const wrappedCommandSource = wrapCommandSource(commandSource);
     const commandScript = new vm.Script(wrappedCommandSource);
     const result = await commandScript.runInNewContext(commandContext);
-    if (!_12.isUndefined(result)) {
+    if (!_13.isUndefined(result)) {
       return processInvokeScriptResult(result);
     }
   } catch (error) {
@@ -665,7 +697,7 @@ var getScriptCommands = () => fs11.readdirSync(SCRIPTS_DIR).filter(
 
 // src/catalog/shortcuts.ts
 import { execaSync } from "execa";
-import _13 from "lodash";
+import _14 from "lodash";
 var getShortcuts = () => {
   try {
     const shortcuts = execaSync("shortcuts", ["list"]).stdout.split("\n").filter(Boolean).map((shortcut) => {
@@ -675,7 +707,7 @@ var getShortcuts = () => {
           try {
             execaSync("shortcuts", ["run", shortcut]);
           } catch (error) {
-            if (_13.isError(error)) {
+            if (_14.isError(error)) {
               logger.error(`Failed to run shortcut: ${error.message}`);
             }
           }
@@ -684,7 +716,7 @@ var getShortcuts = () => {
     });
     return shortcuts;
   } catch (error) {
-    if (_13.isError(error)) {
+    if (_14.isError(error)) {
       logger.error(`Failed to get shortcuts: ${error.message}`);
     }
     return [];
@@ -693,15 +725,15 @@ var getShortcuts = () => {
 
 // src/catalog/snippets.ts
 import fs12 from "fs";
-import path7 from "path";
+import path8 from "path";
 
 // src/utils/getSnippetFilename.ts
-import path6 from "node:path";
-var getSnippetFilename = (snippetFilename) => path6.join(getConfigDir("snippets"), snippetFilename);
+import path7 from "node:path";
+var getSnippetFilename = (snippetFilename) => path7.join(getConfigDir("snippets"), snippetFilename);
 
 // src/catalog/snippets.ts
 var getSnippetCommands = () => fs12.readdirSync(getConfigDir("snippets")).filter((file) => file.endsWith(SNIPPET_EXTENSION)).map((command) => ({
-  title: `${SNIPPET_PREFIX} ${path7.basename(command, SNIPPET_EXTENSION)}`,
+  title: `${SNIPPET_PREFIX} ${path8.basename(command, SNIPPET_EXTENSION)}`,
   invoke: async (_selection) => {
     const snippetFilename = getSnippetFilename(command);
     const snippet = fs12.readFileSync(snippetFilename, "utf-8");
@@ -710,42 +742,42 @@ var getSnippetCommands = () => fs12.readdirSync(getConfigDir("snippets")).filter
 }));
 
 // src/catalog/system.ts
-import { execa as execa3 } from "execa";
+import { execa as execa4 } from "execa";
 var getSystemCommands = () => [
   {
     title: `${SYSTEM_PREFIX} Shutdown`,
     invoke: async () => {
-      await execa3("pmset", ["halt"]);
+      await execa4("pmset", ["halt"]);
     }
   },
   {
     title: `${SYSTEM_PREFIX} Restart`,
     invoke: async () => {
-      await execa3("pmset", ["restart"]);
+      await execa4("pmset", ["restart"]);
     }
   },
   {
     title: `${SYSTEM_PREFIX} Sleep`,
     invoke: async () => {
-      await execa3("pmset", ["sleepnow"]);
+      await execa4("pmset", ["sleepnow"]);
     }
   },
   {
     title: `${SYSTEM_PREFIX} Sleep Displays`,
     invoke: async () => {
-      await execa3("pmset", ["displaysleepnow"]);
+      await execa4("pmset", ["displaysleepnow"]);
     }
   },
   {
     title: `${SYSTEM_PREFIX} About This Mac`,
     invoke: async () => {
-      await execa3("open", ["-a", "About This Mac"]);
+      await execa4("open", ["-a", "About This Mac"]);
     }
   },
   {
     title: `${SYSTEM_PREFIX} Lock Displays`,
     invoke: async () => {
-      await execa3("open", [
+      await execa4("open", [
         "-a",
         "/System/Library/CoreServices/ScreenSaverEngine.app"
       ]);
@@ -755,13 +787,13 @@ var getSystemCommands = () => [
 
 // src/catalog/system-preferences.ts
 import fs13 from "node:fs";
-import path8 from "node:path";
+import path9 from "node:path";
 import open5 from "open";
 var PREFERENCE_PANE_ROOT_DIR = "/System/Library/PreferencePanes";
 var DEFAULT_IGNORED2 = [];
 var getPreferencePanes = () => {
   const ignored = getConfigOption("ignored", DEFAULT_IGNORED2);
-  return fs13.readdirSync(PREFERENCE_PANE_ROOT_DIR).map((filename) => path8.parse(filename).name).filter((filename) => !ignored.some((ignore) => filename.includes(ignore)));
+  return fs13.readdirSync(PREFERENCE_PANE_ROOT_DIR).map((filename) => path9.parse(filename).name).filter((filename) => !ignored.some((ignore) => filename.includes(ignore)));
 };
 var getPane = (pane) => `${PREFERENCE_PANE_ROOT_DIR}/${pane}.prefPane`;
 var getSystemPreferences = () => getPreferencePanes().map((pane) => ({
@@ -786,7 +818,7 @@ var getCommandsFromFallbackHandler = () => {
       isFallback: true
     }));
   } catch (e) {
-    if (_14.isError(e)) {
+    if (_15.isError(e)) {
       logger.error(`Failed to run fallback handler: ${e.message}`);
     }
     return [];
@@ -796,7 +828,7 @@ var commandComparator = ({ title }) => title;
 var applicationComparator = ({ score }) => -score;
 var getAllCommands = clock("getAllCommands", () => {
   const allCommands = [
-    ..._14.sortBy(
+    ..._15.sortBy(
       [...getScriptCommands(), ...getBuiltInCommands()],
       commandComparator
     ),
@@ -806,7 +838,7 @@ var getAllCommands = clock("getAllCommands", () => {
     ...getManageCommands(),
     ...getFolders(),
     ...getShortcuts(),
-    ..._14.chain([
+    ..._15.chain([
       // Applications can live in multiple locations on macOS
       // Source: https://unix.stackexchange.com/a/583843
       ...getApplications("/Applications"),
@@ -836,17 +868,17 @@ var rebuildCatalog = () => {
 };
 
 // src/ui/clipboard-history/index.ts
-import _15 from "lodash";
+import _16 from "lodash";
 var formatHistoryEntry = (entry) => {
-  const firstLine = entry.includes("\n") ? _15.truncate(
-    entry.split("\n").find((line) => !_15.isEmpty(line)),
+  const firstLine = entry.includes("\n") ? _16.truncate(
+    entry.split("\n").find((line) => !_16.isEmpty(line)),
     { length: 50 }
-  ) : _15.truncate(entry, { length: 50 });
-  return _15.trim(firstLine);
+  ) : _16.truncate(entry, { length: 50 });
+  return _16.trim(firstLine);
 };
 var runClipboardHistory = async () => {
   const history = getClipboardHistory();
-  const historyItems = _15.map(history, (entry) => formatHistoryEntry(entry));
+  const historyItems = _16.map(history, (entry) => formatHistoryEntry(entry));
   const index = await choose(historyItems, {
     returnIndex: true,
     placeholder: "Clipboard history"
@@ -862,7 +894,7 @@ var runClipboardHistory = async () => {
 };
 
 // src/ui/main.ts
-import _19 from "lodash";
+import _20 from "lodash";
 import open6 from "open";
 
 // src/keystrokes/pressEnter.ts
@@ -876,14 +908,14 @@ var pressEnter_default = async () => {
 
 // src/ui/prompt/darwin.ts
 import { exec as exec2 } from "child_process";
-import _16 from "lodash";
+import _17 from "lodash";
 var darwin_default3 = (commands) => new Promise((resolve, reject) => {
   const choices = commands.map(({ title }) => title).join("\n");
-  const toShow = Math.min(30, _16.size(commands));
+  const toShow = Math.min(30, _17.size(commands));
   const cmd = `echo "${choices}" | choose -f "${getFontName()}" -b 000000 -c 222222 -w 30 -s 16 -m -n ${toShow} -p "Run a command or open an application"`;
   exec2(cmd, (error, stdout, stderr) => {
     if (stdout) {
-      const query = _16.trim(stdout);
+      const query = _17.trim(stdout);
       const rawQueryCommand = {
         isUnhandled: true,
         query
@@ -925,14 +957,14 @@ var didCalculate = (result) => result !== INCALCULABLE;
 import { createRequire as createRequire3 } from "module";
 
 // src/utils/showCalculationResultDialog.ts
-import { execa as execa4 } from "execa";
+import { execa as execa5 } from "execa";
 import os3 from "node:os";
-import path9 from "node:path";
+import path10 from "node:path";
 var showCalculationResultDialog = async (query, result) => {
-  const cwd = path9.join(os3.homedir(), "Tools", "quickulator", "app");
-  const target = path9.join(cwd, "dist", "quickulator");
+  const cwd = path10.join(os3.homedir(), "Tools", "quickulator", "app");
+  const target = path10.join(cwd, "dist", "quickulator");
   try {
-    await execa4(target, [query], { cwd, preferLocal: true });
+    await execa5(target, [query], { cwd, preferLocal: true });
   } catch (error) {
     logger.error(`Failed to show calculation result`, error);
   }
@@ -942,17 +974,17 @@ var showCalculationResultDialog = async (query, result) => {
 var stripKeystrokes = (text) => text.endsWith(ENTER) ? text.slice(0, -ENTER.length) : text;
 
 // src/utils/isShortcutResult.ts
-import _17 from "lodash";
-var isShortcutResult = (result) => Boolean(result) && _17.isObject(result) && "shortcut" in result && _17.isString(result.shortcut);
+import _18 from "lodash";
+var isShortcutResult = (result) => Boolean(result) && _18.isObject(result) && "shortcut" in result && _18.isString(result.shortcut);
 
 // src/utils/invokeShortcut.ts
-import { execa as execa5 } from "execa";
-import _18 from "lodash";
+import { execa as execa6 } from "execa";
+import _19 from "lodash";
 var invokeShortcut = async ({ shortcut, input }) => {
   try {
-    await execa5("shortcuts", ["run", shortcut, "-i", input ?? ""]);
+    await execa6("shortcuts", ["run", shortcut, "-i", input ?? ""]);
   } catch (error) {
-    if (_18.isError(error)) {
+    if (_19.isError(error)) {
       logger.error(`Failed to run shortcut: ${error.message}`);
     } else {
       logger.error(`Failed to run shortcut: ${shortcut}`);
@@ -970,9 +1002,9 @@ var main_default = async () => {
   Object.assign(global, { open: open6, require: require2 });
   if ("isUnknown" in item) {
     logger.warn(`Unknown command`);
-  } else if ("value" in item && _19.isFunction(item.value)) {
+  } else if ("value" in item && _20.isFunction(item.value)) {
     result = item.value(selection);
-  } else if ("invoke" in item && _19.isFunction(item.invoke)) {
+  } else if ("invoke" in item && _20.isFunction(item.invoke)) {
     result = await item.invoke(selection);
   } else if ("isUnhandled" in item && item.isUnhandled) {
     logger.warn(`Unhandled command: ${item.query}`);
@@ -990,7 +1022,7 @@ var main_default = async () => {
           selection,
           item.query
         );
-        if (!_19.isUndefined(resultFromFallback)) {
+        if (!_20.isUndefined(resultFromFallback)) {
           result = processInvokeScriptResult(resultFromFallback);
         }
       } catch (e) {
@@ -998,7 +1030,7 @@ var main_default = async () => {
       }
     }
   }
-  if (result && _19.isString(result)) {
+  if (result && _20.isString(result)) {
     logger.log(`Result: ${result}`);
     await setClipboardContent(stripKeystrokes(result));
     if (result.endsWith(ENTER)) {
@@ -1029,7 +1061,7 @@ var promptForAndRunCommand = async () => {
     }
   } catch (error) {
     logger.error(error);
-    if (_20.isError(error)) {
+    if (_21.isError(error)) {
       showNotification({
         message: "META-x encountered an error: " + error.message
       });
