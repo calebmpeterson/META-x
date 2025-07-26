@@ -62,11 +62,21 @@ ctrl - v: EDITOR=code ~/Tools/meta-x/bin/clipboard-history
 <h2 id="configuration">Configuration</h2>
 <p><strong>Meta-x</strong> config is kept in <code>~/.meta-x/</code> directory. This makes it easy to keep your config under source control.</p>
 <h3 id="settings">Settings</h3>
-<p>All configuration options are contained in <code>~/.meta-x/config.json</code></p>
+<p>All configuration options are contained in <code>~/.meta-x/config.json</code> (JSON/JSON5 supported):</p>
+<pre><code class="json5 language-json5">{
+  // Command palette font size (default is 16)
+  "font-size": "18",
+
+  // Apps that will be omitted from the catalog
+  ignored: [
+    "Pref", // Will ignore any app including "Pref" (case sensitive)
+  ],
+}
+</code></pre>
 <h3 id="customcommands">Custom Commands</h3>
-<p>Custom commands are <code>commonjs</code> modules placed in <code>~/.meta-x/</code>.</p>
+<p>Custom commands are <code>commonjs</code> modules placed in <code>~/.meta-x/scripts/</code>.</p>
 <h4 id="examplecommand">Example Command</h4>
-<p>To get a calculator capable of all operations/syntax available to you in JavaScript, create <code>~/.meta-x/calc.js</code> with the following content:</p>
+<p>To get a calculator capable of all operations/syntax available to you in JavaScript, create <code>~/.meta-x/scripts/calc.js</code> with the following content:</p>
 <pre><code class="js language-js">module.exports = (selection) =&gt; eval(selection);
 </code></pre>
 <h4 id="nontransformingcommands">Non-transforming Commands</h4>
@@ -93,7 +103,7 @@ ctrl - v: EDITOR=code ~/Tools/meta-x/bin/clipboard-history
 };
 </code></pre>
 <h4 id="commandnotfoundfallback">Command Not Found Fallback</h4>
-<p>In the event that your query does not match a known command, the raw query string will be passed to <code>~/.meta-x/fallback-handler.js</code> if it exists:</p>
+<p>In the event that your query does not match a known command, the raw query string will be passed to <code>~/.meta-x/scripts/fallback-handler.js</code> if it exists:</p>
 <pre><code class="js language-js">module.exports = function (selection, query) {
   // Do something with the currently selected
   // text and/or the raw query string
@@ -123,6 +133,7 @@ module.exports.suggestions = () =&gt; {
 <li><code>ENV</code> which is loaded from the <code>~/.meta-x/.env</code> file if it exists</li>
 <li><code>choose(['option A', 'option B', 'option C'])</code> which returns a <code>Promise</code> that resolves to the selected option or <code>undefined</code> if nothing was selected.</li>
 <li><code>notify({ message: "Your message here" })</code> which displays an OS-level toast/notification with the given message.</li>
+<li><code>display(message, timeout?)</code> which displays a popover alert with an optional auto-dismiss timeout.</li>
 </ul>
 <h4 id="usingnpmpackages">Using NPM Packages</h4>
 <p>You can use <code>npm</code> packages by simply installing them in your <code>~/.meta-x/</code> directory.</p>
@@ -143,6 +154,8 @@ module.exports.suggestions = () =&gt; {
 <li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> Periodically re-build command catalog in the background rather than re-building when launched</li>
 <li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> Add shutdown/restart commands</li>
 <li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> Add support for static text snippets</li>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> Improve standard for organization of ~/.meta-x/*</li>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> Add support for omitting applications and system preferences</li>
 <li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;"> Add a progress indicator for async commands</li>
 <li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;"> Add support for directly invoking a custom command from the launch CLI (e.g. <code>~/Tools/meta-x/bin/launch "My Custom Command"</code>)</li>
 </ul></div>
