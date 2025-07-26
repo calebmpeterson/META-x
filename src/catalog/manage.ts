@@ -1,7 +1,9 @@
 import fs from "node:fs";
 import { rebuildCatalog } from "../state/rebuildCatalog";
 import { SCRIPTS_DIR } from "../utils/getConfigDir";
-import { MANAGE_SCRIPTS_PREFIX } from "./_constants";
+import { CONFIG_FILENAME } from "../utils/getConfigOption";
+import { openInSystemEditor } from "../utils/openInSystemEditor";
+import { CONFIGURE_PREFIX, RELOAD_PREFIX } from "./_constants";
 
 // Ensure the scripts directory exists
 if (!fs.existsSync(SCRIPTS_DIR)) {
@@ -10,9 +12,15 @@ if (!fs.existsSync(SCRIPTS_DIR)) {
 
 export const getManageCommands = () => [
   {
-    title: `${MANAGE_SCRIPTS_PREFIX} Reload`,
+    title: `${RELOAD_PREFIX} Reload`,
     invoke: async () => {
       rebuildCatalog();
+    },
+  },
+  {
+    title: `${CONFIGURE_PREFIX} Configure`,
+    invoke: async () => {
+      openInSystemEditor(CONFIG_FILENAME, "");
     },
   },
 ];

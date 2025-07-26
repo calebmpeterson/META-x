@@ -23,7 +23,11 @@ const logger = {
 
   error: (...args: Parameters<typeof console.error>) => {
     const [first, ...rest] = args;
-    console.error(`⊗`, chalk.red(first), ...rest.map((arg) => arg.toString()));
+    console.error(
+      chalk.red(`✸`),
+      chalk.red(first),
+      ...rest.map((arg) => arg.toString())
+    );
   },
 };
 

@@ -1,1 +1,1 @@
-export const getFontName = () => "Fira Code";
+export const getFontName = () => "FiraCode Nerd Font";

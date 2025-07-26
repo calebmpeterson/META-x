@@ -69,7 +69,11 @@ var logger = {
   },
   error: (...args) => {
     const [first, ...rest] = args;
-    console.error(`\u2297`, chalk.red(first), ...rest.map((arg) => arg.toString()));
+    console.error(
+      chalk.red(`\u2738`),
+      chalk.red(first),
+      ...rest.map((arg) => arg.toString())
+    );
   }
 };
 
@@ -187,14 +191,16 @@ var getConfigOption = (key, defaultValue) => {
 };
 
 // src/catalog/_constants.ts
-var SCRIPT_PREFIX = "\u0192\u0578";
-var SNIPPET_PREFIX = "->";
-var MANAGE_SCRIPTS_PREFIX = "\u2425";
-var MANAGE_SNIPPETS_PREFIX = "\u2425";
-var FOLDER_PREFIX = "\u2302";
-var APPLICATION_PREFIX = "\u232C";
-var SYSTEM_PREFIX = "\u2699\uFE0E";
-var SHORTCUT_PREFIX = "\u2318";
+var SCRIPT_PREFIX = "\u{F0871}";
+var SNIPPET_PREFIX = "\u{F0798}";
+var MANAGE_SCRIPTS_PREFIX = "\u{F10D6}";
+var MANAGE_SNIPPETS_PREFIX = "\u{F0173}";
+var FOLDER_PREFIX = "\u{F0DCF}";
+var APPLICATION_PREFIX = "\u{F1591}";
+var SYSTEM_PREFIX = "\u{F0493}";
+var SHORTCUT_PREFIX = "\u{F0633}";
+var RELOAD_PREFIX = "\u{F0453}";
+var CONFIGURE_PREFIX = "\u{F0494}";
 
 // src/catalog/applications.ts
 var getApplicationUsageHistory = () => path3.join(getConfigDir(), ".application-usage");
@@ -309,14 +315,37 @@ var getFolders = () => FOLDERS.map((folder) => ({
 
 // src/catalog/manage.ts
 import fs4 from "node:fs";
+
+// src/utils/openInSystemEditor.ts
+import { execa } from "execa";
+
+// src/utils/getPathnameWithExtension.ts
+var getPathnameWithExtension = (pathname, extension = ".js") => pathname.endsWith(extension) ? pathname : `${pathname}${extension}`;
+
+// src/utils/openInSystemEditor.ts
+var openInSystemEditor = async (pathname, extension = ".js") => {
+  if (process.env.EDITOR) {
+    await execa(process.env.EDITOR, [
+      getPathnameWithExtension(pathname, extension)
+    ]);
+  }
+};
+
+// src/catalog/manage.ts
 if (!fs4.existsSync(SCRIPTS_DIR)) {
   fs4.mkdirSync(SCRIPTS_DIR, { recursive: true });
 }
 var getManageCommands = () => [
   {
-    title: `${MANAGE_SCRIPTS_PREFIX} Reload`,
+    title: `${RELOAD_PREFIX} Reload`,
     invoke: async () => {
       rebuildCatalog();
+    }
+  },
+  {
+    title: `${CONFIGURE_PREFIX} Configure`,
+    invoke: async () => {
+      openInSystemEditor(CONFIG_FILENAME, "");
     }
   }
 ];
@@ -329,11 +358,6 @@ import open2 from "open";
 
 // src/utils/createEmptyScript.ts
 import fs5 from "node:fs";
-
-// src/utils/getPathnameWithExtension.ts
-var getPathnameWithExtension = (pathname, extension = ".js") => pathname.endsWith(extension) ? pathname : `${pathname}${extension}`;
-
-// src/utils/createEmptyScript.ts
 var TEMPLATE = `
 module.exports = (selection) => {
   // \`this\` is bound to the Command Context. API documentation can be
@@ -378,16 +402,6 @@ var ensureEmptyFallbackHandler = () => {
   const fallbackHandlerFilename = getCommandFilename("fallback-handler.js");
   if (!fs6.existsSync(fallbackHandlerFilename)) {
     fs6.writeFileSync(fallbackHandlerFilename, TEMPLATE2, "utf8");
-  }
-};
-
-// src/utils/openInSystemEditor.ts
-import { execa } from "execa";
-var openInSystemEditor = async (pathname, extension = ".js") => {
-  if (process.env.EDITOR) {
-    await execa(process.env.EDITOR, [
-      getPathnameWithExtension(pathname, extension)
-    ]);
   }
 };
 
@@ -528,7 +542,7 @@ import { exec } from "child_process";
 import _8 from "lodash";
 
 // src/utils/getFontName.ts
-var getFontName = () => "Fira Code";
+var getFontName = () => "FiraCode Nerd Font";
 
 // src/utils/choose.ts
 var choose = (items, options = {}) => new Promise((resolve) => {
@@ -957,17 +971,12 @@ var didCalculate = (result) => result !== INCALCULABLE;
 import { createRequire as createRequire3 } from "module";
 
 // src/utils/showCalculationResultDialog.ts
-import { execa as execa5 } from "execa";
-import os3 from "node:os";
-import path10 from "node:path";
 var showCalculationResultDialog = async (query, result) => {
-  const cwd = path10.join(os3.homedir(), "Tools", "quickulator", "app");
-  const target = path10.join(cwd, "dist", "quickulator");
-  try {
-    await execa5(target, [query], { cwd, preferLocal: true });
-  } catch (error) {
-    logger.error(`Failed to show calculation result`, error);
-  }
+  invokeNativeTool({
+    tool: "display.tool",
+    message: `${query} = ${result}`,
+    timeout: 5
+  });
 };
 
 // src/utils/stripKeystrokes.ts
@@ -978,11 +987,11 @@ import _18 from "lodash";
 var isShortcutResult = (result) => Boolean(result) && _18.isObject(result) && "shortcut" in result && _18.isString(result.shortcut);
 
 // src/utils/invokeShortcut.ts
-import { execa as execa6 } from "execa";
+import { execa as execa5 } from "execa";
 import _19 from "lodash";
 var invokeShortcut = async ({ shortcut, input }) => {
   try {
-    await execa6("shortcuts", ["run", shortcut, "-i", input ?? ""]);
+    await execa5("shortcuts", ["run", shortcut, "-i", input ?? ""]);
   } catch (error) {
     if (_19.isError(error)) {
       logger.error(`Failed to run shortcut: ${error.message}`);
