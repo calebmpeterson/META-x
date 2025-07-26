@@ -1,6 +1,7 @@
 import { exec } from "child_process";
 import _ from "lodash";
 import { getFontName } from "./getFontName";
+import { getFontSize } from "./getFontSize";
 import { logger } from "./logger";
 
 // Uses choose: https://github.com/chipsenkbeil/choose
@@ -21,7 +22,7 @@ export const choose = (items: string[], options: Options = {}) =>
       options.returnIndex ? "-i" : "",
       options.placeholder ? `-p "${options.placeholder}"` : "",
     ].join(" ");
-    const cmd = `echo "${choices}" | choose -f "${getFontName()}" -b 000000 -c 222222 -w 30 -s 16 -m -n ${toShow} ${outputConfig}`;
+    const cmd = `echo "${choices}" | choose -f "${getFontName()}" -b 000000 -c 222222 -w 30 -s ${getFontSize()} -m -n ${toShow} ${outputConfig}`;
 
     exec(cmd, (error, stdout, stderr) => {
       if (stdout) {

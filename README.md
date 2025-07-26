@@ -50,6 +50,9 @@ All configuration options are contained in `~/.meta-x/config.json` (JSON/JSON5 s
 
 ```json5
 {
+  // Command palette font size (default is 16)
+  "font-size": "18",
+
   // Apps that will be omitted from the catalog
   ignored: [
     "Pref", // Will ignore any app including "Pref" (case sensitive)

@@ -6,14 +6,24 @@ import { getConfigPath } from "./getConfigPath";
 
 export const CONFIG_FILENAME = getConfigPath("config.json");
 
+const CACHE: Record<string, JsonValue> = {};
+
 export const getConfigOption = <T extends JsonValue>(
   key: string,
   defaultValue: T
 ): T => {
+  if (_.has(CACHE, key)) {
+    return CACHE[key] as T;
+  }
+
   try {
     const contents = fs.readFileSync(CONFIG_FILENAME, "utf8");
     const json = JSON5.parse(contents);
-    return _.get(json, key, defaultValue);
+    const value = _.get(json, key, defaultValue);
+
+    CACHE[key] = value;
+
+    return value;
   } catch {
     return defaultValue;
   }

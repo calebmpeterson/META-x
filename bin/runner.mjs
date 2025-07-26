@@ -180,11 +180,17 @@ var getConfigPath = (filename) => path2.join(getConfigDir(), filename);
 
 // src/utils/getConfigOption.ts
 var CONFIG_FILENAME = getConfigPath("config.json");
+var CACHE = {};
 var getConfigOption = (key, defaultValue) => {
+  if (_3.has(CACHE, key)) {
+    return CACHE[key];
+  }
   try {
     const contents = fs2.readFileSync(CONFIG_FILENAME, "utf8");
     const json = JSON5.parse(contents);
-    return _3.get(json, key, defaultValue);
+    const value = _3.get(json, key, defaultValue);
+    CACHE[key] = value;
+    return value;
   } catch {
     return defaultValue;
   }
@@ -544,6 +550,11 @@ import _8 from "lodash";
 // src/utils/getFontName.ts
 var getFontName = () => "FiraCode Nerd Font";
 
+// src/utils/getFontSize.ts
+var CONFIG_FONT_SIZE_KEY = "font-size";
+var DEFAULT_FONT_SIZE = "16";
+var getFontSize = () => getConfigOption(CONFIG_FONT_SIZE_KEY, DEFAULT_FONT_SIZE);
+
 // src/utils/choose.ts
 var choose = (items, options = {}) => new Promise((resolve) => {
   const choices = items.join("\n");
@@ -552,7 +563,7 @@ var choose = (items, options = {}) => new Promise((resolve) => {
     options.returnIndex ? "-i" : "",
     options.placeholder ? `-p "${options.placeholder}"` : ""
   ].join(" ");
-  const cmd = `echo "${choices}" | choose -f "${getFontName()}" -b 000000 -c 222222 -w 30 -s 16 -m -n ${toShow} ${outputConfig}`;
+  const cmd = `echo "${choices}" | choose -f "${getFontName()}" -b 000000 -c 222222 -w 30 -s ${getFontSize()} -m -n ${toShow} ${outputConfig}`;
   exec(cmd, (error, stdout, stderr) => {
     if (stdout) {
       const selection = _8.trim(stdout);
@@ -926,7 +937,7 @@ import _17 from "lodash";
 var darwin_default3 = (commands) => new Promise((resolve, reject) => {
   const choices = commands.map(({ title }) => title).join("\n");
   const toShow = Math.min(30, _17.size(commands));
-  const cmd = `echo "${choices}" | choose -f "${getFontName()}" -b 000000 -c 222222 -w 30 -s 16 -m -n ${toShow} -p "Run a command or open an application"`;
+  const cmd = `echo "${choices}" | choose -f "${getFontName()}" -b 000000 -c 222222 -w 30 -s ${getFontSize()} -m -n ${toShow} -p "Run a command or open an application"`;
   exec2(cmd, (error, stdout, stderr) => {
     if (stdout) {
       const query = _17.trim(stdout);
