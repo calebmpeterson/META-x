@@ -17,7 +17,7 @@ Emacs-esque `M-x` commands for your entire OS.
 1. `git clone https://github.com/calebmpeterson/META-x.git`
 2. `cd META-x`
 3. `yarn install`
-4. `brew install font-fira-code`
+4. `brew install font-fira-code-nerd-font`
 5. `brew install choose-gui`
 
 ## Running
