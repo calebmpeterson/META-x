@@ -28,3 +28,9 @@ export const getConfigOption = <T extends JsonValue>(
     return defaultValue;
   }
 };
+
+export const clearConfigCache = () => {
+  Object.keys(CACHE).forEach((key) => {
+    delete CACHE[key];
+  });
+};

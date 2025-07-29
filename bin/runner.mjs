@@ -195,6 +195,11 @@ var getConfigOption = (key, defaultValue) => {
     return defaultValue;
   }
 };
+var clearConfigCache = () => {
+  Object.keys(CACHE).forEach((key) => {
+    delete CACHE[key];
+  });
+};
 
 // src/catalog/_constants.ts
 var SCRIPT_PREFIX = "\u{F0871}";
@@ -345,6 +350,7 @@ var getManageCommands = () => [
   {
     title: `${RELOAD_PREFIX} Reload`,
     invoke: async () => {
+      clearConfigCache();
       rebuildCatalog();
     }
   },

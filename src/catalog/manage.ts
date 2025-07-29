@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import { rebuildCatalog } from "../state/rebuildCatalog";
 import { SCRIPTS_DIR } from "../utils/getConfigDir";
-import { CONFIG_FILENAME } from "../utils/getConfigOption";
+import { clearConfigCache, CONFIG_FILENAME } from "../utils/getConfigOption";
 import { openInSystemEditor } from "../utils/openInSystemEditor";
 import { CONFIGURE_PREFIX, RELOAD_PREFIX } from "./_constants";
 
@@ -14,6 +14,7 @@ export const getManageCommands = () => [
   {
     title: `${RELOAD_PREFIX} Reload`,
     invoke: async () => {
+      clearConfigCache();
       rebuildCatalog();
     },
   },
