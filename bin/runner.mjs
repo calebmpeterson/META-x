@@ -949,9 +949,9 @@ var pressEnter_default = async () => {
 // src/ui/prompt/darwin.ts
 import _17 from "lodash";
 
-// src/utils/ToolCache.ts
+// src/utils/SpawnCache.ts
 import { spawn } from "child_process";
-var ToolCache = class {
+var SpawnCache = class {
   constructor(command, args = []) {
     this.command = command;
     this.args = args;
@@ -1007,7 +1007,7 @@ var ToolCache = class {
 };
 
 // src/ui/prompt/darwin.ts
-var choose2 = new ToolCache("choose", [
+var choose2 = new SpawnCache("choose", [
   `-f`,
   getFontName(),
   "-b",
