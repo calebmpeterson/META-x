@@ -271,18 +271,27 @@ var getApplications = (rootDir = "/Applications") => {
 // src/catalog/built-ins.ts
 import _5 from "lodash";
 var BUILT_IN_COMMANDS = {
+  // Basic string case transformations
   "Camel Case": _5.camelCase,
   "Kebab Case": _5.kebabCase,
   "Snake Case": _5.snakeCase,
   "Start Case": _5.startCase,
   "Title Case": _5.startCase,
-  "To Lower": _5.toLower,
-  "To Upper": _5.toUpper,
-  Capitalize: _5.capitalize,
+  "Lower Case": _5.toLower,
+  "Upper Case": _5.toUpper,
   "Sentence Case": _5.capitalize,
+  Capitalize: _5.capitalize,
   Deburr: _5.deburr,
+  // Multi-line transformations
   "Sort Lines": (selection) => _5.chain(selection).split("\n").sort().join("\n").value(),
-  "Reverse Lines": (selection) => _5.chain(selection).split("\n").reverse().join("\n").value()
+  "Reverse Lines": (selection) => _5.chain(selection).split("\n").reverse().join("\n").value(),
+  // Markdown transformations
+  "To Markdown List": (selection) => _5.chain(selection).split("\n").map((line) => `- ${line}`).join("\n").value(),
+  "To Markdown Blockquote": (selection) => _5.chain(selection).split("\n").map((line) => `> ${line}`).join("\n").value(),
+  "To Markdown Checklist": (selection) => _5.chain(selection).split("\n").map((line) => `- [ ] ${line}`).join("\n").value(),
+  "To Markdown Strikethrough": (selection) => _5.chain(selection).split("\n").map((line) => `~${line}~`).join("\n").value(),
+  "To Markdown Italic": (selection) => _5.chain(selection).split("\n").map((line) => `_${line}_`).join("\n").value(),
+  "To Markdown Bold": (selection) => _5.chain(selection).split("\n").map((line) => `**${line}**`).join("\n").value()
 };
 var getBuiltInCommands = () => _5.map(BUILT_IN_COMMANDS, (command, name) => ({
   label: name,
@@ -1069,8 +1078,18 @@ var main_default = async () => {
   return false;
 };
 
+// src/utils/setTerminalTitle.ts
+var setTerminalTitle = (title, { bell = false } = {}) => {
+  const ESC = "\x1B";
+  process.stdout.write(`${ESC}]0;${title}${ESC}\\`);
+  if (bell) {
+    process.stdout.write("\x07");
+  }
+};
+
 // src/runner.ts
 logger.clear();
+setTerminalTitle(TITLE);
 var spinner = ora({
   text: "Ready",
   spinner: "dots"
