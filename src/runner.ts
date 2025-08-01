@@ -9,10 +9,13 @@ import { updateClipboardHistory } from "./state/clipboardHistory";
 import { rebuildCatalog } from "./state/rebuildCatalog";
 import { runClipboardHistory } from "./ui/clipboard-history";
 import showPrompt from "./ui/main";
-import { showNotification } from "./utils/showNotification";
 import { logger } from "./utils/logger";
+import { setTerminalTitle } from "./utils/setTerminalTitle";
+import { showNotification } from "./utils/showNotification";
 
 logger.clear();
+
+setTerminalTitle(TITLE);
 
 const spinner = ora({
   text: "Ready",
