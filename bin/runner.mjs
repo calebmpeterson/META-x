@@ -947,32 +947,106 @@ var pressEnter_default = async () => {
 };
 
 // src/ui/prompt/darwin.ts
-import { exec as exec2 } from "child_process";
 import _17 from "lodash";
-var darwin_default3 = (commands) => new Promise((resolve, reject) => {
+
+// src/utils/ToolCache.ts
+import { spawn } from "child_process";
+var ToolCache = class {
+  constructor(command, args = []) {
+    this.command = command;
+    this.args = args;
+    this.spawnTool();
+  }
+  child = null;
+  ready = Promise.resolve();
+  spawnTool = () => {
+    this.child = spawn(this.command, this.args, {
+      stdio: ["pipe", "pipe", "pipe"]
+    });
+    this.child.stdout.setEncoding("utf-8");
+    this.child.stderr.setEncoding("utf-8");
+    this.child.on("exit", (code, signal) => {
+      console.warn(
+        `[tool] exited (code=${code}, signal=${signal}), respawning...`
+      );
+      this.child = null;
+      this.spawnTool();
+    });
+    this.ready = new Promise((resolve) => {
+      process.nextTick(resolve);
+    });
+  };
+  async run(input) {
+    await this.ready;
+    const child = this.child;
+    if (!child) return { stderr: "Tool is not available" };
+    return new Promise((resolve) => {
+      let stdout = "";
+      let stderr = "";
+      const onStdout = (chunk) => {
+        stdout += chunk.toString();
+      };
+      const onStderr = (chunk) => {
+        stderr += chunk.toString();
+      };
+      const onClose = () => {
+        child.stdout.off("data", onStdout);
+        child.stderr.off("data", onStderr);
+        resolve({
+          stdout: stdout || void 0,
+          stderr: stderr || void 0
+        });
+      };
+      child.stdout.once("data", onStdout);
+      child.stderr.once("data", onStderr);
+      child.once("close", onClose);
+      child.stdin.write(input);
+      child.stdin.end();
+    });
+  }
+};
+
+// src/ui/prompt/darwin.ts
+var choose2 = new ToolCache("choose", [
+  `-f`,
+  getFontName(),
+  "-b",
+  "000000",
+  "-c",
+  "222222",
+  "-w",
+  "30",
+  "-s",
+  getFontSize(),
+  "-m",
+  "-n",
+  "30",
+  "-p",
+  "Run a command or open an application"
+]);
+var darwin_default3 = (commands) => new Promise(async (resolve, reject) => {
   const choices = commands.map(({ title }) => title).join("\n");
   const toShow = Math.min(30, _17.size(commands));
-  const cmd = `echo "${choices}" | choose -f "${getFontName()}" -b 000000 -c 222222 -w 30 -s ${getFontSize()} -m -n ${toShow} -p "Run a command or open an application"`;
-  exec2(cmd, (error, stdout, stderr) => {
-    if (stdout) {
-      const query = _17.trim(stdout);
-      const rawQueryCommand = {
-        isUnhandled: true,
-        query
-      };
-      const command = commands.find(
-        ({ title, isFallback }) => title === query && !isFallback
-      ) || rawQueryCommand;
-      resolve(command);
-    } else {
-      if (error && process.env.NODE_ENV === "development") {
-        logger.error(error.stack);
-      }
-      resolve({
-        isUnknown: true
-      });
+  const cmd = `choose -f "${getFontName()}" -b 000000 -c 222222 -w 30 -s ${getFontSize()} -m -n ${toShow} -p "Run a command or open an application"`;
+  const { stdout = "", stderr } = await choose2.run(choices);
+  if (stdout.trim().length > 0) {
+    const query = _17.trim(stdout);
+    const rawQueryCommand = {
+      isUnhandled: true,
+      query
+    };
+    const command = commands.find(
+      ({ title, isFallback }) => title === query && !isFallback
+    ) || rawQueryCommand;
+    resolve(command);
+  } else {
+    if (stderr && process.env.NODE_ENV === "development") {
+      logger.error(stderr);
     }
-  });
+    resolve({
+      isUnknown: true
+    });
+  }
 });
 
 // src/ui/prompt/index.ts
