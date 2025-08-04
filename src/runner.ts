@@ -8,7 +8,7 @@ import { listen } from "./ipc";
 import { updateClipboardHistory } from "./state/clipboardHistory";
 import { rebuildCatalog } from "./state/rebuildCatalog";
 import { runClipboardHistory } from "./ui/clipboard-history";
-import showPrompt from "./ui/main";
+import promptAndRun from "./ui/main";
 import { logger } from "./utils/logger";
 import { setTerminalTitle } from "./utils/setTerminalTitle";
 import { showNotification } from "./utils/showNotification";
@@ -23,14 +23,14 @@ const spinner = ora({
 });
 
 const promptForAndRunCommand = async () => {
-  spinner.stop();
-
   try {
     logger.clear();
     logger.log("Meta-x triggered");
 
     await prepareClipboard();
-    const result = await showPrompt();
+
+    const result = await promptAndRun();
+
     if (result) {
       await finishClipboard();
     }
@@ -42,8 +42,6 @@ const promptForAndRunCommand = async () => {
         message: "META-x encountered an error: " + error.message,
       });
     }
-  } finally {
-    spinner.start();
   }
 };
 
@@ -62,13 +60,21 @@ setInterval(async () => {
 }, 250);
 
 // Listen for IPC messages
-listen((message) => {
-  if (message.trim() === "run") {
-    promptForAndRunCommand();
-  } else if (message.trim() === "clipboard-history") {
-    runClipboardHistory();
-  } else {
-    logger.log(`Unknown message: "${message}"`);
+listen(async (message) => {
+  try {
+    spinner.stop();
+
+    if (message.trim() === "run") {
+      await promptForAndRunCommand();
+    } else if (message.trim() === "clipboard-history") {
+      await runClipboardHistory();
+    } else {
+      logger.log(`Unknown message: "${message}"`);
+    }
+  } catch (error: unknown) {
+    logger.error(error);
+  } finally {
+    spinner.start();
   }
 });
 

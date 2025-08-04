@@ -1,39 +1,32 @@
 import { execa } from "execa";
 import { SYSTEM_PREFIX } from "./_constants";
+import { SystemCommand } from "./types";
 
-export const getSystemCommands = () => [
+export const getSystemCommands = (): SystemCommand[] => [
   {
-    title: `${SYSTEM_PREFIX} Shutdown`,
-    invoke: async () => {
-      await execa("pmset", ["halt"]);
-    },
-  },
-  {
-    title: `${SYSTEM_PREFIX} Restart`,
-    invoke: async () => {
-      await execa("pmset", ["restart"]);
-    },
-  },
-  {
-    title: `${SYSTEM_PREFIX} Sleep`,
+    prefix: SYSTEM_PREFIX,
+    title: `Sleep`,
     invoke: async () => {
       await execa("pmset", ["sleepnow"]);
     },
   },
   {
-    title: `${SYSTEM_PREFIX} Sleep Displays`,
+    prefix: SYSTEM_PREFIX,
+    title: `Sleep Displays`,
     invoke: async () => {
       await execa("pmset", ["displaysleepnow"]);
     },
   },
   {
-    title: `${SYSTEM_PREFIX} About This Mac`,
+    prefix: SYSTEM_PREFIX,
+    title: `About This Mac`,
     invoke: async () => {
       await execa("open", ["-a", "About This Mac"]);
     },
   },
   {
-    title: `${SYSTEM_PREFIX} Lock Displays`,
+    prefix: SYSTEM_PREFIX,
+    title: `Lock Displays`,
     invoke: async () => {
       await execa("open", [
         "-a",

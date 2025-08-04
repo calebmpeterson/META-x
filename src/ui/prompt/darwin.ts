@@ -36,7 +36,9 @@ const triggerSuperwhisper = async () => {
 
 export default (commands: Command[]) =>
   new Promise<PromptResult>(async (resolve, reject) => {
-    const choices = commands.map(({ title }) => title).join("\n");
+    const choices = commands
+      .map(({ title, prefix }) => [prefix, title].filter(Boolean).join(" "))
+      .join("\n");
 
     const chooseProcess = choose.run(choices);
 
@@ -55,7 +57,8 @@ export default (commands: Command[]) =>
 
       const command =
         commands.find(
-          ({ title, isFallback }) => title === query && !isFallback
+          ({ prefix, title, isFallback }) =>
+            [prefix, title].filter(Boolean).join(" ") === query && !isFallback
         ) || rawQueryCommand;
 
       resolve(command);

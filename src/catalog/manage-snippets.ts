@@ -19,7 +19,8 @@ if (!fs.existsSync(SNIPPETS_DIR)) {
 
 export const getManageSnippetCommands = () => [
   {
-    title: `${MANAGE_SNIPPETS_PREFIX} Create Snippet`,
+    prefix: MANAGE_SNIPPETS_PREFIX,
+    title: `Create Snippet`,
     invoke: async () => {
       const result = await cocoaDialog("filesave", {
         title: "Save Snippet As...",
@@ -33,7 +34,8 @@ export const getManageSnippetCommands = () => [
     },
   },
   {
-    title: `${MANAGE_SNIPPETS_PREFIX} Edit Snippet`,
+    prefix: MANAGE_SNIPPETS_PREFIX,
+    title: `Edit Snippet`,
     invoke: async () => {
       const result = await cocoaDialog("fileselect", {
         title: "Choose Snippet To Edit...",
@@ -46,7 +48,8 @@ export const getManageSnippetCommands = () => [
     },
   },
   {
-    title: `${MANAGE_SNIPPETS_PREFIX} Manage Snippets`,
+    prefix: MANAGE_SNIPPETS_PREFIX,
+    title: `Manage Snippets`,
     invoke: async () => {
       await open(SNIPPETS_DIR);
     },

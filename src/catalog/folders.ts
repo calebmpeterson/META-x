@@ -1,7 +1,8 @@
+import open, { openApp } from "open";
 import os from "os";
 import path from "path";
-import open, { openApp } from "open";
 import { FOLDER_PREFIX } from "./_constants";
+import { SystemCommand } from "./types";
 
 const FOLDERS = [
   "Finder",
@@ -13,9 +14,10 @@ const FOLDERS = [
   "Workspace",
 ];
 
-export const getFolders = () =>
+export const getFolders = (): SystemCommand[] =>
   FOLDERS.map((folder) => ({
-    title: `${FOLDER_PREFIX} ${folder}`,
+    prefix: FOLDER_PREFIX,
+    title: folder,
     value: folder,
     invoke: async () => {
       if (folder === "Finder") {

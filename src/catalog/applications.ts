@@ -66,7 +66,8 @@ export const getApplications = (
     const value = path.join(rootDir, application);
     const name = _.get(path.parse(application), "name", application);
     return {
-      title: `${APPLICATION_PREFIX} ${name}`,
+      prefix: APPLICATION_PREFIX,
+      title: name,
       value,
       score: scores[value] ?? 0,
       invoke: async () => {

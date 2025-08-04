@@ -62,7 +62,8 @@ const BUILT_IN_COMMANDS = {
 
 export const getBuiltInCommands = (): BuiltInCommand[] =>
   _.map(BUILT_IN_COMMANDS, (command, name) => ({
+    prefix: SCRIPT_PREFIX,
     label: name,
-    title: `${SCRIPT_PREFIX} ${name}`,
+    title: name,
     value: command,
   }));

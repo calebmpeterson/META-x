@@ -1,4 +1,5 @@
 export type Command = {
+  prefix?: string;
   title: string;
   isFallback?: boolean;
 };
@@ -14,5 +15,9 @@ export type ScriptCommand = Command & {
 export type ApplicationLauncher = Command & {
   value: string;
   score: number;
+  invoke: () => Promise<void>;
+};
+
+export type SystemCommand = Command & {
   invoke: () => Promise<void>;
 };

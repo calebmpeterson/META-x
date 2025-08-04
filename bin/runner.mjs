@@ -255,7 +255,8 @@ var getApplications = (rootDir = "/Applications") => {
     const value = path3.join(rootDir, application);
     const name = _4.get(path3.parse(application), "name", application);
     return {
-      title: `${APPLICATION_PREFIX} ${name}`,
+      prefix: APPLICATION_PREFIX,
+      title: name,
       value,
       score: scores[value] ?? 0,
       invoke: async () => {
@@ -294,8 +295,9 @@ var BUILT_IN_COMMANDS = {
   "To Markdown Bold": (selection) => _5.chain(selection).split("\n").map((line) => `**${line}**`).join("\n").value()
 };
 var getBuiltInCommands = () => _5.map(BUILT_IN_COMMANDS, (command, name) => ({
+  prefix: SCRIPT_PREFIX,
   label: name,
-  title: `${SCRIPT_PREFIX} ${name}`,
+  title: name,
   value: command
 }));
 
@@ -304,9 +306,9 @@ import path4 from "node:path";
 var getCommandFilename = (commandFilename) => path4.join(SCRIPTS_DIR, commandFilename);
 
 // src/catalog/folders.ts
+import open, { openApp as openApp2 } from "open";
 import os2 from "os";
 import path5 from "path";
-import open, { openApp as openApp2 } from "open";
 var FOLDERS = [
   "Finder",
   "Applications",
@@ -317,7 +319,8 @@ var FOLDERS = [
   "Workspace"
 ];
 var getFolders = () => FOLDERS.map((folder) => ({
-  title: `${FOLDER_PREFIX} ${folder}`,
+  prefix: FOLDER_PREFIX,
+  title: folder,
   value: folder,
   invoke: async () => {
     if (folder === "Finder") {
@@ -357,14 +360,16 @@ if (!fs4.existsSync(SCRIPTS_DIR)) {
 }
 var getManageCommands = () => [
   {
-    title: `${RELOAD_PREFIX} Reload`,
+    prefix: RELOAD_PREFIX,
+    title: `Reload`,
     invoke: async () => {
       clearConfigCache();
       rebuildCatalog();
     }
   },
   {
-    title: `${CONFIGURE_PREFIX} Configure`,
+    prefix: CONFIGURE_PREFIX,
+    title: `Configure`,
     invoke: async () => {
       openInSystemEditor(CONFIG_FILENAME, "");
     }
@@ -432,13 +437,15 @@ if (!fs7.existsSync(SCRIPTS_DIR)) {
 }
 var getManageScriptCommands = () => [
   {
-    title: `${MANAGE_SCRIPTS_PREFIX} Manage Scripts`,
+    prefix: MANAGE_SCRIPTS_PREFIX,
+    title: `Manage Scripts`,
     invoke: async () => {
       await open2(SCRIPTS_DIR);
     }
   },
   {
-    title: `${MANAGE_SCRIPTS_PREFIX} Create Script`,
+    prefix: MANAGE_SCRIPTS_PREFIX,
+    title: `Create Script`,
     invoke: async () => {
       const result = await cocoaDialog("filesave", {
         title: "Save Script As...",
@@ -451,7 +458,8 @@ var getManageScriptCommands = () => [
     }
   },
   {
-    title: `${MANAGE_SCRIPTS_PREFIX} Edit Script`,
+    prefix: MANAGE_SCRIPTS_PREFIX,
+    title: `Edit Script`,
     invoke: async () => {
       const result = await cocoaDialog("fileselect", {
         title: "Choose Script To Edit...",
@@ -463,7 +471,8 @@ var getManageScriptCommands = () => [
     }
   },
   {
-    title: `${MANAGE_SCRIPTS_PREFIX} Edit Fallback Handler`,
+    prefix: MANAGE_SCRIPTS_PREFIX,
+    title: `Edit Fallback Handler`,
     invoke: async () => {
       const fallbackHandlerFilename = getCommandFilename("fallback-handler.js");
       ensureEmptyFallbackHandler();
@@ -471,7 +480,8 @@ var getManageScriptCommands = () => [
     }
   },
   {
-    title: `${MANAGE_SCRIPTS_PREFIX} Open ${TITLE} Documentation`,
+    prefix: MANAGE_SCRIPTS_PREFIX,
+    title: `Open ${TITLE} Documentation`,
     invoke: async () => {
       await open2(`https://github.com/calebmpeterson/META-x#command-context`);
     }
@@ -505,7 +515,8 @@ if (!fs9.existsSync(SNIPPETS_DIR)) {
 }
 var getManageSnippetCommands = () => [
   {
-    title: `${MANAGE_SNIPPETS_PREFIX} Create Snippet`,
+    prefix: MANAGE_SNIPPETS_PREFIX,
+    title: `Create Snippet`,
     invoke: async () => {
       const result = await cocoaDialog2("filesave", {
         title: "Save Snippet As...",
@@ -518,7 +529,8 @@ var getManageSnippetCommands = () => [
     }
   },
   {
-    title: `${MANAGE_SNIPPETS_PREFIX} Edit Snippet`,
+    prefix: MANAGE_SNIPPETS_PREFIX,
+    title: `Edit Snippet`,
     invoke: async () => {
       const result = await cocoaDialog2("fileselect", {
         title: "Choose Snippet To Edit...",
@@ -530,7 +542,8 @@ var getManageSnippetCommands = () => [
     }
   },
   {
-    title: `${MANAGE_SNIPPETS_PREFIX} Manage Snippets`,
+    prefix: MANAGE_SNIPPETS_PREFIX,
+    title: `Manage Snippets`,
     invoke: async () => {
       await open3(SNIPPETS_DIR);
     }
@@ -728,7 +741,8 @@ var invokeScript = async (commandFilename, selection) => {
 var getScriptCommands = () => fs11.readdirSync(SCRIPTS_DIR).filter(
   (file) => file.endsWith(".js") && !file.includes("fallback-handler")
 ).map((command) => ({
-  title: `${SCRIPT_PREFIX} ${getCommandTitle(command)}`,
+  prefix: SCRIPT_PREFIX,
+  title: `${getCommandTitle(command)}`,
   invoke: async (selection) => {
     const commandFilename = getCommandFilename(command);
     return invokeScript(commandFilename, selection);
@@ -742,7 +756,8 @@ var getShortcuts = () => {
   try {
     const shortcuts = execaSync("shortcuts", ["list"]).stdout.split("\n").filter(Boolean).map((shortcut) => {
       return {
-        title: `${SHORTCUT_PREFIX} ${shortcut}`,
+        prefix: SHORTCUT_PREFIX,
+        title: shortcut,
         invoke: async () => {
           try {
             execaSync("shortcuts", ["run", shortcut]);
@@ -773,7 +788,8 @@ var getSnippetFilename = (snippetFilename) => path7.join(getConfigDir("snippets"
 
 // src/catalog/snippets.ts
 var getSnippetCommands = () => fs12.readdirSync(getConfigDir("snippets")).filter((file) => file.endsWith(SNIPPET_EXTENSION)).map((command) => ({
-  title: `${SNIPPET_PREFIX} ${path8.basename(command, SNIPPET_EXTENSION)}`,
+  prefix: SNIPPET_PREFIX,
+  title: `${path8.basename(command, SNIPPET_EXTENSION)}`,
   invoke: async (_selection) => {
     const snippetFilename = getSnippetFilename(command);
     const snippet = fs12.readFileSync(snippetFilename, "utf-8");
@@ -785,37 +801,29 @@ var getSnippetCommands = () => fs12.readdirSync(getConfigDir("snippets")).filter
 import { execa as execa4 } from "execa";
 var getSystemCommands = () => [
   {
-    title: `${SYSTEM_PREFIX} Shutdown`,
-    invoke: async () => {
-      await execa4("pmset", ["halt"]);
-    }
-  },
-  {
-    title: `${SYSTEM_PREFIX} Restart`,
-    invoke: async () => {
-      await execa4("pmset", ["restart"]);
-    }
-  },
-  {
-    title: `${SYSTEM_PREFIX} Sleep`,
+    prefix: SYSTEM_PREFIX,
+    title: `Sleep`,
     invoke: async () => {
       await execa4("pmset", ["sleepnow"]);
     }
   },
   {
-    title: `${SYSTEM_PREFIX} Sleep Displays`,
+    prefix: SYSTEM_PREFIX,
+    title: `Sleep Displays`,
     invoke: async () => {
       await execa4("pmset", ["displaysleepnow"]);
     }
   },
   {
-    title: `${SYSTEM_PREFIX} About This Mac`,
+    prefix: SYSTEM_PREFIX,
+    title: `About This Mac`,
     invoke: async () => {
       await execa4("open", ["-a", "About This Mac"]);
     }
   },
   {
-    title: `${SYSTEM_PREFIX} Lock Displays`,
+    prefix: SYSTEM_PREFIX,
+    title: `Lock Displays`,
     invoke: async () => {
       await execa4("open", [
         "-a",
@@ -1077,7 +1085,7 @@ var triggerSuperwhisper = async () => {
   await keyboard4.type(Key4.LeftCmd, Key4.Space);
 };
 var darwin_default3 = (commands) => new Promise(async (resolve, reject) => {
-  const choices = commands.map(({ title }) => title).join("\n");
+  const choices = commands.map(({ title, prefix }) => [prefix, title].filter(Boolean).join(" ")).join("\n");
   const chooseProcess = choose2.run(choices);
   if (getConfigOption("superwhisper", false)) {
     await triggerSuperwhisper();
@@ -1090,7 +1098,7 @@ var darwin_default3 = (commands) => new Promise(async (resolve, reject) => {
       query
     };
     const command = commands.find(
-      ({ title, isFallback }) => title === query && !isFallback
+      ({ prefix, title, isFallback }) => [prefix, title].filter(Boolean).join(" ") === query && !isFallback
     ) || rawQueryCommand;
     resolve(command);
   } else {
@@ -1174,7 +1182,6 @@ var spinner = ora({
   spinner: "dots"
 });
 var promptForAndRunCommand = async () => {
-  spinner.stop();
   try {
     logger.clear();
     logger.log("Meta-x triggered");
@@ -1190,8 +1197,6 @@ var promptForAndRunCommand = async () => {
         message: "META-x encountered an error: " + error.message
       });
     }
-  } finally {
-    spinner.start();
   }
 };
 rebuildCatalog();
@@ -1203,13 +1208,20 @@ setInterval(async () => {
 setInterval(async () => {
   updateClipboardHistory(await getClipboardContent());
 }, 250);
-listen((message) => {
-  if (message.trim() === "run") {
-    promptForAndRunCommand();
-  } else if (message.trim() === "clipboard-history") {
-    runClipboardHistory();
-  } else {
-    logger.log(`Unknown message: "${message}"`);
+listen(async (message) => {
+  try {
+    spinner.stop();
+    if (message.trim() === "run") {
+      await promptForAndRunCommand();
+    } else if (message.trim() === "clipboard-history") {
+      await runClipboardHistory();
+    } else {
+      logger.log(`Unknown message: "${message}"`);
+    }
+  } catch (error) {
+    logger.error(error);
+  } finally {
+    spinner.start();
   }
 });
 showNotification({

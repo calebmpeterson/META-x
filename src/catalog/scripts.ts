@@ -13,7 +13,8 @@ export const getScriptCommands = (): ScriptCommand[] =>
       (file) => file.endsWith(".js") && !file.includes("fallback-handler")
     )
     .map((command) => ({
-      title: `${SCRIPT_PREFIX} ${getCommandTitle(command)}`,
+      prefix: SCRIPT_PREFIX,
+      title: `${getCommandTitle(command)}`,
       invoke: async (selection: string) => {
         const commandFilename = getCommandFilename(command);
 

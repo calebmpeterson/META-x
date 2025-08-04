@@ -1,7 +1,7 @@
 import { execaSync } from "execa";
-import { SHORTCUT_PREFIX } from "./_constants";
 import _ from "lodash";
 import { logger } from "../utils/logger";
+import { SHORTCUT_PREFIX } from "./_constants";
 
 export const getShortcuts = () => {
   try {
@@ -10,7 +10,8 @@ export const getShortcuts = () => {
       .filter(Boolean)
       .map((shortcut) => {
         return {
-          title: `${SHORTCUT_PREFIX} ${shortcut}`,
+          prefix: SHORTCUT_PREFIX,
+          title: shortcut,
           invoke: async () => {
             try {
               execaSync("shortcuts", ["run", shortcut]);

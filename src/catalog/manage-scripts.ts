@@ -17,13 +17,15 @@ if (!fs.existsSync(SCRIPTS_DIR)) {
 
 export const getManageScriptCommands = () => [
   {
-    title: `${MANAGE_SCRIPTS_PREFIX} Manage Scripts`,
+    prefix: MANAGE_SCRIPTS_PREFIX,
+    title: `Manage Scripts`,
     invoke: async () => {
       await open(SCRIPTS_DIR);
     },
   },
   {
-    title: `${MANAGE_SCRIPTS_PREFIX} Create Script`,
+    prefix: MANAGE_SCRIPTS_PREFIX,
+    title: `Create Script`,
     invoke: async () => {
       const result = await cocoaDialog("filesave", {
         title: "Save Script As...",
@@ -37,7 +39,8 @@ export const getManageScriptCommands = () => [
     },
   },
   {
-    title: `${MANAGE_SCRIPTS_PREFIX} Edit Script`,
+    prefix: MANAGE_SCRIPTS_PREFIX,
+    title: `Edit Script`,
     invoke: async () => {
       const result = await cocoaDialog("fileselect", {
         title: "Choose Script To Edit...",
@@ -50,7 +53,8 @@ export const getManageScriptCommands = () => [
     },
   },
   {
-    title: `${MANAGE_SCRIPTS_PREFIX} Edit Fallback Handler`,
+    prefix: MANAGE_SCRIPTS_PREFIX,
+    title: `Edit Fallback Handler`,
     invoke: async () => {
       const fallbackHandlerFilename = getCommandFilename("fallback-handler.js");
 
@@ -60,7 +64,8 @@ export const getManageScriptCommands = () => [
     },
   },
   {
-    title: `${MANAGE_SCRIPTS_PREFIX} Open ${TITLE} Documentation`,
+    prefix: MANAGE_SCRIPTS_PREFIX,
+    title: `Open ${TITLE} Documentation`,
     invoke: async () => {
       await open(`https://github.com/calebmpeterson/META-x#command-context`);
     },

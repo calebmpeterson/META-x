@@ -12,14 +12,16 @@ if (!fs.existsSync(SCRIPTS_DIR)) {
 
 export const getManageCommands = () => [
   {
-    title: `${RELOAD_PREFIX} Reload`,
+    prefix: RELOAD_PREFIX,
+    title: `Reload`,
     invoke: async () => {
       clearConfigCache();
       rebuildCatalog();
     },
   },
   {
-    title: `${CONFIGURE_PREFIX} Configure`,
+    prefix: CONFIGURE_PREFIX,
+    title: `Configure`,
     invoke: async () => {
       openInSystemEditor(CONFIG_FILENAME, "");
     },
