@@ -22,14 +22,14 @@ const spinner = ora({
   spinner: "dots",
 });
 
-const promptForAndRunCommand = async () => {
+const promptForAndRunCommand = async (injected?: string) => {
   try {
     logger.clear();
     logger.log("Meta-x triggered");
 
     await prepareClipboard();
 
-    const result = await promptAndRun();
+    const result = await promptAndRun(injected);
 
     if (result) {
       await finishClipboard();
@@ -66,6 +66,10 @@ listen(async (message) => {
 
     if (message.trim() === "run") {
       await promptForAndRunCommand();
+    } else if (message.trim().startsWith("run")) {
+      const injection = message.slice(3).trim();
+      logger.info(`Invoking "${injection}"`);
+      await promptForAndRunCommand(injection);
     } else if (message.trim() === "clipboard-history") {
       await runClipboardHistory();
     } else {

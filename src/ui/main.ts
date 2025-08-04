@@ -1,6 +1,7 @@
 import _ from "lodash";
 import { createRequire } from "module";
 import open from "open";
+import { UNKNOWN_COMMAND } from "../catalog/unknown";
 import { getCurrentSelection, setClipboardContent } from "../clipboard/utils";
 import { ENTER } from "../keystrokes/constants";
 import pressEnter from "../keystrokes/pressEnter";
@@ -16,12 +17,15 @@ import { showCalculationResultDialog } from "../utils/showCalculationResultDialo
 import { stripKeystrokes } from "../utils/stripKeystrokes";
 import prompt from "./prompt";
 
-export default async () => {
+export default async (injected?: string) => {
   const selection = await getCurrentSelection();
 
   const commands = getCommandsCatalog();
 
-  const item = await prompt(commands);
+  const item = injected
+    ? (commands.find((command) => command.title === injected) ??
+      UNKNOWN_COMMAND)
+    : await prompt(commands);
 
   let result;
 

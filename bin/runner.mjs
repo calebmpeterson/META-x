@@ -946,6 +946,11 @@ import _20 from "lodash";
 import { createRequire as createRequire3 } from "module";
 import open6 from "open";
 
+// src/catalog/unknown.ts
+var UNKNOWN_COMMAND = {
+  isUnknown: true
+};
+
 // src/keystrokes/pressEnter.ts
 import { keyboard as keyboard3, Key as Key3 } from "@nut-tree-fork/nut-js";
 var pressEnter_default = async () => {
@@ -1105,9 +1110,7 @@ var darwin_default3 = (commands) => new Promise(async (resolve, reject) => {
     if (stderr && process.env.NODE_ENV === "development") {
       logger.error(stderr);
     }
-    resolve({
-      isUnknown: true
-    });
+    resolve(UNKNOWN_COMMAND);
   }
 });
 
@@ -1115,10 +1118,10 @@ var darwin_default3 = (commands) => new Promise(async (resolve, reject) => {
 var prompt_default = (commands) => darwin_default3(commands);
 
 // src/ui/main.ts
-var main_default = async () => {
+var main_default = async (injected) => {
   const selection = await getCurrentSelection();
   const commands = getCommandsCatalog();
-  const item = await prompt_default(commands);
+  const item = injected ? commands.find((command) => command.title === injected) ?? UNKNOWN_COMMAND : await prompt_default(commands);
   let result;
   const require2 = createRequire3(import.meta.url);
   Object.assign(global, { open: open6, require: require2 });
@@ -1181,12 +1184,12 @@ var spinner = ora({
   text: "Ready",
   spinner: "dots"
 });
-var promptForAndRunCommand = async () => {
+var promptForAndRunCommand = async (injected) => {
   try {
     logger.clear();
     logger.log("Meta-x triggered");
     await prepare_default();
-    const result = await main_default();
+    const result = await main_default(injected);
     if (result) {
       await finish_default();
     }
@@ -1213,6 +1216,10 @@ listen(async (message) => {
     spinner.stop();
     if (message.trim() === "run") {
       await promptForAndRunCommand();
+    } else if (message.trim().startsWith("run")) {
+      const injection = message.slice(3).trim();
+      logger.info(`Invoking "${injection}"`);
+      await promptForAndRunCommand(injection);
     } else if (message.trim() === "clipboard-history") {
       await runClipboardHistory();
     } else {

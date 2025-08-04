@@ -54,18 +54,27 @@ skhd --start-service
 <h3 id="sampleshkdrc">Sample <code>.shkdrc</code></h3>
 <pre><code># ⌘SPACE to launch Meta-x on the current text selection in the active window
 alt - space: EDITOR=code ~/Tools/meta-x/bin/launch
-cmd - space: EDITOR=code ~/Tools/meta-x/bin/launch
 
 # CTRL+V to launch clipboard history
 ctrl - v: EDITOR=code ~/Tools/meta-x/bin/clipboard-history
 </code></pre>
+<h3 id="directcommandinvocation">Direct Command Invocation</h3>
+<p>Any command can be directly invoked (thus bypassing the prompt):</p>
+<pre><code>~/Tools/meta-x/bin/invoke "&lt;script name&gt;"
+</code></pre>
+<h4 id="exampleinvokethemanagescriptsdirectly">Example: Invoke the "Manage Scripts" Directly</h4>
+<pre><code>~/Tools/meta-x/bin/invoke "Manage Scripts"
+</code></pre>
 <h2 id="configuration">Configuration</h2>
-<p><strong>Meta-x</strong> config is kept in <code>~/.meta-x/</code> directory. This makes it easy to keep your config under source control.</p>
+<p><strong>Meta-x</strong> config is kept in <code>~/.meta-x/</code> directory. This makes it easy to keep the configuration, snippets, and scripts under source control.</p>
 <h3 id="settings">Settings</h3>
 <p>All configuration options are contained in <code>~/.meta-x/config.json</code> (JSON/JSON5 supported):</p>
 <pre><code class="json5 language-json5">{
   // Command palette font size (default is 16)
   "font-size": "18",
+
+  // Trigger Superwhisper via CMD+Space
+  superwhisper: false,
 
   // Apps that will be omitted from the catalog
   ignored: [
@@ -156,8 +165,8 @@ module.exports.suggestions = () =&gt; {
 <li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> Add support for static text snippets</li>
 <li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> Improve standard for organization of ~/.meta-x/*</li>
 <li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> Add support for omitting applications and system preferences</li>
+<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;" checked> Add support for directly invoking a custom command from the launch CLI (e.g. <code>~/Tools/meta-x/bin/launch "My Custom Command"</code>)</li>
 <li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;"> Add a progress indicator for async commands</li>
-<li class="task-list-item" style="list-style-type: none;"><input type="checkbox" disabled style="margin: 0px 0.35em 0.25em -1.6em; vertical-align: middle;"> Add support for directly invoking a custom command from the launch CLI (e.g. <code>~/Tools/meta-x/bin/launch "My Custom Command"</code>)</li>
 </ul></div>
       </div>
     </div>

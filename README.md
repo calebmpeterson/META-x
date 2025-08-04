@@ -39,9 +39,23 @@ alt - space: EDITOR=code ~/Tools/meta-x/bin/launch
 ctrl - v: EDITOR=code ~/Tools/meta-x/bin/clipboard-history
 ```
 
+### Direct Command Invocation
+
+Any command can be directly invoked (thus bypassing the prompt):
+
+```
+~/Tools/meta-x/bin/invoke "<script name>"
+```
+
+#### Example: Invoke the "Manage Scripts" Directly
+
+```
+~/Tools/meta-x/bin/invoke "Manage Scripts"
+```
+
 ## Configuration
 
-**Meta-x** config is kept in `~/.meta-x/` directory. This makes it easy to keep your config under source control.
+**Meta-x** config is kept in `~/.meta-x/` directory. This makes it easy to keep the configuration, snippets, and scripts under source control.
 
 ### Settings
 
@@ -178,5 +192,5 @@ Issues and Pull Requests are welcome!
 - [x] Add support for static text snippets
 - [x] Improve standard for organization of ~/.meta-x/\*
 - [x] Add support for omitting applications and system preferences
+- [x] Add support for directly invoking a custom command from the launch CLI (e.g. `~/Tools/meta-x/bin/launch "My Custom Command"`)
 - [ ] Add a progress indicator for async commands
-- [ ] Add support for directly invoking a custom command from the launch CLI (e.g. `~/Tools/meta-x/bin/launch "My Custom Command"`)

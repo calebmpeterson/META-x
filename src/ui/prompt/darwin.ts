@@ -1,6 +1,7 @@
 import { Key, keyboard } from "@nut-tree-fork/nut-js";
 import _ from "lodash";
 import { Command } from "../../catalog/types";
+import { UNKNOWN_COMMAND } from "../../catalog/unknown";
 import { getConfigOption } from "../../utils/getConfigOption";
 import { getFontName } from "../../utils/getFontName";
 import { getFontSize } from "../../utils/getFontSize";
@@ -67,8 +68,6 @@ export default (commands: Command[]) =>
         logger.error(stderr);
       }
 
-      resolve({
-        isUnknown: true,
-      });
+      resolve(UNKNOWN_COMMAND);
     }
   });
