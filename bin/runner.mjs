@@ -935,6 +935,7 @@ var runClipboardHistory = async () => {
 
 // src/ui/main.ts
 import _20 from "lodash";
+import { createRequire as createRequire3 } from "module";
 import open6 from "open";
 
 // src/keystrokes/pressEnter.ts
@@ -946,8 +947,55 @@ var pressEnter_default = async () => {
   await keyboard3.releaseKey(Key3.Enter);
 };
 
-// src/ui/prompt/darwin.ts
+// src/utils/calculate.ts
+import vm2 from "node:vm";
+var INCALCULABLE = Symbol("incalculable");
+var calculate = (input) => {
+  try {
+    const script = new vm2.Script(input);
+    const result = script.runInNewContext();
+    logger.log(`Calculated ${input} as ${result}`);
+    return result;
+  } catch {
+    return INCALCULABLE;
+  }
+};
+var didCalculate = (result) => result !== INCALCULABLE;
+
+// src/utils/invokeShortcut.ts
+import { execa as execa5 } from "execa";
 import _17 from "lodash";
+var invokeShortcut = async ({ shortcut, input }) => {
+  try {
+    await execa5("shortcuts", ["run", shortcut, "-i", input ?? ""]);
+  } catch (error) {
+    if (_17.isError(error)) {
+      logger.error(`Failed to run shortcut: ${error.message}`);
+    } else {
+      logger.error(`Failed to run shortcut: ${shortcut}`);
+    }
+  }
+};
+
+// src/utils/isShortcutResult.ts
+import _18 from "lodash";
+var isShortcutResult = (result) => Boolean(result) && _18.isObject(result) && "shortcut" in result && _18.isString(result.shortcut);
+
+// src/utils/showCalculationResultDialog.ts
+var showCalculationResultDialog = async (query, result) => {
+  invokeNativeTool({
+    tool: "display.tool",
+    message: `${query} = ${result}`,
+    timeout: 5
+  });
+};
+
+// src/utils/stripKeystrokes.ts
+var stripKeystrokes = (text) => text.endsWith(ENTER) ? text.slice(0, -ENTER.length) : text;
+
+// src/ui/prompt/darwin.ts
+import { Key as Key4, keyboard as keyboard4 } from "@nut-tree-fork/nut-js";
+import _19 from "lodash";
 
 // src/utils/SpawnCache.ts
 import { spawn } from "child_process";
@@ -1007,6 +1055,7 @@ var SpawnCache = class {
 };
 
 // src/ui/prompt/darwin.ts
+var PROMPT = "Run a command or open an application";
 var choose2 = new SpawnCache("choose", [
   `-f`,
   getFontName(),
@@ -1022,15 +1071,20 @@ var choose2 = new SpawnCache("choose", [
   "-n",
   "30",
   "-p",
-  "Run a command or open an application"
+  PROMPT
 ]);
+var triggerSuperwhisper = async () => {
+  await keyboard4.type(Key4.LeftCmd, Key4.Space);
+};
 var darwin_default3 = (commands) => new Promise(async (resolve, reject) => {
   const choices = commands.map(({ title }) => title).join("\n");
-  const toShow = Math.min(30, _17.size(commands));
-  const cmd = `choose -f "${getFontName()}" -b 000000 -c 222222 -w 30 -s ${getFontSize()} -m -n ${toShow} -p "Run a command or open an application"`;
-  const { stdout = "", stderr } = await choose2.run(choices);
+  const chooseProcess = choose2.run(choices);
+  if (getConfigOption("superwhisper", false)) {
+    await triggerSuperwhisper();
+  }
+  const { stdout = "", stderr } = await chooseProcess;
   if (stdout.trim().length > 0) {
-    const query = _17.trim(stdout);
+    const query = _19.trim(stdout);
     const rawQueryCommand = {
       isUnhandled: true,
       query
@@ -1051,55 +1105,6 @@ var darwin_default3 = (commands) => new Promise(async (resolve, reject) => {
 
 // src/ui/prompt/index.ts
 var prompt_default = (commands) => darwin_default3(commands);
-
-// src/utils/calculate.ts
-import vm2 from "node:vm";
-var INCALCULABLE = Symbol("incalculable");
-var calculate = (input) => {
-  try {
-    const script = new vm2.Script(input);
-    const result = script.runInNewContext();
-    logger.log(`Calculated ${input} as ${result}`);
-    return result;
-  } catch {
-    return INCALCULABLE;
-  }
-};
-var didCalculate = (result) => result !== INCALCULABLE;
-
-// src/ui/main.ts
-import { createRequire as createRequire3 } from "module";
-
-// src/utils/showCalculationResultDialog.ts
-var showCalculationResultDialog = async (query, result) => {
-  invokeNativeTool({
-    tool: "display.tool",
-    message: `${query} = ${result}`,
-    timeout: 5
-  });
-};
-
-// src/utils/stripKeystrokes.ts
-var stripKeystrokes = (text) => text.endsWith(ENTER) ? text.slice(0, -ENTER.length) : text;
-
-// src/utils/isShortcutResult.ts
-import _18 from "lodash";
-var isShortcutResult = (result) => Boolean(result) && _18.isObject(result) && "shortcut" in result && _18.isString(result.shortcut);
-
-// src/utils/invokeShortcut.ts
-import { execa as execa5 } from "execa";
-import _19 from "lodash";
-var invokeShortcut = async ({ shortcut, input }) => {
-  try {
-    await execa5("shortcuts", ["run", shortcut, "-i", input ?? ""]);
-  } catch (error) {
-    if (_19.isError(error)) {
-      logger.error(`Failed to run shortcut: ${error.message}`);
-    } else {
-      logger.error(`Failed to run shortcut: ${shortcut}`);
-    }
-  }
-};
 
 // src/ui/main.ts
 var main_default = async () => {

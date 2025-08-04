@@ -1,10 +1,14 @@
+import { Key, keyboard } from "@nut-tree-fork/nut-js";
 import _ from "lodash";
 import { Command } from "../../catalog/types";
+import { getConfigOption } from "../../utils/getConfigOption";
 import { getFontName } from "../../utils/getFontName";
 import { getFontSize } from "../../utils/getFontSize";
 import { logger } from "../../utils/logger";
 import { SpawnCache } from "../../utils/SpawnCache";
 import { PromptResult } from "./types";
+
+const PROMPT = "Run a command or open an application";
 
 // Uses choose: https://github.com/chipsenkbeil/choose
 // brew install choose-gui
@@ -23,16 +27,24 @@ const choose = new SpawnCache("choose", [
   "-n",
   "30",
   "-p",
-  "Run a command or open an application",
+  PROMPT,
 ]);
+
+const triggerSuperwhisper = async () => {
+  await keyboard.type(Key.LeftCmd, Key.Space);
+};
 
 export default (commands: Command[]) =>
   new Promise<PromptResult>(async (resolve, reject) => {
     const choices = commands.map(({ title }) => title).join("\n");
-    const toShow = Math.min(30, _.size(commands));
-    const cmd = `choose -f "${getFontName()}" -b 000000 -c 222222 -w 30 -s ${getFontSize()} -m -n ${toShow} -p "Run a command or open an application"`;
 
-    const { stdout = "", stderr } = await choose.run(choices);
+    const chooseProcess = choose.run(choices);
+
+    if (getConfigOption("superwhisper", false)) {
+      await triggerSuperwhisper();
+    }
+
+    const { stdout = "", stderr } = await chooseProcess;
 
     if (stdout.trim().length > 0) {
       const query = _.trim(stdout);

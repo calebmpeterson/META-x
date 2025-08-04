@@ -1,20 +1,20 @@
 import _ from "lodash";
-import open from "open";
-import pressEnter from "../keystrokes/pressEnter";
-import prompt from "./prompt";
-import { ENTER } from "../keystrokes/constants";
-import { calculate, didCalculate } from "../utils/calculate";
 import { createRequire } from "module";
-import { getCommandFilename } from "../utils/getCommandFilename";
-import { getCommandsCatalog } from "../state/commands";
+import open from "open";
 import { getCurrentSelection, setClipboardContent } from "../clipboard/utils";
+import { ENTER } from "../keystrokes/constants";
+import pressEnter from "../keystrokes/pressEnter";
+import { getCommandsCatalog } from "../state/commands";
+import { calculate, didCalculate } from "../utils/calculate";
+import { createScriptContext } from "../utils/createScriptContext";
+import { getCommandFilename } from "../utils/getCommandFilename";
+import { invokeShortcut } from "../utils/invokeShortcut";
+import { isShortcutResult } from "../utils/isShortcutResult";
+import { logger } from "../utils/logger";
 import { processInvokeScriptResult } from "../utils/processInvokeScriptResult";
 import { showCalculationResultDialog } from "../utils/showCalculationResultDialog";
 import { stripKeystrokes } from "../utils/stripKeystrokes";
-import { isShortcutResult } from "../utils/isShortcutResult";
-import { invokeShortcut } from "../utils/invokeShortcut";
-import { createScriptContext } from "../utils/createScriptContext";
-import { logger } from "../utils/logger";
+import prompt from "./prompt";
 
 export default async () => {
   const selection = await getCurrentSelection();

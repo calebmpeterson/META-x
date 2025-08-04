@@ -34,7 +34,6 @@ skhd --start-service
 ```
 # ⌘SPACE to launch Meta-x on the current text selection in the active window
 alt - space: EDITOR=code ~/Tools/meta-x/bin/launch
-cmd - space: EDITOR=code ~/Tools/meta-x/bin/launch
 
 # CTRL+V to launch clipboard history
 ctrl - v: EDITOR=code ~/Tools/meta-x/bin/clipboard-history
@@ -52,6 +51,9 @@ All configuration options are contained in `~/.meta-x/config.json` (JSON/JSON5 s
 {
   // Command palette font size (default is 16)
   "font-size": "18",
+
+  // Trigger Superwhisper via CMD+Space
+  superwhisper: false,
 
   // Apps that will be omitted from the catalog
   ignored: [
