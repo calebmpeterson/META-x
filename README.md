@@ -146,11 +146,11 @@ module.exports.suggestions = () => {
 };
 ```
 
-#### Command Context
+#### Script Context
 
 In addition to the `selection`, each command function is invoked within the "command context".
 
-The "command context" API includes:
+The "script context" API includes:
 
 - [`_` the Lodash library](https://lodash.com/docs/)
 - [`open` API](https://www.npmjs.com/package/open) ↗
@@ -161,6 +161,7 @@ The "command context" API includes:
 - `choose(['option A', 'option B', 'option C'])` which returns a `Promise` that resolves to the selected option or `undefined` if nothing was selected.
 - `notify({ message: "Your message here" })` which displays an OS-level toast/notification with the given message.
 - `display(message, timeout?)` which displays a popover alert with an optional auto-dismiss timeout.
+- [`keyboard` and `Key`](https://nutjs.dev/docs/apidoc/keyboard)
 
 #### Using NPM Packages
 

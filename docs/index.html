@@ -133,9 +133,9 @@ module.exports.suggestions = () =&gt; {
   return ["suggestion one", "suggestion two", "suggestion three"];
 };
 </code></pre>
-<h4 id="commandcontext">Command Context</h4>
+<h4 id="scriptcontext">Script Context</h4>
 <p>In addition to the <code>selection</code>, each command function is invoked within the "command context".</p>
-<p>The "command context" API includes:</p>
+<p>The "script context" API includes:</p>
 <ul>
 <li><a href="https://lodash.com/docs/"><code>_</code> the Lodash library</a></li>
 <li><a href="https://www.npmjs.com/package/open"><code>open</code> API</a> ↗</li>
@@ -146,6 +146,7 @@ module.exports.suggestions = () =&gt; {
 <li><code>choose(['option A', 'option B', 'option C'])</code> which returns a <code>Promise</code> that resolves to the selected option or <code>undefined</code> if nothing was selected.</li>
 <li><code>notify({ message: "Your message here" })</code> which displays an OS-level toast/notification with the given message.</li>
 <li><code>display(message, timeout?)</code> which displays a popover alert with an optional auto-dismiss timeout.</li>
+<li><a href="https://nutjs.dev/docs/apidoc/keyboard"><code>keyboard</code> and <code>Key</code></a></li>
 </ul>
 <h4 id="usingnpmpackages">Using NPM Packages</h4>
 <p>You can use <code>npm</code> packages by simply installing them in your <code>~/.meta-x/</code> directory.</p>

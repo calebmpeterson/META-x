@@ -1,15 +1,16 @@
-import _ from "lodash";
+import { Key, keyboard } from "@nut-tree-fork/nut-js";
 import axios from "axios";
 import dotenv from "dotenv";
+import { $, execa } from "execa";
+import _ from "lodash";
+import { createRequire } from "module";
 import open from "open";
+import { runAppleScript } from "run-applescript";
 import { ENTER } from "../keystrokes/constants";
 import { choose } from "./choose";
-import { createRequire } from "module";
-import { execa, $ } from "execa";
 import { getConfigPath } from "./getConfigPath.js";
-import { runAppleScript } from "run-applescript";
-import { showNotification } from "./showNotification";
 import { invokeNativeTool } from "./invokeNativeTool";
+import { showNotification } from "./showNotification";
 
 export const createScriptContext = (
   commandFilename: string,
@@ -44,6 +45,9 @@ export const createScriptContext = (
     display: async (message: string, timeout?: string | number) => {
       await invokeNativeTool({ tool: "display.tool", message, timeout });
     },
+
+    keyboard,
+    Key,
   };
 
   return commandContext;
