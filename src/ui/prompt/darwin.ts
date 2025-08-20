@@ -1,8 +1,6 @@
-import { Key, keyboard } from "@nut-tree-fork/nut-js";
 import _ from "lodash";
 import { Command } from "../../catalog/types";
 import { UNKNOWN_COMMAND } from "../../catalog/unknown";
-import { getConfigOption } from "../../utils/getConfigOption";
 import { getFontName } from "../../utils/getFontName";
 import { getFontSize } from "../../utils/getFontSize";
 import { logger } from "../../utils/logger";
@@ -31,10 +29,6 @@ const choose = new SpawnCache("choose", [
   PROMPT,
 ]);
 
-const triggerSuperwhisper = async () => {
-  await keyboard.type(Key.LeftCmd, Key.Space);
-};
-
 export default (commands: Command[]) =>
   new Promise<PromptResult>(async (resolve, reject) => {
     const choices = commands
@@ -42,10 +36,6 @@ export default (commands: Command[]) =>
       .join("\n");
 
     const chooseProcess = choose.run(choices);
-
-    if (getConfigOption("superwhisper", false)) {
-      await triggerSuperwhisper();
-    }
 
     const { stdout = "", stderr } = await chooseProcess;
 

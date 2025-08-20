@@ -66,9 +66,6 @@ All configuration options are contained in `~/.meta-x/config.json` (JSON/JSON5 s
   // Command palette font size (default is 16)
   "font-size": "18",
 
-  // Trigger Superwhisper via CMD+Space
-  superwhisper: false,
-
   // Apps that will be omitted from the catalog
   ignored: [
     "Pref", // Will ignore any app including "Pref" (case sensitive)

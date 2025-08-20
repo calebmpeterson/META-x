@@ -283,6 +283,7 @@ var BUILT_IN_COMMANDS = {
   "Sentence Case": _5.capitalize,
   Capitalize: _5.capitalize,
   Deburr: _5.deburr,
+  "Pascal Case": (selection) => _5.upperFirst(_5.camelCase(selection)),
   // Multi-line transformations
   "Sort Lines": (selection) => _5.chain(selection).split("\n").sort().join("\n").value(),
   "Reverse Lines": (selection) => _5.chain(selection).split("\n").reverse().join("\n").value(),
@@ -563,10 +564,14 @@ import fs10 from "node:fs";
 import vm from "node:vm";
 
 // src/utils/createScriptContext.ts
-import _10 from "lodash";
+import { Key as Key3, keyboard as keyboard3 } from "@nut-tree-fork/nut-js";
 import axios from "axios";
 import dotenv from "dotenv";
+import { $, execa as execa3 } from "execa";
+import _10 from "lodash";
+import { createRequire } from "module";
 import open4 from "open";
+import { runAppleScript } from "run-applescript";
 
 // src/keystrokes/constants.ts
 var ENTER = "{ENTER}";
@@ -608,20 +613,6 @@ var choose = (items, options = {}) => new Promise((resolve) => {
   });
 });
 
-// src/utils/createScriptContext.ts
-import { createRequire } from "module";
-import { execa as execa3, $ } from "execa";
-import { runAppleScript } from "run-applescript";
-
-// src/utils/showNotification.ts
-import notifier from "node-notifier";
-var showNotification = ({ message }) => {
-  notifier.notify({
-    title: TITLE,
-    message
-  });
-};
-
 // src/utils/invokeNativeTool.ts
 import { execa as execa2 } from "execa";
 import _9 from "lodash";
@@ -650,6 +641,15 @@ var invokeNativeTool = async (invocation) => {
   }
 };
 
+// src/utils/showNotification.ts
+import notifier from "node-notifier";
+var showNotification = ({ message }) => {
+  notifier.notify({
+    title: TITLE,
+    message
+  });
+};
+
 // src/utils/createScriptContext.ts
 var createScriptContext = (commandFilename, selection) => {
   const require2 = createRequire(commandFilename);
@@ -674,10 +674,13 @@ var createScriptContext = (commandFilename, selection) => {
     choose,
     notify: showNotification,
     setTimeout,
+    delay,
     // Display a message to the user with an optional timeout
     display: async (message, timeout) => {
       await invokeNativeTool({ tool: "display.tool", message, timeout });
-    }
+    },
+    keyboard: keyboard3,
+    Key: Key3
   };
   return commandContext;
 };
@@ -952,12 +955,12 @@ var UNKNOWN_COMMAND = {
 };
 
 // src/keystrokes/pressEnter.ts
-import { keyboard as keyboard3, Key as Key3 } from "@nut-tree-fork/nut-js";
+import { keyboard as keyboard4, Key as Key4 } from "@nut-tree-fork/nut-js";
 var pressEnter_default = async () => {
   await delay(1e3);
-  await keyboard3.pressKey(Key3.Enter);
+  await keyboard4.pressKey(Key4.Enter);
   await delay(10);
-  await keyboard3.releaseKey(Key3.Enter);
+  await keyboard4.releaseKey(Key4.Enter);
 };
 
 // src/utils/calculate.ts
@@ -1007,7 +1010,6 @@ var showCalculationResultDialog = async (query, result) => {
 var stripKeystrokes = (text) => text.endsWith(ENTER) ? text.slice(0, -ENTER.length) : text;
 
 // src/ui/prompt/darwin.ts
-import { Key as Key4, keyboard as keyboard4 } from "@nut-tree-fork/nut-js";
 import _19 from "lodash";
 
 // src/utils/SpawnCache.ts
@@ -1086,15 +1088,9 @@ var choose2 = new SpawnCache("choose", [
   "-p",
   PROMPT
 ]);
-var triggerSuperwhisper = async () => {
-  await keyboard4.type(Key4.LeftCmd, Key4.Space);
-};
 var darwin_default3 = (commands) => new Promise(async (resolve, reject) => {
   const choices = commands.map(({ title, prefix }) => [prefix, title].filter(Boolean).join(" ")).join("\n");
   const chooseProcess = choose2.run(choices);
-  if (getConfigOption("superwhisper", false)) {
-    await triggerSuperwhisper();
-  }
   const { stdout = "", stderr } = await chooseProcess;
   if (stdout.trim().length > 0) {
     const query = _19.trim(stdout);

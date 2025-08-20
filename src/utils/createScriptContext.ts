@@ -11,6 +11,7 @@ import { choose } from "./choose";
 import { getConfigPath } from "./getConfigPath.js";
 import { invokeNativeTool } from "./invokeNativeTool";
 import { showNotification } from "./showNotification";
+import { delay } from "./delay";
 
 export const createScriptContext = (
   commandFilename: string,
@@ -40,6 +41,7 @@ export const createScriptContext = (
     choose,
     notify: showNotification,
     setTimeout,
+    delay,
 
     // Display a message to the user with an optional timeout
     display: async (message: string, timeout?: string | number) => {

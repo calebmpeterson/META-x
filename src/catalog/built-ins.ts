@@ -15,6 +15,8 @@ const BUILT_IN_COMMANDS = {
   Capitalize: _.capitalize,
   Deburr: _.deburr,
 
+  "Pascal Case": (selection: string) => _.upperFirst(_.camelCase(selection)),
+
   // Multi-line transformations
   "Sort Lines": (selection: string) =>
     _.chain(selection).split("\n").sort().join("\n").value(),
