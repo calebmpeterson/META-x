@@ -7,7 +7,7 @@ export const openInSystemEditor = async (
 ) => {
   if (process.env.EDITOR) {
     await execa(process.env.EDITOR, [
-      getPathnameWithExtension(pathname, extension),
+      '"' + getPathnameWithExtension(pathname, extension) + '"',
     ]);
   }
 };

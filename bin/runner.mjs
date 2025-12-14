@@ -350,7 +350,7 @@ var getPathnameWithExtension = (pathname, extension = ".js") => pathname.endsWit
 var openInSystemEditor = async (pathname, extension = ".js") => {
   if (process.env.EDITOR) {
     await execa(process.env.EDITOR, [
-      getPathnameWithExtension(pathname, extension)
+      '"' + getPathnameWithExtension(pathname, extension) + '"'
     ]);
   }
 };
