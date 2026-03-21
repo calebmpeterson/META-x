@@ -997,6 +997,29 @@ var invokeShortcut = async ({ shortcut, input }) => {
 import _18 from "lodash";
 var isShortcutResult = (result) => Boolean(result) && _18.isObject(result) && "shortcut" in result && _18.isString(result.shortcut);
 
+// src/utils/logSelection.ts
+import fs14 from "node:fs";
+var logSelection = (selection) => {
+  if ("isUnknown" in selection && selection.isUnknown) {
+    return;
+  }
+  const now = /* @__PURE__ */ new Date();
+  const date = [
+    now.getFullYear(),
+    String(now.getMonth() + 1).padStart(2, "0"),
+    String(now.getDate()).padStart(2, "0")
+  ].join(".");
+  const time = [now.getHours(), now.getMinutes()].map((part) => String(part).padStart(2, "0")).join(":");
+  const label = "title" in selection ? selection.title : "unknown";
+  const asCSV = `${date},${time},${label}`;
+  fs14.appendFile("./usage.log", `${asCSV}
+`, "utf8", (error) => {
+    if (error) {
+      logger.error("Failed to append selection to usage.log", error);
+    }
+  });
+};
+
 // src/utils/showCalculationResultDialog.ts
 var showCalculationResultDialog = async (query, result) => {
   invokeNativeTool({
@@ -1118,6 +1141,7 @@ var main_default = async (injected) => {
   const selection = await getCurrentSelection();
   const commands = getCommandsCatalog();
   const item = injected ? commands.find((command) => command.title === injected) ?? UNKNOWN_COMMAND : await prompt_default(commands);
+  logSelection(item);
   let result;
   const require2 = createRequire3(import.meta.url);
   Object.assign(global, { open: open6, require: require2 });

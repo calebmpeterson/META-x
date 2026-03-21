@@ -12,6 +12,7 @@ import { getCommandFilename } from "../utils/getCommandFilename";
 import { invokeShortcut } from "../utils/invokeShortcut";
 import { isShortcutResult } from "../utils/isShortcutResult";
 import { logger } from "../utils/logger";
+import { logSelection } from "../utils/logSelection";
 import { processInvokeScriptResult } from "../utils/processInvokeScriptResult";
 import { showCalculationResultDialog } from "../utils/showCalculationResultDialog";
 import { stripKeystrokes } from "../utils/stripKeystrokes";
@@ -26,6 +27,8 @@ export default async (injected?: string) => {
     ? (commands.find((command) => command.title === injected) ??
       UNKNOWN_COMMAND)
     : await prompt(commands);
+
+  logSelection(item);
 
   let result;
 
@@ -67,7 +70,7 @@ export default async (injected?: string) => {
         const resultFromFallback = fallbackHandler.call(
           commandContext,
           selection,
-          item.query
+          item.query,
         );
 
         if (!_.isUndefined(resultFromFallback)) {
