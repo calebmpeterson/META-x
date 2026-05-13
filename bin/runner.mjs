@@ -620,6 +620,9 @@ import path6 from "path";
 var isDisplayToolInvocation = (invocation) => {
   return invocation.tool === "display.tool";
 };
+var isPromptToolInvocation = (invocation) => {
+  return invocation.tool === "prompt.tool";
+};
 var invokeNativeTool = async (invocation) => {
   const toolDirectory = path6.join(process.cwd(), "bin", "tools");
   const toolExecutable = path6.join(toolDirectory, invocation.tool);
@@ -629,6 +632,17 @@ var invokeNativeTool = async (invocation) => {
         ...invocation.timeout ? ["--timeout", String(invocation.timeout)] : [],
         invocation.message
       ]);
+    } else if (isPromptToolInvocation(invocation)) {
+      const args = Object.entries(invocation.fields).flatMap(
+        ([label, kind]) => [`--${kind}`, label]
+      );
+      const { stdout, exitCode } = await execa2(toolExecutable, args, {
+        reject: false
+      });
+      if (exitCode !== 0 || !stdout.trim()) {
+        return void 0;
+      }
+      return JSON.parse(stdout);
     } else {
       await execa2("shortcuts", ["run", invocation.tool]);
     }
@@ -678,6 +692,11 @@ var createScriptContext = (commandFilename, selection) => {
     // Display a message to the user with an optional timeout
     display: async (message, timeout) => {
       await invokeNativeTool({ tool: "display.tool", message, timeout });
+    },
+    // Prompt the user for one or more inputs and resolve to an object
+    // keyed by label, or undefined if the prompt is dismissed.
+    prompt: async (fields) => {
+      return await invokeNativeTool({ tool: "prompt.tool", fields });
     },
     keyboard: keyboard3,
     Key: Key3

@@ -158,6 +158,7 @@ The "script context" API includes:
 - `choose(['option A', 'option B', 'option C'])` which returns a `Promise` that resolves to the selected option or `undefined` if nothing was selected.
 - `notify({ message: "Your message here" })` which displays an OS-level toast/notification with the given message.
 - `display(message, timeout?)` which displays a popover alert with an optional auto-dismiss timeout.
+- `prompt({ Label: 'string' | 'text', ... })` which displays a popover with vertically stacked inputs in the given order and resolves to an object keyed by label, or `undefined` if dismissed. Press `Shift+Enter` to submit (`Enter` alone inserts a newline in `text` fields).
 - [`keyboard` and `Key`](https://nutjs.dev/docs/apidoc/keyboard)
 
 #### Using NPM Packages
@@ -192,3 +193,4 @@ Issues and Pull Requests are welcome!
 - [x] Add support for omitting applications and system preferences
 - [x] Add support for directly invoking a custom command from the launch CLI (e.g. `~/Tools/meta-x/bin/launch "My Custom Command"`)
 - [ ] Add a progress indicator for async commands
+- [ ] Add the ability to launch snippet-only selection

@@ -13,4 +13,14 @@ export type DisplayToolInvocation = {
   timeout?: string | number;
 };
 
-export type ToolInvocation = GenericToolInvocation | DisplayToolInvocation;
+export type PromptFieldKind = "string" | "text";
+
+export type PromptToolInvocation = {
+  tool: "prompt.tool";
+  fields: Record<string, PromptFieldKind>;
+};
+
+export type ToolInvocation =
+  | GenericToolInvocation
+  | DisplayToolInvocation
+  | PromptToolInvocation;

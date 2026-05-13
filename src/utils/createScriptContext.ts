@@ -15,7 +15,7 @@ import { delay } from "./delay";
 
 export const createScriptContext = (
   commandFilename: string,
-  selection: string
+  selection: string,
 ) => {
   const require = createRequire(commandFilename);
 
@@ -46,6 +46,12 @@ export const createScriptContext = (
     // Display a message to the user with an optional timeout
     display: async (message: string, timeout?: string | number) => {
       await invokeNativeTool({ tool: "display.tool", message, timeout });
+    },
+
+    // Prompt the user for one or more inputs and resolve to an object
+    // keyed by label, or undefined if the prompt is dismissed.
+    prompt: async (fields: Record<string, "string" | "text">) => {
+      return await invokeNativeTool({ tool: "prompt.tool", fields });
     },
 
     keyboard,
