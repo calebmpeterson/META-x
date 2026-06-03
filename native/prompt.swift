@@ -26,8 +26,8 @@ class KeyableWindow: NSWindow {
             case "x": return NSApp.sendAction(#selector(NSText.cut(_:)),        to: nil, from: nil)
             case "c": return NSApp.sendAction(#selector(NSText.copy(_:)),       to: nil, from: nil)
             case "a": return NSApp.sendAction(#selector(NSText.selectAll(_:)),  to: nil, from: nil)
-            case "z": return NSApp.sendAction(#selector(UndoManager.undo),      to: nil, from: nil)
-            case "Z": return NSApp.sendAction(#selector(UndoManager.redo),      to: nil, from: nil)
+            case "z": return NSApp.sendAction(Selector(("undo:")), to: nil, from: nil)
+            case "Z": return NSApp.sendAction(Selector(("redo:")), to: nil, from: nil)
             default: break
             }
         }
