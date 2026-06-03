@@ -18,6 +18,21 @@ class DraggableView: NSView {
 class KeyableWindow: NSWindow {
     override var canBecomeKey: Bool { true }
     override var canBecomeMain: Bool { true }
+
+    override func performKeyEquivalent(with event: NSEvent) -> Bool {
+        if event.modifierFlags.contains(.command) {
+            switch event.charactersIgnoringModifiers {
+            case "v": return NSApp.sendAction(#selector(NSText.paste(_:)),      to: nil, from: nil)
+            case "x": return NSApp.sendAction(#selector(NSText.cut(_:)),        to: nil, from: nil)
+            case "c": return NSApp.sendAction(#selector(NSText.copy(_:)),       to: nil, from: nil)
+            case "a": return NSApp.sendAction(#selector(NSText.selectAll(_:)),  to: nil, from: nil)
+            case "z": return NSApp.sendAction(#selector(UndoManager.undo),      to: nil, from: nil)
+            case "Z": return NSApp.sendAction(#selector(UndoManager.redo),      to: nil, from: nil)
+            default: break
+            }
+        }
+        return super.performKeyEquivalent(with: event)
+    }
 }
 
 // A multi-line NSTextField. Reuses the standard rounded text-field control so
