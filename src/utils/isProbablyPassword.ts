@@ -10,5 +10,6 @@ export const isProbablyPassword = (text: string) => {
   if (hasDigit) score++;
   if (hasSpecialChar) score++;
 
-  return score >= 3 && !text.startsWith("https://");
+  const hasWordBoundaries = /\s/.test(text);
+  return score >= 3 && !text.startsWith("https://") && !hasWordBoundaries;
 };
