@@ -14,6 +14,8 @@
     "build": "yarn typecheck:runner && yarn build:runner && yarn build:native",
     "docs:build": "node scripts/build-docs.mjs",
     "postinstall": "yarn build",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "tail-logs": "tail -f /tmp/skhd_$USER.out.log",
     "tail-errors": "tail -f /tmp/skhd_$USER.err.log"
   },
@@ -25,7 +27,8 @@
     "esbuild": "^0.23.0",
     "prettier": "^3.3.3",
     "showdown": "^1.9.1",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "vitest": "^4.1.9"
   },
   "dependencies": {
     "@nut-tree-fork/nut-js": "^4.2.6",
