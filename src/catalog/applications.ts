@@ -1,4 +1,5 @@
-import fs from "fs";
+import { accessSync, constants, readdirSync, readFileSync, statSync } from "fs";
+import { writeFile } from "fs/promises";
 import _ from "lodash";
 import { openApp } from "open";
 import path from "path";
@@ -12,7 +13,7 @@ const getApplicationUsageHistory = () =>
   path.join(getConfigDir(), ".application-usage");
 
 const persistApplicationUsage = (values: string[]) => {
-  fs.writeFileSync(
+  void writeFile(
     getApplicationUsageHistory(),
     _.takeRight(values, 100).join("\n"),
     "utf8"
@@ -21,7 +22,7 @@ const persistApplicationUsage = (values: string[]) => {
 
 const restoreApplicationUsage = () => {
   try {
-    return fs.readFileSync(getApplicationUsageHistory(), "utf8").split("\n");
+    return readFileSync(getApplicationUsageHistory(), "utf8").split("\n");
   } catch {
     // The file doesn't exist yet
     return [];
@@ -42,18 +43,17 @@ export const getApplications = (
   const scores = _.countBy(history, _.identity);
   const ignored = getConfigOption("ignored", DEFAULT_IGNORED);
 
-  const applications = fs
-    .readdirSync(rootDir)
+  const applications = readdirSync(rootDir)
     .filter((filename) => {
       const pathname = path.join(rootDir, filename);
-      const stats = fs.statSync(pathname);
+      const stats = statSync(pathname);
       if (stats.isDirectory() && !filename.endsWith(".app")) {
         return false;
       }
 
       try {
         // If this doesn't throw, then the file is executable
-        fs.accessSync(pathname, fs.constants.X_OK);
+        accessSync(pathname, constants.X_OK);
         return true;
       } catch {
         return false;
