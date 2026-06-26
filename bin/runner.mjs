@@ -588,7 +588,7 @@ import { $, execa as execa3 } from "execa";
 import _10 from "lodash";
 import { createRequire } from "module";
 import open4 from "open";
-import { runAppleScript } from "run-applescript";
+import { runAppleScript as runAppleScript2 } from "run-applescript";
 
 // src/keystrokes/constants.ts
 var ENTER = "{ENTER}";
@@ -673,12 +673,16 @@ var invokeNativeTool = async (invocation) => {
 };
 
 // src/utils/showNotification.ts
-import notifier from "node-notifier";
-var showNotification = ({ message }) => {
-  notifier.notify({
-    title: TITLE,
-    message
-  });
+import { runAppleScript } from "run-applescript";
+var escape = (s) => s.replaceAll("\\", "\\\\").replaceAll('"', '\\"');
+var showNotification = ({
+  message,
+  title = TITLE,
+  subtitle
+}) => {
+  let script = `display notification "${escape(message)}" with title "${escape(title)}"`;
+  if (subtitle) script += ` subtitle "${escape(subtitle)}"`;
+  runAppleScript(script);
 };
 
 // src/utils/createScriptContext.ts
@@ -701,7 +705,7 @@ var createScriptContext = (commandFilename, selection) => {
     ENTER,
     execa: execa3,
     $,
-    osascript: runAppleScript,
+    osascript: runAppleScript2,
     choose,
     notify: showNotification,
     setTimeout,
