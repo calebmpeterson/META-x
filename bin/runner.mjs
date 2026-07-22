@@ -387,7 +387,7 @@ var getManageCommands = () => [
   },
   {
     prefix: CONFIGURE_PREFIX,
-    title: `Configure`,
+    title: `Configure ${TITLE}`,
     invoke: async () => {
       openInSystemEditor(CONFIG_FILENAME, "");
     }
@@ -680,8 +680,7 @@ var showNotification = ({
   title = TITLE,
   subtitle
 }) => {
-  let script = `display notification "${escape(message)}" with title "${escape(title)}"`;
-  if (subtitle) script += ` subtitle "${escape(subtitle)}"`;
+  const script = subtitle ? `display notification "${escape(message)}" with title "${escape(title)}" subtitle "${escape(subtitle)}"` : `display notification "${escape(message)}" with title "${escape(title)}"`;
   runAppleScript(script);
 };
 

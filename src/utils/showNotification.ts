@@ -14,7 +14,8 @@ export const showNotification = ({
   title = TITLE,
   subtitle,
 }: Options) => {
-  let script = `display notification "${escape(message)}" with title "${escape(title)}"`;
-  if (subtitle) script += ` subtitle "${escape(subtitle)}"`;
+  const script = subtitle
+    ? `display notification "${escape(message)}" with title "${escape(title)}" subtitle "${escape(subtitle)}"`
+    : `display notification "${escape(message)}" with title "${escape(title)}"`;
   runAppleScript(script);
 };
