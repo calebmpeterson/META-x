@@ -24,7 +24,7 @@ const spinner = ora({
 
 const promptForAndRunCommand = async (injected?: string) => {
   try {
-    logger.log("─".repeat(process.stdout.columns ?? 80));
+    logger.break();
     logger.log("Meta-x triggered");
 
     await prepareClipboard();

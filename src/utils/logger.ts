@@ -8,8 +8,12 @@ const logger = {
     console.log(
       chalk.grey(`⚙︎`),
       chalk.grey(first),
-      ...rest.map((arg) => arg.toString())
+      ...rest.map((arg) => arg.toString()),
     );
+  },
+
+  break: () => {
+    console.log(chalk.grey("─".repeat(process.stdout.columns ?? 80)));
   },
 
   warn: (...args: Parameters<typeof console.warn>) => {
@@ -17,7 +21,7 @@ const logger = {
     console.warn(
       chalk.yellow(`⚠︎`),
       chalk.yellow(first),
-      ...rest.map((arg) => arg.toString())
+      ...rest.map((arg) => arg.toString()),
     );
   },
 
@@ -26,7 +30,7 @@ const logger = {
     console.error(
       chalk.red(`✸`),
       chalk.red(first),
-      ...rest.map((arg) => arg.toString())
+      ...rest.map((arg) => arg.toString()),
     );
   },
 };

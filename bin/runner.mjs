@@ -81,6 +81,9 @@ var logger = {
       ...rest.map((arg) => arg.toString())
     );
   },
+  break: () => {
+    console.log(chalk.grey("\u2500".repeat(process.stdout.columns ?? 80)));
+  },
   warn: (...args) => {
     const [first, ...rest] = args;
     console.warn(
@@ -366,9 +369,12 @@ var getPathnameWithExtension = (pathname, extension = ".js") => pathname.endsWit
 // src/utils/openInSystemEditor.ts
 var openInSystemEditor = async (pathname, extension = ".js") => {
   if (process.env.EDITOR) {
-    await execa(process.env.EDITOR, [
-      '"' + getPathnameWithExtension(pathname, extension) + '"'
-    ]);
+    const completedPathname = getPathnameWithExtension(pathname, extension);
+    const safePathname = completedPathname.includes(" ") ? `"${completedPathname}"` : completedPathname;
+    logger.info(`Opening ${pathname} in ${process.env.EDITOR}`);
+    await execa(process.env.EDITOR, [safePathname]);
+  } else {
+    logger.error("EDITOR is not set");
   }
 };
 
@@ -689,12 +695,16 @@ var createScriptContext = (commandFilename, selection) => {
   const require2 = createRequire(commandFilename);
   const ENV = {};
   dotenv.config({ path: getConfigPath(".env"), processEnv: ENV });
+  const edit = async (pathname) => {
+    await openInSystemEditor(pathname, "");
+  };
   const commandContext = {
     _: _10,
     selection,
     require: require2,
     console,
     open: open4,
+    edit,
     get: axios.get,
     post: axios.post,
     put: axios.put,
@@ -1246,7 +1256,7 @@ var spinner = ora({
 });
 var promptForAndRunCommand = async (injected) => {
   try {
-    logger.log("\u2500".repeat(process.stdout.columns ?? 80));
+    logger.break();
     logger.log("Meta-x triggered");
     await prepare_default();
     const result = await main_default(injected);

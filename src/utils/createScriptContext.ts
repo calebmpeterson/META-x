@@ -12,6 +12,7 @@ import { getConfigPath } from "./getConfigPath.js";
 import { invokeNativeTool } from "./invokeNativeTool";
 import { showNotification } from "./showNotification";
 import { delay } from "./delay";
+import { openInSystemEditor } from "./openInSystemEditor";
 
 export const createScriptContext = (
   commandFilename: string,
@@ -22,12 +23,17 @@ export const createScriptContext = (
   const ENV = {};
   dotenv.config({ path: getConfigPath(".env"), processEnv: ENV });
 
+  const edit = async (pathname: string) => {
+    await openInSystemEditor(pathname, "");
+  };
+
   const commandContext = {
     _,
     selection,
     require,
     console,
     open,
+    edit,
     get: axios.get,
     post: axios.post,
     put: axios.put,
