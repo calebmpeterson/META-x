@@ -1,4 +1,4 @@
-import cocoaDialog from "cocoa-dialog";
+import { invokeNativeTool } from "./invokeNativeTool.js";
 import { openInSystemEditor } from "./openInSystemEditor.js";
 import _ from "lodash";
 
@@ -7,16 +7,15 @@ export const showCommandErrorDialog = async (
   error: unknown
 ) => {
   if (_.isError(error)) {
-    const result = await cocoaDialog("textbox", {
+    const result = await invokeNativeTool({
+      tool: "alert.tool",
       title: `Error in ${commandFilename}`,
-      text: error.stack,
-      height: 200,
-      width: 600,
+      text: error.stack ?? error.message,
       button1: "Edit",
       button2: "Dismiss",
     });
 
-    if (result === "1") {
+    if (result?.button === "Edit") {
       await openInSystemEditor(commandFilename);
     }
   }

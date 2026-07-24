@@ -1,5 +1,5 @@
 // src/runner.ts
-import _21 from "lodash";
+import _19 from "lodash";
 import ora from "ora";
 
 // src/clipboard/finish/darwin.ts
@@ -179,7 +179,7 @@ var listen = (onMessage) => {
 };
 
 // src/utils/getAllCommands.ts
-import _15 from "lodash";
+import _13 from "lodash";
 import { createRequire as createRequire2 } from "node:module";
 
 // src/catalog/applications.ts
@@ -401,8 +401,6 @@ var getManageCommands = () => [
 ];
 
 // src/catalog/manage-scripts.ts
-import cocoaDialog from "cocoa-dialog";
-import _6 from "lodash";
 import fs6 from "node:fs";
 import open2 from "open";
 
@@ -455,6 +453,90 @@ var ensureEmptyFallbackHandler = () => {
   }
 };
 
+// src/utils/invokeNativeTool.ts
+import { execa as execa2 } from "execa";
+import _6 from "lodash";
+import path6 from "path";
+var isDisplayToolInvocation = (invocation) => {
+  return invocation.tool === "display.tool";
+};
+var isPromptToolInvocation = (invocation) => {
+  return invocation.tool === "prompt.tool";
+};
+var isFileToolInvocation = (invocation) => {
+  return invocation.tool === "file.tool";
+};
+var isAlertToolInvocation = (invocation) => {
+  return invocation.tool === "alert.tool";
+};
+var invokeNativeTool = async (invocation) => {
+  const toolDirectory = path6.join(process.cwd(), "bin", "tools");
+  const toolExecutable = path6.join(toolDirectory, invocation.tool);
+  try {
+    if (isDisplayToolInvocation(invocation)) {
+      await execa2(toolExecutable, [
+        ...invocation.timeout ? ["--timeout", String(invocation.timeout)] : [],
+        invocation.message
+      ]);
+    } else if (isPromptToolInvocation(invocation)) {
+      const args = Object.entries(invocation.fields).flatMap(
+        ([label, kind]) => [`--${kind}`, label]
+      );
+      const { stdout, exitCode } = await execa2(toolExecutable, args, {
+        reject: false
+      });
+      if (exitCode !== 0 || !stdout.trim()) {
+        return void 0;
+      }
+      return JSON.parse(stdout);
+    } else if (isFileToolInvocation(invocation)) {
+      const { stdout, exitCode } = await execa2(
+        toolExecutable,
+        [
+          "--mode",
+          invocation.mode,
+          "--title",
+          invocation.title,
+          "--directory",
+          invocation.directory
+        ],
+        { reject: false }
+      );
+      if (exitCode !== 0 || !stdout.trim()) {
+        return void 0;
+      }
+      return { path: stdout.trim() };
+    } else if (isAlertToolInvocation(invocation)) {
+      const { stdout, exitCode } = await execa2(
+        toolExecutable,
+        [
+          "--title",
+          invocation.title,
+          "--text",
+          invocation.text,
+          "--button1",
+          invocation.button1,
+          "--button2",
+          invocation.button2
+        ],
+        { reject: false }
+      );
+      if (exitCode !== 0 || !stdout.trim()) {
+        return void 0;
+      }
+      return { button: stdout.trim() };
+    } else {
+      await execa2("shortcuts", ["run", invocation.tool]);
+    }
+  } catch (error) {
+    if (_6.isError(error)) {
+      logger.error(`Failed to run tool: ${error.message}`);
+    } else {
+      logger.error(`Failed to run tool: ${invocation.tool}`);
+    }
+  }
+};
+
 // src/catalog/manage-scripts.ts
 if (!fs6.existsSync(SCRIPTS_DIR)) {
   fs6.mkdirSync(SCRIPTS_DIR, { recursive: true });
@@ -471,13 +553,16 @@ var getManageScriptCommands = () => [
     prefix: MANAGE_SCRIPTS_PREFIX,
     title: `Create Script`,
     invoke: async () => {
-      const result = await cocoaDialog("filesave", {
+      const result = await invokeNativeTool({
+        tool: "file.tool",
+        mode: "save",
         title: "Save Script As...",
-        withDirectory: SCRIPTS_DIR
+        directory: SCRIPTS_DIR
       });
-      if (!_6.isEmpty(result)) {
-        createEmptyScript(result);
-        await openInSystemEditor(result);
+      const scriptFilename = result?.path;
+      if (scriptFilename) {
+        createEmptyScript(scriptFilename);
+        await openInSystemEditor(scriptFilename);
       }
     }
   },
@@ -485,12 +570,15 @@ var getManageScriptCommands = () => [
     prefix: MANAGE_SCRIPTS_PREFIX,
     title: `Edit Script`,
     invoke: async () => {
-      const result = await cocoaDialog("fileselect", {
+      const result = await invokeNativeTool({
+        tool: "file.tool",
+        mode: "open",
         title: "Choose Script To Edit...",
-        withDirectory: SCRIPTS_DIR
+        directory: SCRIPTS_DIR
       });
-      if (!_6.isEmpty(result)) {
-        await openInSystemEditor(result);
+      const scriptFilename = result?.path;
+      if (scriptFilename) {
+        await openInSystemEditor(scriptFilename);
       }
     }
   },
@@ -513,8 +601,6 @@ var getManageScriptCommands = () => [
 ];
 
 // src/catalog/manage-snippets.ts
-import cocoaDialog2 from "cocoa-dialog";
-import _7 from "lodash";
 import fs8 from "node:fs";
 import open3 from "open";
 
@@ -542,13 +628,16 @@ var getManageSnippetCommands = () => [
     prefix: MANAGE_SNIPPETS_PREFIX,
     title: `Create Snippet`,
     invoke: async () => {
-      const result = await cocoaDialog2("filesave", {
+      const result = await invokeNativeTool({
+        tool: "file.tool",
+        mode: "save",
         title: "Save Snippet As...",
-        withDirectory: SNIPPETS_DIR
+        directory: SNIPPETS_DIR
       });
-      if (!_7.isEmpty(result)) {
-        createEmptySnippet(result);
-        await openInSystemEditor(result, SNIPPET_EXTENSION);
+      const snippetFilename = result?.path;
+      if (snippetFilename) {
+        createEmptySnippet(snippetFilename);
+        await openInSystemEditor(snippetFilename, SNIPPET_EXTENSION);
       }
     }
   },
@@ -556,12 +645,15 @@ var getManageSnippetCommands = () => [
     prefix: MANAGE_SNIPPETS_PREFIX,
     title: `Edit Snippet`,
     invoke: async () => {
-      const result = await cocoaDialog2("fileselect", {
+      const result = await invokeNativeTool({
+        tool: "file.tool",
+        mode: "open",
         title: "Choose Snippet To Edit...",
-        withDirectory: SNIPPETS_DIR
+        directory: SNIPPETS_DIR
       });
-      if (!_7.isEmpty(result)) {
-        await openInSystemEditor(result, SNIPPET_EXTENSION);
+      const snippetFilename = result?.path;
+      if (snippetFilename) {
+        await openInSystemEditor(snippetFilename, SNIPPET_EXTENSION);
       }
     }
   },
@@ -582,7 +674,7 @@ import { basename } from "node:path";
 var getCommandTitle = (commandFilename) => basename(commandFilename, ".js");
 
 // src/utils/invokeScript.ts
-import _13 from "lodash";
+import _11 from "lodash";
 import fs9 from "node:fs";
 import vm from "node:vm";
 
@@ -591,7 +683,7 @@ import { Key as Key3, keyboard as keyboard3 } from "@nut-tree-fork/nut-js";
 import axios from "axios";
 import dotenv from "dotenv";
 import { $, execa as execa3 } from "execa";
-import _10 from "lodash";
+import _8 from "lodash";
 import { createRequire } from "module";
 import open4 from "open";
 import { runAppleScript as runAppleScript2 } from "run-applescript";
@@ -601,7 +693,7 @@ var ENTER = "{ENTER}";
 
 // src/utils/choose.ts
 import { exec } from "child_process";
-import _8 from "lodash";
+import _7 from "lodash";
 
 // src/utils/getFontName.ts
 var getFontName = () => "FiraCode Nerd Font";
@@ -614,7 +706,7 @@ var getFontSize = () => getConfigOption(CONFIG_FONT_SIZE_KEY, DEFAULT_FONT_SIZE)
 // src/utils/choose.ts
 var choose = (items, options = {}) => new Promise((resolve) => {
   const choices = items.join("\n");
-  const toShow = Math.max(5, Math.min(40, _8.size(items)));
+  const toShow = Math.max(5, Math.min(40, _7.size(items)));
   const outputConfig = [
     options.returnIndex ? "-i" : "",
     options.placeholder ? `-p "${options.placeholder}"` : ""
@@ -622,7 +714,7 @@ var choose = (items, options = {}) => new Promise((resolve) => {
   const cmd = `echo "${choices}" | choose -f "${getFontName()}" -b 000000 -c 222222 -w 30 -s ${getFontSize()} -m -n ${toShow} ${outputConfig}`;
   exec(cmd, (error, stdout, stderr) => {
     if (stdout) {
-      const selection = _8.trim(stdout);
+      const selection = _7.trim(stdout);
       if (options.returnIndex && selection === "-1") {
         resolve(void 0);
       }
@@ -635,48 +727,6 @@ var choose = (items, options = {}) => new Promise((resolve) => {
     }
   });
 });
-
-// src/utils/invokeNativeTool.ts
-import { execa as execa2 } from "execa";
-import _9 from "lodash";
-import path6 from "path";
-var isDisplayToolInvocation = (invocation) => {
-  return invocation.tool === "display.tool";
-};
-var isPromptToolInvocation = (invocation) => {
-  return invocation.tool === "prompt.tool";
-};
-var invokeNativeTool = async (invocation) => {
-  const toolDirectory = path6.join(process.cwd(), "bin", "tools");
-  const toolExecutable = path6.join(toolDirectory, invocation.tool);
-  try {
-    if (isDisplayToolInvocation(invocation)) {
-      await execa2(toolExecutable, [
-        ...invocation.timeout ? ["--timeout", String(invocation.timeout)] : [],
-        invocation.message
-      ]);
-    } else if (isPromptToolInvocation(invocation)) {
-      const args = Object.entries(invocation.fields).flatMap(
-        ([label, kind]) => [`--${kind}`, label]
-      );
-      const { stdout, exitCode } = await execa2(toolExecutable, args, {
-        reject: false
-      });
-      if (exitCode !== 0 || !stdout.trim()) {
-        return void 0;
-      }
-      return JSON.parse(stdout);
-    } else {
-      await execa2("shortcuts", ["run", invocation.tool]);
-    }
-  } catch (error) {
-    if (_9.isError(error)) {
-      logger.error(`Failed to run tool: ${error.message}`);
-    } else {
-      logger.error(`Failed to run tool: ${invocation.tool}`);
-    }
-  }
-};
 
 // src/utils/showNotification.ts
 import { runAppleScript } from "run-applescript";
@@ -699,7 +749,7 @@ var createScriptContext = (commandFilename, selection) => {
     await openInSystemEditor(pathname, "");
   };
   const commandContext = {
-    _: _10,
+    _: _8,
     selection,
     require: require2,
     console,
@@ -735,23 +785,21 @@ var createScriptContext = (commandFilename, selection) => {
 };
 
 // src/utils/processInvokeScriptResult.ts
-import _11 from "lodash";
-var processInvokeScriptResult = (result) => _11.isArray(result) || _11.isObject(result) ? result : _11.toString(result);
+import _9 from "lodash";
+var processInvokeScriptResult = (result) => _9.isArray(result) || _9.isObject(result) ? result : _9.toString(result);
 
 // src/utils/showCommandErrorDialog.ts
-import cocoaDialog3 from "cocoa-dialog";
-import _12 from "lodash";
+import _10 from "lodash";
 var showCommandErrorDialog = async (commandFilename, error) => {
-  if (_12.isError(error)) {
-    const result = await cocoaDialog3("textbox", {
+  if (_10.isError(error)) {
+    const result = await invokeNativeTool({
+      tool: "alert.tool",
       title: `Error in ${commandFilename}`,
-      text: error.stack,
-      height: 200,
-      width: 600,
+      text: error.stack ?? error.message,
       button1: "Edit",
       button2: "Dismiss"
     });
-    if (result === "1") {
+    if (result?.button === "Edit") {
       await openInSystemEditor(commandFilename);
     }
   }
@@ -778,7 +826,7 @@ var invokeScript = async (commandFilename, selection) => {
     const wrappedCommandSource = wrapCommandSource(commandSource);
     const commandScript = new vm.Script(wrappedCommandSource);
     const result = await commandScript.runInNewContext(commandContext);
-    if (!_13.isUndefined(result)) {
+    if (!_11.isUndefined(result)) {
       return processInvokeScriptResult(result);
     }
   } catch (error) {
@@ -803,7 +851,7 @@ var getScriptCommands = () => fs10.readdirSync(SCRIPTS_DIR).filter(
 
 // src/catalog/shortcuts.ts
 import { execaSync } from "execa";
-import _14 from "lodash";
+import _12 from "lodash";
 var getShortcuts = () => {
   try {
     const shortcuts = execaSync("shortcuts", ["list"]).stdout.split("\n").filter(Boolean).map((shortcut) => {
@@ -814,7 +862,7 @@ var getShortcuts = () => {
           try {
             execaSync("shortcuts", ["run", shortcut]);
           } catch (error) {
-            if (_14.isError(error)) {
+            if (_12.isError(error)) {
               logger.error(`Failed to run shortcut: ${error.message}`);
             }
           }
@@ -823,7 +871,7 @@ var getShortcuts = () => {
     });
     return shortcuts;
   } catch (error) {
-    if (_14.isError(error)) {
+    if (_12.isError(error)) {
       logger.error(`Failed to get shortcuts: ${error.message}`);
     }
     return [];
@@ -919,7 +967,7 @@ var getCommandsFromFallbackHandler = () => {
       isFallback: true
     }));
   } catch (e) {
-    if (_15.isError(e)) {
+    if (_13.isError(e)) {
       logger.error(`Failed to run fallback handler: ${e.message}`);
     }
     return [];
@@ -929,7 +977,7 @@ var commandComparator = ({ title }) => title;
 var applicationComparator = ({ score }) => -score;
 var getAllCommands = clock("getAllCommands", () => {
   const allCommands = [
-    ..._15.sortBy(
+    ..._13.sortBy(
       [...getScriptCommands(), ...getBuiltInCommands()],
       commandComparator
     ),
@@ -939,7 +987,7 @@ var getAllCommands = clock("getAllCommands", () => {
     ...getManageCommands(),
     ...getFolders(),
     ...getShortcuts(),
-    ..._15.chain([
+    ..._13.chain([
       // Applications can live in multiple locations on macOS
       // Source: https://unix.stackexchange.com/a/583843
       ...getApplications("/Applications"),
@@ -969,17 +1017,17 @@ var rebuildCatalog = () => {
 };
 
 // src/ui/clipboard-history/index.ts
-import _16 from "lodash";
+import _14 from "lodash";
 var formatHistoryEntry = (entry) => {
-  const firstLine = entry.includes("\n") ? _16.truncate(
-    entry.split("\n").find((line) => !_16.isEmpty(line)),
+  const firstLine = entry.includes("\n") ? _14.truncate(
+    entry.split("\n").find((line) => !_14.isEmpty(line)),
     { length: 50 }
-  ) : _16.truncate(entry, { length: 50 });
-  return _16.trim(firstLine);
+  ) : _14.truncate(entry, { length: 50 });
+  return _14.trim(firstLine);
 };
 var runClipboardHistory = async () => {
   const history = getClipboardHistory();
-  const historyItems = _16.map(history, (entry) => formatHistoryEntry(entry));
+  const historyItems = _14.map(history, (entry) => formatHistoryEntry(entry));
   const index = await choose(historyItems, {
     returnIndex: true,
     placeholder: "Clipboard history"
@@ -995,7 +1043,7 @@ var runClipboardHistory = async () => {
 };
 
 // src/ui/main.ts
-import _20 from "lodash";
+import _18 from "lodash";
 import { createRequire as createRequire3 } from "module";
 import open6 from "open";
 
@@ -1030,12 +1078,12 @@ var didCalculate = (result) => result !== INCALCULABLE;
 
 // src/utils/invokeShortcut.ts
 import { execa as execa5 } from "execa";
-import _17 from "lodash";
+import _15 from "lodash";
 var invokeShortcut = async ({ shortcut, input }) => {
   try {
     await execa5("shortcuts", ["run", shortcut, "-i", input ?? ""]);
   } catch (error) {
-    if (_17.isError(error)) {
+    if (_15.isError(error)) {
       logger.error(`Failed to run shortcut: ${error.message}`);
     } else {
       logger.error(`Failed to run shortcut: ${shortcut}`);
@@ -1044,8 +1092,8 @@ var invokeShortcut = async ({ shortcut, input }) => {
 };
 
 // src/utils/isShortcutResult.ts
-import _18 from "lodash";
-var isShortcutResult = (result) => Boolean(result) && _18.isObject(result) && "shortcut" in result && _18.isString(result.shortcut);
+import _16 from "lodash";
+var isShortcutResult = (result) => Boolean(result) && _16.isObject(result) && "shortcut" in result && _16.isString(result.shortcut);
 
 // src/utils/logSelection.ts
 import fs13 from "node:fs";
@@ -1083,7 +1131,7 @@ var showCalculationResultDialog = async (query, result) => {
 var stripKeystrokes = (text) => text.endsWith(ENTER) ? text.slice(0, -ENTER.length) : text;
 
 // src/ui/prompt/darwin.ts
-import _19 from "lodash";
+import _17 from "lodash";
 
 // src/utils/SpawnCache.ts
 import { spawn } from "child_process";
@@ -1166,7 +1214,7 @@ var darwin_default3 = (commands) => new Promise(async (resolve, reject) => {
   const chooseProcess = choose2.run(choices);
   const { stdout = "", stderr } = await chooseProcess;
   if (stdout.trim().length > 0) {
-    const query = _19.trim(stdout);
+    const query = _17.trim(stdout);
     const rawQueryCommand = {
       isUnhandled: true,
       query
@@ -1197,9 +1245,9 @@ var main_default = async (injected) => {
   Object.assign(global, { open: open6, require: require2 });
   if ("isUnknown" in item) {
     logger.warn(`Unknown command`);
-  } else if ("value" in item && _20.isFunction(item.value)) {
+  } else if ("value" in item && _18.isFunction(item.value)) {
     result = item.value(selection);
-  } else if ("invoke" in item && _20.isFunction(item.invoke)) {
+  } else if ("invoke" in item && _18.isFunction(item.invoke)) {
     result = await item.invoke(selection);
   } else if ("isUnhandled" in item && item.isUnhandled) {
     logger.warn(`Unhandled command: ${item.query}`);
@@ -1217,7 +1265,7 @@ var main_default = async (injected) => {
           selection,
           item.query
         );
-        if (!_20.isUndefined(resultFromFallback)) {
+        if (!_18.isUndefined(resultFromFallback)) {
           result = processInvokeScriptResult(resultFromFallback);
         }
       } catch (e) {
@@ -1225,7 +1273,7 @@ var main_default = async (injected) => {
       }
     }
   }
-  if (result && _20.isString(result)) {
+  if (result && _18.isString(result)) {
     logger.log(`Result: ${result}`);
     await setClipboardContent(stripKeystrokes(result));
     if (result.endsWith(ENTER)) {
@@ -1265,7 +1313,7 @@ var promptForAndRunCommand = async (injected) => {
     }
   } catch (error) {
     logger.error(error);
-    if (_21.isError(error)) {
+    if (_19.isError(error)) {
       showNotification({
         message: "META-x encountered an error: " + error.message
       });

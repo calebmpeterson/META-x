@@ -1526,16 +1526,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cocoa-dialog@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "cocoa-dialog@npm:3.0.0"
-  dependencies:
-    dargs: "npm:^8.1.0"
-    execa: "npm:^5.1.1"
-  checksum: 10c0/500e23214324c81c8ddd540a5b830e8ad96855ab06bf414310f37a22e305b00c46d14876f9cff3a2c253b66c9afeeab300b2bc22d383fd37bd0726ef798d8195
-  languageName: node
-  linkType: hard
-
 "color-convert@npm:^1.9.0":
   version: 1.9.3
   resolution: "color-convert@npm:1.9.3"
@@ -1639,13 +1629,6 @@ __metadata:
     shebang-command: "npm:^2.0.0"
     which: "npm:^2.0.1"
   checksum: 10c0/053ea8b2135caff68a9e81470e845613e374e7309a47731e81639de3eaeb90c3d01af0e0b44d2ab9d50b43467223b88567dfeb3262db942dc063b9976718ffc1
-  languageName: node
-  linkType: hard
-
-"dargs@npm:^8.1.0":
-  version: 8.1.0
-  resolution: "dargs@npm:8.1.0"
-  checksum: 10c0/08cbd1ee4ac1a16fb7700e761af2e3e22d1bdc04ac4f851926f552dde8f9e57714c0d04013c2cca1cda0cba8fb637e0f93ad15d5285547a939dd1989ee06a82d
   languageName: node
   linkType: hard
 
@@ -2002,7 +1985,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"execa@npm:^5.0.0, execa@npm:^5.1.1":
+"execa@npm:^5.0.0":
   version: 5.1.1
   resolution: "execa@npm:5.1.1"
   dependencies:
@@ -2862,7 +2845,6 @@ __metadata:
     "@types/node": "npm:^20.14.12"
     axios: "npm:^1.6.7"
     clipboardy: "npm:^4.0.0"
-    cocoa-dialog: "npm:^3.0.0"
     cross-env: "npm:^7.0.2"
     dotenv: "npm:^16.4.5"
     esbuild: "npm:^0.23.0"

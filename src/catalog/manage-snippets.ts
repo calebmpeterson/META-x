@@ -1,5 +1,3 @@
-import cocoaDialog from "cocoa-dialog";
-import _ from "lodash";
 import fs from "node:fs";
 import open from "open";
 import {
@@ -7,6 +5,7 @@ import {
   SNIPPET_EXTENSION,
 } from "../utils/createEmptySnippet";
 import { getConfigDir } from "../utils/getConfigDir";
+import { invokeNativeTool } from "../utils/invokeNativeTool";
 import { openInSystemEditor } from "../utils/openInSystemEditor";
 import { MANAGE_SNIPPETS_PREFIX } from "./_constants";
 
@@ -22,14 +21,18 @@ export const getManageSnippetCommands = () => [
     prefix: MANAGE_SNIPPETS_PREFIX,
     title: `Create Snippet`,
     invoke: async () => {
-      const result = await cocoaDialog("filesave", {
+      const result = await invokeNativeTool({
+        tool: "file.tool",
+        mode: "save",
         title: "Save Snippet As...",
-        withDirectory: SNIPPETS_DIR,
+        directory: SNIPPETS_DIR,
       });
 
-      if (!_.isEmpty(result)) {
-        createEmptySnippet(result);
-        await openInSystemEditor(result, SNIPPET_EXTENSION);
+      const snippetFilename = result?.path;
+
+      if (snippetFilename) {
+        createEmptySnippet(snippetFilename);
+        await openInSystemEditor(snippetFilename, SNIPPET_EXTENSION);
       }
     },
   },
@@ -37,13 +40,17 @@ export const getManageSnippetCommands = () => [
     prefix: MANAGE_SNIPPETS_PREFIX,
     title: `Edit Snippet`,
     invoke: async () => {
-      const result = await cocoaDialog("fileselect", {
+      const result = await invokeNativeTool({
+        tool: "file.tool",
+        mode: "open",
         title: "Choose Snippet To Edit...",
-        withDirectory: SNIPPETS_DIR,
+        directory: SNIPPETS_DIR,
       });
 
-      if (!_.isEmpty(result)) {
-        await openInSystemEditor(result, SNIPPET_EXTENSION);
+      const snippetFilename = result?.path;
+
+      if (snippetFilename) {
+        await openInSystemEditor(snippetFilename, SNIPPET_EXTENSION);
       }
     },
   },

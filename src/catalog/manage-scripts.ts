@@ -1,5 +1,3 @@
-import cocoaDialog from "cocoa-dialog";
-import _ from "lodash";
 import fs from "node:fs";
 import open from "open";
 import { TITLE } from "../constants";
@@ -7,6 +5,7 @@ import { createEmptyScript } from "../utils/createEmptyScript";
 import { ensureEmptyFallbackHandler } from "../utils/ensureEmptyFallbackHandler";
 import { getCommandFilename } from "../utils/getCommandFilename";
 import { SCRIPTS_DIR } from "../utils/getConfigDir";
+import { invokeNativeTool } from "../utils/invokeNativeTool";
 import { openInSystemEditor } from "../utils/openInSystemEditor";
 import { MANAGE_SCRIPTS_PREFIX } from "./_constants";
 
@@ -27,14 +26,18 @@ export const getManageScriptCommands = () => [
     prefix: MANAGE_SCRIPTS_PREFIX,
     title: `Create Script`,
     invoke: async () => {
-      const result = await cocoaDialog("filesave", {
+      const result = await invokeNativeTool({
+        tool: "file.tool",
+        mode: "save",
         title: "Save Script As...",
-        withDirectory: SCRIPTS_DIR,
+        directory: SCRIPTS_DIR,
       });
 
-      if (!_.isEmpty(result)) {
-        createEmptyScript(result);
-        await openInSystemEditor(result);
+      const scriptFilename = result?.path;
+
+      if (scriptFilename) {
+        createEmptyScript(scriptFilename);
+        await openInSystemEditor(scriptFilename);
       }
     },
   },
@@ -42,13 +45,17 @@ export const getManageScriptCommands = () => [
     prefix: MANAGE_SCRIPTS_PREFIX,
     title: `Edit Script`,
     invoke: async () => {
-      const result = await cocoaDialog("fileselect", {
+      const result = await invokeNativeTool({
+        tool: "file.tool",
+        mode: "open",
         title: "Choose Script To Edit...",
-        withDirectory: SCRIPTS_DIR,
+        directory: SCRIPTS_DIR,
       });
 
-      if (!_.isEmpty(result)) {
-        await openInSystemEditor(result);
+      const scriptFilename = result?.path;
+
+      if (scriptFilename) {
+        await openInSystemEditor(scriptFilename);
       }
     },
   },

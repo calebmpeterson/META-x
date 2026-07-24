@@ -20,7 +20,24 @@ export type PromptToolInvocation = {
   fields: Record<string, PromptFieldKind>;
 };
 
+export type FileToolInvocation = {
+  tool: "file.tool";
+  mode: "save" | "open";
+  title: string;
+  directory: string;
+};
+
+export type AlertToolInvocation = {
+  tool: "alert.tool";
+  title: string;
+  text: string;
+  button1: string;
+  button2: string;
+};
+
 export type ToolInvocation =
   | GenericToolInvocation
   | DisplayToolInvocation
-  | PromptToolInvocation;
+  | PromptToolInvocation
+  | FileToolInvocation
+  | AlertToolInvocation;

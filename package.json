@@ -10,7 +10,7 @@
     "launch": "./bin/launch",
     "typecheck:runner": "tsc --noEmit",
     "build:runner": "esbuild src/runner.ts --bundle --platform=node --format=esm --outfile=bin/runner.mjs --packages=external",
-    "build:native": "echo 'Building native tools' ; mkdir -p bin/tools ; swiftc native/display.swift -o bin/tools/display.tool && swiftc native/prompt.swift -o bin/tools/prompt.tool",
+    "build:native": "echo 'Building native tools' ; mkdir -p bin/tools ; swiftc native/display.swift -o bin/tools/display.tool && swiftc native/prompt.swift -o bin/tools/prompt.tool && swiftc native/file.swift -o bin/tools/file.tool && swiftc native/alert.swift -o bin/tools/alert.tool",
     "build": "yarn typecheck:runner && yarn build:runner && yarn build:native",
     "docs:build": "node scripts/build-docs.mjs",
     "postinstall": "yarn build",
@@ -18,7 +18,11 @@
     "test:watch": "vitest",
     "notify": "tsx scripts/notify.ts",
     "tail-logs": "tail -f /tmp/skhd_$USER.out.log",
-    "tail-errors": "tail -f /tmp/skhd_$USER.err.log"
+    "tail-errors": "tail -f /tmp/skhd_$USER.err.log",
+    "native:display": "bin/tools/display.tool --timeout 5 \"Sample display message\"",
+    "native:prompt": "bin/tools/prompt.tool --string \"Name\" --text \"Notes\"",
+    "native:file": "bin/tools/file.tool --mode save --title \"Save Script As...\" --directory .",
+    "native:alert": "bin/tools/alert.tool --title \"Sample Error\" --text \"Error: something went wrong\\n  at foo (bar.js:1:1)\" --button1 \"Edit\" --button2 \"Dismiss\""
   },
   "devDependencies": {
     "@types/lodash": "^4.17.7",
@@ -35,7 +39,6 @@
     "@nut-tree-fork/nut-js": "^4.2.6",
     "axios": "^1.6.7",
     "clipboardy": "^4.0.0",
-    "cocoa-dialog": "^3.0.0",
     "dotenv": "^16.4.5",
     "execa": "^9.3.0",
     "json5": "^2.2.3",
