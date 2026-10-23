@@ -137,9 +137,9 @@ var darwin_default2 = clock("prepare", async () => {
 });
 
 // src/clipboard/prepare/index.ts
-var prepare_default = async () => {
+var prepare_default = async ({ skipCopy = false } = {}) => {
   updateClipboardHistory(await getClipboardContent());
-  return process.platform === "darwin" ? darwin_default2() : Promise.resolve();
+  return process.platform === "darwin" && !skipCopy ? darwin_default2() : Promise.resolve();
 };
 
 // src/constants.ts
@@ -1302,11 +1302,11 @@ var spinner = ora({
   text: "Ready",
   spinner: "dots"
 });
-var promptForAndRunCommand = async (injected) => {
+var promptForAndRunCommand = async (injected, { skipCopy = false } = {}) => {
   try {
     logger.break();
     logger.log("Meta-x triggered");
-    await prepare_default();
+    await prepare_default({ skipCopy });
     const result = await main_default(injected);
     if (result) {
       await finish_default();
@@ -1334,6 +1334,8 @@ listen(async (message) => {
     spinner.stop();
     if (message.trim() === "run") {
       await promptForAndRunCommand();
+    } else if (message.trim() === "run-no-copy") {
+      await promptForAndRunCommand(void 0, { skipCopy: true });
     } else if (message.trim().startsWith("run")) {
       const injection = message.slice(3).trim();
       logger.info(`Invoking "${injection}"`);

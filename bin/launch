@@ -1,4 +1,8 @@
 #!/bin/sh
 
 # Send "run" to the Unix socket that the runner is listening on
-echo run | nc -U /tmp/meta-x.socket
+if [ "$1" = "--no-copy" ]; then
+  echo run-no-copy | nc -U /tmp/meta-x.socket
+else
+  echo run | nc -U /tmp/meta-x.socket
+fi

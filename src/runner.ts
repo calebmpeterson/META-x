@@ -22,12 +22,15 @@ const spinner = ora({
   spinner: "dots",
 });
 
-const promptForAndRunCommand = async (injected?: string) => {
+const promptForAndRunCommand = async (
+  injected?: string,
+  { skipCopy = false }: { skipCopy?: boolean } = {},
+) => {
   try {
     logger.break();
     logger.log("Meta-x triggered");
 
-    await prepareClipboard();
+    await prepareClipboard({ skipCopy });
 
     const result = await promptAndRun(injected);
 
@@ -66,6 +69,8 @@ listen(async (message) => {
 
     if (message.trim() === "run") {
       await promptForAndRunCommand();
+    } else if (message.trim() === "run-no-copy") {
+      await promptForAndRunCommand(undefined, { skipCopy: true });
     } else if (message.trim().startsWith("run")) {
       const injection = message.slice(3).trim();
       logger.info(`Invoking "${injection}"`);
